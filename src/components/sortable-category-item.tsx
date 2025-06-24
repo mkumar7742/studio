@@ -9,14 +9,17 @@ import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface SortableCategoryItemProps {
   id: string;
   item: Category;
   count: number;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export function SortableCategoryItem({ id, item, count }: SortableCategoryItemProps) {
+export function SortableCategoryItem({ id, item, count, onEdit, onDelete }: SortableCategoryItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -26,6 +29,19 @@ export function SortableCategoryItem({ id, item, count }: SortableCategoryItemPr
   };
 
   const Icon = item.icon;
+  const isDeletable = count === 0;
+
+  const deleteButton = (
+    <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+        onClick={onDelete}
+        disabled={!isDeletable}
+    >
+        <Trash2 className="size-4" />
+    </Button>
+  );
 
   return (
     <div
@@ -47,12 +63,23 @@ export function SortableCategoryItem({ id, item, count }: SortableCategoryItemPr
             <Eye className="size-4" />
           </Link>
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
             <Pencil className="size-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
-            <Trash2 className="size-4" />
-        </Button>
+        {isDeletable ? (
+            deleteButton
+        ) : (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span>{deleteButton}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Cannot delete a category that is in use.</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )}
       </div>
     </div>
   );

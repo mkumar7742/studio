@@ -1,15 +1,24 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { AddCategoryDialog } from "@/components/add-category-dialog";
 import { SortableCategoryList } from "@/components/sortable-category-list";
 import { useAppContext } from "@/context/app-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Category } from "@/types";
+import { EditCategoryDialog } from "@/components/edit-category-dialog";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function CategoriesPage() {
-    const { categories, setCategories, transactions } = useAppContext();
+    const { categories, setCategories, transactions, deleteCategory } = useAppContext();
+    const { toast } = useToast();
+    const [categoryToEdit, setCategoryToEdit] = useState<Category | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
 
     const categoryCounts = useMemo(() => {
         return transactions.reduce((acc, t) => {
@@ -17,6 +26,25 @@ export default function CategoriesPage() {
             return acc;
         }, new Map<string, number>());
     }, [transactions]);
+
+    const handleEdit = (category: Category) => {
+        setCategoryToEdit(category);
+    };
+
+    const handleDelete = (category: Category) => {
+        setCategoryToDelete(category);
+    };
+
+    const handleConfirmDelete = () => {
+        if (categoryToDelete) {
+            deleteCategory(categoryToDelete.id);
+            setCategoryToDelete(null);
+            toast({
+                title: "Category Deleted",
+                description: `The "${categoryToDelete.name}" category has been deleted.`,
+            });
+        }
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -36,10 +64,28 @@ export default function CategoriesPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <SortableCategoryList items={categories} setItems={setCategories} categoryCounts={categoryCounts} />
+                        <SortableCategoryList 
+                            items={categories} 
+                            setItems={setCategories} 
+                            categoryCounts={categoryCounts}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
                     </CardContent>
                 </Card>
             </main>
+            <EditCategoryDialog
+                category={categoryToEdit}
+                open={!!categoryToEdit}
+                onOpenChange={(isOpen) => !isOpen && setCategoryToEdit(null)}
+            />
+            <DeleteConfirmationDialog
+                open={!!categoryToDelete}
+                onOpenChange={(isOpen) => !isOpen && setCategoryToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Category"
+                description={`Are you sure you want to delete the "${categoryToDelete?.name}" category? This action cannot be undone.`}
+            />
         </div>
     );
 }

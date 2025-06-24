@@ -44,6 +44,8 @@ interface AppContextType {
     deleteBudget: (budgetId: string) => void;
     archiveBudget: (budgetId: string, status: 'active' | 'archived') => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
+    editCategory: (categoryId: string, values: { name: string; color: string; icon: string }) => void;
+    deleteCategory: (categoryId: string) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
     editMember: (memberId: string, values: Partial<MemberProfile>) => void;
@@ -130,6 +132,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCategories(prev => [...prev, newCategory]);
     };
 
+    const editCategory = (categoryId: string, values: { name:string, color: string, icon: string }) => {
+        setCategories(prev => prev.map(c => 
+            c.id === categoryId 
+            ? { ...c, name: values.name, color: values.color, icon: iconMap[values.icon] || Shapes } 
+            : c));
+    }
+
+    const deleteCategory = (categoryId: string) => {
+        setCategories(prev => prev.filter(c => c.id !== categoryId));
+    };
+
     const addMember = (values: { name: string; email: string; roleId: string; }) => {
         const newMember: MemberProfile = {
             id: `mem-${Date.now()}`,
@@ -197,6 +210,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deleteBudget,
         archiveBudget,
         addCategory,
+        editCategory,
+        deleteCategory,
         setCategories,
         addMember,
         editMember,

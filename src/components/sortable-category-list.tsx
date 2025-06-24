@@ -11,9 +11,11 @@ interface SortableCategoryListProps {
   items: Category[];
   setItems: (items: Category[]) => void;
   categoryCounts: Map<string, number>;
+  onEdit: (category: Category) => void;
+  onDelete: (category: Category) => void;
 }
 
-export function SortableCategoryList({ items, setItems, categoryCounts }: SortableCategoryListProps) {
+export function SortableCategoryList({ items, setItems, categoryCounts, onEdit, onDelete }: SortableCategoryListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -38,7 +40,14 @@ export function SortableCategoryList({ items, setItems, categoryCounts }: Sortab
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <div className="space-y-2">
           {items.map((item) => (
-            <SortableCategoryItem key={item.id} id={item.id} item={item} count={categoryCounts.get(item.name) || 0} />
+            <SortableCategoryItem 
+                key={item.id} 
+                id={item.id} 
+                item={item} 
+                count={categoryCounts.get(item.name) || 0}
+                onEdit={() => onEdit(item)}
+                onDelete={() => onDelete(item)}
+            />
           ))}
            {items.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
