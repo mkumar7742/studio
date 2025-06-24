@@ -103,7 +103,7 @@ export function Dashboard() {
                 <TableHeader>
                   <TableRow className="border-border/50">
                     <TableHead>Subject</TableHead>
-                    <TableHead className="hidden sm:table-cell">Employee</TableHead>
+                    <TableHead className="hidden sm:table-cell">Member</TableHead>
                     <TableHead className="hidden md:table-cell">Team</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
@@ -130,7 +130,7 @@ export function Dashboard() {
                               <span className="font-medium">{txn.description}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell">{txn.employee}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{txn.member}</TableCell>
                           <TableCell className="hidden md:table-cell">
                             <Badge
                               variant="outline"

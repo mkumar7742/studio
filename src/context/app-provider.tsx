@@ -51,8 +51,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             accountId: values.accountId,
             date: format(values.date, "MMMM d"),
             receiptUrl: values.receipt ? URL.createObjectURL(values.receipt) : null,
-            employee: 'You',
-            team: 'Personal'
+            member: 'You',
+            team: 'Personal',
+            merchant: 'N/A',
+            report: 'N/A',
+            status: 'Not Submitted'
         };
         setTransactions(prev => [newTransaction, ...prev]);
     };

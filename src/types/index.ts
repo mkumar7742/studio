@@ -9,7 +9,7 @@ export interface Transaction {
   date: string;
   accountId: string;
   receiptUrl: string | null;
-  employee: string;
+  member: string;
   team: string;
   merchant: string;
   report: string;

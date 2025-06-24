@@ -81,8 +81,8 @@ export default function NewExpensePage() {
                                 <Textarea id="description" className="mt-1 bg-muted border-border" />
                             </div>
                             <div>
-                                <Label htmlFor="employee">Employee*</Label>
-                                <Input id="employee" className="mt-1 bg-muted border-border" />
+                                <Label htmlFor="member">Member*</Label>
+                                <Input id="member" className="mt-1 bg-muted border-border" />
                             </div>
                             <div>
                                 <Label className="mb-2 block">Add to report</Label>
