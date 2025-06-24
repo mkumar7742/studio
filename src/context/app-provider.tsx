@@ -40,6 +40,8 @@ interface AppContextType {
     currentUserPermissions: Permission[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (values: Omit<Budget, 'id'>) => void;
+    editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => void;
+    deleteBudget: (budgetId: string) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
@@ -103,6 +105,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         };
         setBudgets(prev => [...prev, newBudget]);
     }
+
+    const editBudget = (budgetId: string, values: Omit<Budget, 'id'>) => {
+        setBudgets(prev => prev.map(b => b.id === budgetId ? { id: budgetId, ...values } : b));
+    };
+
+    const deleteBudget = (budgetId: string) => {
+        setBudgets(prev => prev.filter(b => b.id !== budgetId));
+    };
 
     const addCategory = (values: { name: string; color: string; icon: string }) => {
         const newCategory: Category = {
@@ -177,6 +187,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         currentUserPermissions,
         addTransaction,
         addBudget,
+        editBudget,
+        deleteBudget,
         addCategory,
         setCategories,
         addMember,
