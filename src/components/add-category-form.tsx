@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAppContext } from "@/context/app-provider";
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 // The list of available icons for category creation
@@ -39,6 +39,8 @@ const availableIcons: { name: string; icon: LucideIcon }[] = [
     { name: "Baby", icon: Baby },
     { name: "Train", icon: Train },
     { name: "Wifi", icon: Wifi },
+    { name: "PenSquare", icon: PenSquare },
+    { name: "ClipboardCheck", icon: ClipboardCheck },
 ];
 
 const categoryColors = [
