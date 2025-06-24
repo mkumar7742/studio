@@ -52,3 +52,16 @@ export interface Trip {
   report: string;
   status: 'Approved' | 'Pending' | 'Not Approved';
 }
+
+export interface Approval {
+  id: string;
+  owner: {
+    name: string;
+    title: string;
+    avatar: string;
+    avatarHint: string;
+  };
+  category: 'Travel' | 'Food' | 'Software';
+  amount: number;
+  frequency: 'Once' | 'Monthly' | 'Bi-Monthly';
+}

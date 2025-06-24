@@ -1,4 +1,4 @@
-import type { Account, Transaction, Category, Budget, PendingTask, Trip } from '@/types';
+import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
 
 export const accounts: Account[] = [
@@ -20,6 +20,7 @@ export const categories: Category[] = [
   { id: 'cat-10', name: 'Travel', icon: Plane, color: 'hsl(14, 88%, 58%)' },
   { id: 'cat-11', name: 'Accommodation', icon: Home, color: 'hsl(130, 71%, 48%)' },
   { id: 'cat-12', name: 'News Subscription', icon: Receipt, color: 'hsl(26, 88%, 58%)' },
+  { id: 'cat-13', name: 'Software', icon: Shapes, color: 'hsl(250, 88%, 58%)' },
 ];
 
 export const transactions: Transaction[] = [
@@ -53,6 +54,16 @@ export const trips: Trip[] = [
     { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, report: 'November_2022', status: 'Approved' },
     { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, report: 'November_2022', status: 'Approved' },
     { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, report: 'November_2022', status: 'Not Approved' },
+];
+
+export const approvals: Approval[] = [
+  { id: 'appr1', owner: { name: 'Samson Zap', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 780.00, frequency: 'Once' },
+  { id: 'appr2', owner: { name: 'Jessica Bowers', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 430.00, frequency: 'Once' },
+  { id: 'appr3', owner: { name: 'John Wilson', title: 'Account Executive', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Food', amount: 95.50, frequency: 'Monthly' },
+  { id: 'appr4', owner: { name: 'Hannah Gomez', title: 'Product Manager', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 560.00, frequency: 'Monthly' },
+  { id: 'appr5', owner: { name: 'Laura Polis', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 120.00, frequency: 'Bi-Monthly' },
+  { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, frequency: 'Bi-Monthly' },
+  { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, frequency: 'Monthly' },
 ];
 
 export const teamSpendingData = [
