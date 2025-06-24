@@ -82,7 +82,7 @@ export default function CategoryDetailPage() {
                                                 <CategoryIcon categoryName={txn.category} />
                                                 <div>
                                                     <div className="font-medium">{txn.description}</div>
-                                                    <div className="text-sm text-muted-foreground">{txn.category}</div>
+                                                    <div className="text-sm text-muted-foreground">{txn.category} &middot; {txn.member}</div>
                                                 </div>
                                             </div>
                                         </TableCell>

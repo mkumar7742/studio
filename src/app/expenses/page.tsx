@@ -108,8 +108,8 @@ export default function ExpensesPage() {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <div className="text-xs text-muted-foreground">{txn.date}</div>
                                                         <div className="font-semibold">{txn.description}</div>
+                                                        <div className="text-xs text-muted-foreground">{txn.member} &middot; {txn.date}</div>
                                                     </div>
                                                 </div>
                                             </TableCell>
