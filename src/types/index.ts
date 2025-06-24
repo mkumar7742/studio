@@ -42,3 +42,13 @@ export interface PendingTask {
     value: string | number;
     color: string;
 }
+
+export interface Trip {
+  id: string;
+  date: string;
+  location: string;
+  purpose: string;
+  amount: number;
+  report: string;
+  status: 'Approved' | 'Pending' | 'Not Approved';
+}

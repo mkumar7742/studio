@@ -2,13 +2,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import type { Transaction, Account, Category, Budget, PendingTask } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
     transactions as initialTransactions,
     budgets as initialBudgets,
-    pendingTasks as initialPendingTasks
+    pendingTasks as initialPendingTasks,
+    trips as initialTrips
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
@@ -26,6 +27,7 @@ interface AppContextType {
     categories: Category[];
     budgets: Budget[];
     pendingTasks: PendingTask[];
+    trips: Trip[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
@@ -40,6 +42,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [budgets, setBudgets] = useState<Budget[]>(initialBudgets);
     const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks);
+    const [trips, setTrips] = useState<Trip[]>(initialTrips);
 
     const addTransaction = (values: AddTransactionValues) => {
         const newTransaction: Transaction = {
@@ -84,6 +87,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         categories,
         budgets,
         pendingTasks,
+        trips,
         addTransaction,
         addBudget,
         addCategory,

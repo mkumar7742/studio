@@ -1,4 +1,4 @@
-import type { Account, Transaction, Category, Budget, PendingTask } from '@/types';
+import type { Account, Transaction, Category, Budget, PendingTask, Trip } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
 
 export const accounts: Account[] = [
@@ -45,6 +45,14 @@ export const pendingTasks: PendingTask[] = [
   { icon: Receipt, label: 'Unreported Expenses', value: 4, color: 'bg-emerald-600' },
   { icon: CalendarClock, label: 'Upcoming Expenses', value: 0, color: 'bg-orange-500' },
   { icon: Undo2, label: 'Unreported Advances', value: '€0.00', color: 'bg-purple-500' }
+];
+
+export const trips: Trip[] = [
+    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, report: 'November_2022', status: 'Approved' },
+    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, report: 'November_2022', status: 'Pending' },
+    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, report: 'November_2022', status: 'Approved' },
+    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, report: 'November_2022', status: 'Approved' },
+    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, report: 'November_2022', status: 'Not Approved' },
 ];
 
 export const teamSpendingData = [
