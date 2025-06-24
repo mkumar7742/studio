@@ -2,7 +2,6 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import type { Transaction } from '@/types';
-import { useMemo } from 'react';
 import { teamSpendingData, dayToDayExpensesData } from '@/lib/data';
 
 interface SpendingChartsProps {
@@ -21,7 +20,7 @@ const renderTooltip = (props: any) => {
                             {label}
                         </span>
                         <span className="font-bold">
-                           {payload[0].value.toLocaleString()}
+                           {new Intl.NumberFormat('de-DE').format(payload[0].value)}
                         </span>
                     </div>
                 </div>
@@ -34,11 +33,19 @@ const renderTooltip = (props: any) => {
 
 
 export function SpendingCharts({ transactions }: SpendingChartsProps) {
+  const chartColors = [
+      "hsl(var(--chart-1))",
+      "hsl(var(--chart-2))",
+      "hsl(var(--chart-3))",
+      "hsl(var(--chart-4))",
+      "hsl(var(--chart-5))",
+  ];
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
-        <div className="h-[300px] w-full">
+        <div className="h-[300px] w-full rounded-md bg-muted/30 p-4">
             <h3 className="text-lg font-semibold mb-4">Team Spending Trend</h3>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="90%">
             <BarChart data={teamSpendingData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <XAxis
                     dataKey="name"
@@ -66,9 +73,9 @@ export function SpendingCharts({ transactions }: SpendingChartsProps) {
             </BarChart>
             </ResponsiveContainer>
         </div>
-        <div className="h-[300px] w-full">
+        <div className="h-[300px] w-full rounded-md bg-muted/30 p-4">
             <h3 className="text-lg font-semibold mb-4">Day-to-Day Expenses</h3>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="90%">
             <BarChart data={dayToDayExpensesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <XAxis
                     dataKey="name"
@@ -90,7 +97,7 @@ export function SpendingCharts({ transactions }: SpendingChartsProps) {
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} >
                     {dayToDayExpensesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--chart-2))" : "hsl(var(--chart-1))"} />
+                        <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                     ))}
                 </Bar>
             </BarChart>

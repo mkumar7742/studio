@@ -17,7 +17,7 @@ import {
   ClipboardCheck,
   Settings,
   LifeBuoy,
-  Atom,
+  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 
@@ -34,9 +34,9 @@ export function SidebarNav() {
     ];
 
     return <>
-        <SidebarHeader className="flex flex-col items-start gap-6 p-4">
-            <Link href="/profile" className='flex items-center gap-3 w-full'>
-                <Avatar className="size-12">
+        <SidebarHeader className="p-4">
+            <Link href="/profile" className='flex flex-col items-center gap-3 w-full text-center'>
+                <Avatar className="size-16">
                     <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait" />
                     <AvatarFallback>JC</AvatarFallback>
                 </Avatar>
@@ -45,7 +45,7 @@ export function SidebarNav() {
                 </div>
             </Link>
         </SidebarHeader>
-        <SidebarContent className="flex-grow px-2">
+        <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
                 {menuItems.map(item => {
                     const isActive = (item.href === '/') ? pathname === item.href : pathname.startsWith(item.href);
@@ -55,13 +55,13 @@ export function SidebarNav() {
                                 asChild
                                 isActive={isActive}
                                 className={cn(
-                                    "justify-start h-11",
-                                    isActive && "bg-sidebar-accent text-primary-foreground font-semibold",
-                                    !isActive && "hover:bg-sidebar-accent/50"
+                                    "justify-start h-12 text-base",
+                                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
+                                    !isActive && "hover:bg-sidebar-accent/50 text-sidebar-foreground"
                                 )}
                             >
                                 <Link href={item.href}>
-                                    <item.icon className={cn(isActive && "text-primary")} />
+                                    <item.icon className={cn(isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground")} />
                                     {item.label}
                                 </Link>
                             </SidebarMenuButton>
@@ -72,7 +72,7 @@ export function SidebarNav() {
         </SidebarContent>
         <SidebarFooter className="p-4">
             <div className="flex items-center gap-2">
-                <Atom className="size-6 text-primary" />
+                <ArrowRightLeft className="size-6 text-primary" />
                 <span className="text-xl font-bold text-foreground">EXPENSIO</span>
             </div>
         </SidebarFooter>

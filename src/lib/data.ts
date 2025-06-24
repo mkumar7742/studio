@@ -1,5 +1,5 @@
 import type { Account, Transaction, Category, Budget, PendingTask } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Clock, Plane, Receipt, Calendar, Undo2 } from 'lucide-react';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Clock, Plane, Receipt, CalendarClock, Undo2 } from 'lucide-react';
 
 export const accounts: Account[] = [
   { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
@@ -39,7 +39,7 @@ export const pendingTasks: PendingTask[] = [
   { icon: Clock, label: 'Pending Approvals', value: 5 },
   { icon: Plane, label: 'New Trips Registered', value: 1 },
   { icon: Receipt, label: 'Unreported Expenses', value: 4 },
-  { icon: Calendar, label: 'Upcoming Expenses', value: 0 },
+  { icon: CalendarClock, label: 'Upcoming Expenses', value: 0 },
   { icon: Undo2, label: 'Unreported Advances', value: '€0.00' }
 ];
 
