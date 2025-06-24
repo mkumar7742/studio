@@ -17,11 +17,11 @@ export function EditMemberDialog({ member, open, onOpenChange }: EditMemberDialo
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Edit {member.name}</DialogTitle>
+                    <DialogTitle>Edit {member.name}'s Profile</DialogTitle>
                     <DialogDescription>
-                        Update the role for this member.
+                        Update the profile details for this member.
                     </DialogDescription>
                 </DialogHeader>
                 <EditMemberForm 

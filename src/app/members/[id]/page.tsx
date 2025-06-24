@@ -53,7 +53,7 @@ export default function MemberProfilePage() {
     if (!member) {
         return (
             <div className="flex flex-col h-full">
-                <PageHeader title="Member Not Found" description="Could not find the requested member." />
+                <PageHeader title="Member Not Found" description="Could not find the requested category." />
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 text-center">
                     <p>The member you are looking for does not exist.</p>
                      <Button asChild variant="outline" className="mt-4" onClick={() => router.back()}>
@@ -72,7 +72,7 @@ export default function MemberProfilePage() {
             <PageHeader title="Member Profile" description={`Details and activity for ${member.name}.`}>
                 <RequirePermission permission="members:edit">
                     <Button variant="outline" onClick={() => setMemberToEdit(member)}>
-                        <Pencil className="mr-2 size-4" /> Edit Role
+                        <Pencil className="mr-2 size-4" /> Edit Profile
                     </Button>
                 </RequirePermission>
             </PageHeader>

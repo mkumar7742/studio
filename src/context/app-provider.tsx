@@ -43,7 +43,7 @@ interface AppContextType {
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
-    editMember: (memberId: string, values: { roleId: string }) => void;
+    editMember: (memberId: string, values: Partial<MemberProfile>) => void;
     deleteMember: (memberId: string) => void;
     getMemberRole: (member: MemberProfile) => Role | undefined;
     addRole: (values: { name: string; permissions: Permission[] }) => void;
@@ -126,7 +126,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setMembers(prev => [...prev, newMember]);
     };
 
-    const editMember = (memberId: string, values: { roleId: string }) => {
+    const editMember = (memberId: string, values: Partial<MemberProfile>) => {
         setMembers(prev => prev.map(m => m.id === memberId ? { ...m, ...values } : m));
     };
     
