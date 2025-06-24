@@ -57,7 +57,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             accountId: values.accountId,
             date: format(values.date, "MMMM d"),
             receiptUrl: values.receipt ? URL.createObjectURL(values.receipt) : null,
-            member: 'You',
+            member: values.member,
             team: 'Personal',
             merchant: 'N/A',
             report: 'N/A',

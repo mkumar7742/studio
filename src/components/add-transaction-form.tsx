@@ -49,6 +49,9 @@ const formSchema = z.object({
   accountId: z.string({
       required_error: "Please select an account."
   }),
+  member: z.string().min(2, {
+    message: "Member name must be at least 2 characters.",
+  }),
   receipt: z.custom<File>().optional(),
 });
 
@@ -67,6 +70,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
       type: "expense",
       description: "",
       date: new Date(),
+      member: "",
     },
   });
 
@@ -76,7 +80,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
     addTransaction({
         ...values,
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, receipt: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, member: "", receipt: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -229,6 +233,19 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
                 <FormMessage />
                 </FormItem>
             )}
+        />
+        <FormField
+          control={form.control}
+          name="member"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Member</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <FormField
           control={form.control}
