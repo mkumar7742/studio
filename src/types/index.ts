@@ -1,0 +1,29 @@
+import type { LucideIcon } from 'lucide-react';
+
+export interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  category: string;
+  description: string;
+  amount: number;
+  date: string;
+}
+
+export interface Account {
+  id: string;
+  name: string;
+  balance: number;
+  icon: LucideIcon;
+}
+
+export interface Category {
+  name: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+export interface Budget {
+    category: string;
+    allocated: number;
+    spent: number;
+}
