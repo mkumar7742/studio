@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Wallet, ArrowDownUp, PiggyBank, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowDownUp, PiggyBank, Shapes } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,7 @@ const navItems = [
   { href: '/accounts', label: 'Accounts', icon: Wallet },
   { href: '/transactions', label: 'Transactions', icon: ArrowDownUp },
   { href: '/budgets', label: 'Budgets', icon: PiggyBank },
-  { href: '/subscriptions', label: 'Subscriptions', icon: TrendingUp },
+  { href: '/categories', label: 'Categories', icon: Shapes },
 ];
 
 export function BottomNavigation() {

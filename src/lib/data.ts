@@ -1,5 +1,5 @@
 import type { Account, Transaction, Category, Budget } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, TrendingUp } from 'lucide-react';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes } from 'lucide-react';
 
 export const accounts: Account[] = [
   { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
@@ -8,15 +8,14 @@ export const accounts: Account[] = [
 ];
 
 export const categories: Category[] = [
-  { name: 'Income', icon: Briefcase, color: 'hsl(var(--chart-1))' },
-  { name: 'Rent', icon: Landmark, color: 'hsl(var(--chart-2))' },
-  { name: 'Food', icon: UtensilsCrossed, color: 'hsl(var(--chart-3))' },
-  { name: 'Shopping', icon: ShoppingCart, color: 'hsl(var(--chart-4))' },
-  { name: 'Health', icon: HeartPulse, color: 'hsl(var(--chart-5))' },
-  { name: 'Transport', icon: Car, color: 'hsl(var(--chart-1))' },
-  { name: 'Education', icon: GraduationCap, color: 'hsl(var(--chart-2))' },
-  { name: 'Entertainment', icon: Film, color: 'hsl(var(--chart-3))' },
-  { name: 'Subscriptions', icon: TrendingUp, color: 'hsl(var(--chart-4))' },
+  { id: 'cat-1', name: 'Income', icon: Briefcase, color: 'hsl(var(--chart-1))' },
+  { id: 'cat-2', name: 'Rent', icon: Landmark, color: 'hsl(var(--chart-2))' },
+  { id: 'cat-3', name: 'Food', icon: UtensilsCrossed, color: 'hsl(var(--chart-3))' },
+  { id: 'cat-4', name: 'Shopping', icon: ShoppingCart, color: 'hsl(var(--chart-4))' },
+  { id: 'cat-5', name: 'Health', icon: HeartPulse, color: 'hsl(var(--chart-5))' },
+  { id: 'cat-6', name: 'Transport', icon: Car, color: 'hsl(var(--chart-1))' },
+  { id: 'cat-7', name: 'Education', icon: GraduationCap, color: 'hsl(var(--chart-2))' },
+  { id: 'cat-8', name: 'Entertainment', icon: Film, color: 'hsl(var(--chart-3))' },
 ];
 
 const today = new Date();

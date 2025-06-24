@@ -10,6 +10,7 @@ import {
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
+import { Shapes } from 'lucide-react';
 
 interface AppContextType {
     transactions: Transaction[];
@@ -18,6 +19,8 @@ interface AppContextType {
     budgets: Budget[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
+    addCategory: (values: { name: string; color: string }) => void;
+    setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,6 +53,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setBudgets(prev => [...prev, newBudget]);
     }
 
+    const addCategory = (values: { name: string; color: string }) => {
+        const newCategory: Category = {
+            id: `cat-${Date.now()}`,
+            name: values.name,
+            color: values.color,
+            icon: Shapes,
+        };
+        setCategories(prev => [...prev, newCategory]);
+    };
+
     const value = {
         transactions,
         accounts,
@@ -57,6 +70,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         budgets,
         addTransaction,
         addBudget,
+        addCategory,
+        setCategories,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
