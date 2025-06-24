@@ -21,6 +21,7 @@ import { CreditCard, Receipt, FileText, Plane } from "lucide-react";
 import { useAppContext } from '@/context/app-provider';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+import { AIFinancialInsights } from "./ai-financial-insights";
 
 const teamColors: { [key: string]: string } = {
   Marketing: "bg-fuchsia-600 text-white",
@@ -72,22 +73,25 @@ export function Dashboard() {
   return (
     <main className="flex-1 overflow-y-auto flex flex-col gap-6 p-4 md:p-6">
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1 bg-card">
-          <CardHeader>
-            <CardTitle>Pending Tasks</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            {pendingTasks.map((task: PendingTask) => (
-              <div key={task.label} className="flex items-center">
-                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label])}>
-                    <task.icon className="size-4" />
-                </div>
-                <span className="flex-grow text-sm">{task.label}</span>
-                <span className="text-sm font-semibold">{task.value}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-1 flex flex-col gap-6">
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle>Pending Tasks</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {pendingTasks.map((task: PendingTask) => (
+                  <div key={task.label} className="flex items-center">
+                    <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label])}>
+                        <task.icon className="size-4" />
+                    </div>
+                    <span className="flex-grow text-sm">{task.label}</span>
+                    <span className="text-sm font-semibold">{task.value}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <AIFinancialInsights />
+        </div>
         <Card className="lg:col-span-2 bg-card">
           <CardHeader>
             <CardTitle>Recent Expenses</CardTitle>

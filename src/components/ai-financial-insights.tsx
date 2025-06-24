@@ -69,7 +69,7 @@ export function AIFinancialInsights() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="size-5 text-accent" />
+          <Lightbulb className="size-5 text-chart-5" />
           AI-Powered Insights
         </CardTitle>
         <CardDescription>
@@ -90,7 +90,7 @@ export function AIFinancialInsights() {
                   <AccordionTrigger>{insight.title}</AccordionTrigger>
                   <AccordionContent>
                     <p className="mb-2 text-sm">{insight.description}</p>
-                    <p className="rounded-md bg-accent/20 p-2 text-sm font-medium text-accent-foreground">
+                    <p className="rounded-md bg-primary/10 p-3 text-sm font-medium text-primary border border-primary/20">
                       {insight.recommendation}
                     </p>
                   </AccordionContent>
