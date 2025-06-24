@@ -84,17 +84,19 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Groceries" {...field} />
-              </FormControl>
-              <FormMessage />
+            <FormItem className="grid grid-cols-4 items-center gap-x-4">
+              <FormLabel className="text-right">Name</FormLabel>
+              <div className="col-span-3">
+                <FormControl>
+                  <Input placeholder="e.g., Groceries" {...field} />
+                </FormControl>
+                <FormMessage className="mt-2" />
+              </div>
             </FormItem>
           )}
         />
@@ -102,32 +104,34 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
           control={form.control}
           name="color"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Color</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="grid grid-cols-8 gap-2 pt-2"
-                >
-                  {categoryColors.map((color) => (
-                    <FormItem key={color} className="flex items-center justify-center">
-                      <FormControl>
-                        <RadioGroupItem value={color} className="sr-only" />
-                      </FormControl>
-                      <FormLabel
-                        className={cn(
-                          "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-transparent",
-                          "ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                          field.value === color && "ring-2 ring-ring ring-offset-2"
-                        )}
-                        style={{ backgroundColor: color }}
-                      />
-                    </FormItem>
-                  ))}
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
+            <FormItem className="grid grid-cols-4 items-start gap-x-4 pt-2">
+              <FormLabel className="text-right mt-2">Color</FormLabel>
+              <div className="col-span-3">
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-8 gap-2"
+                  >
+                    {categoryColors.map((color) => (
+                      <FormItem key={color} className="flex items-center justify-center">
+                        <FormControl>
+                          <RadioGroupItem value={color} className="sr-only" />
+                        </FormControl>
+                        <FormLabel
+                          className={cn(
+                            "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-transparent",
+                            "ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                            field.value === color && "ring-2 ring-ring ring-offset-2"
+                          )}
+                          style={{ backgroundColor: color }}
+                        />
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage className="mt-2" />
+              </div>
             </FormItem>
           )}
         />
@@ -135,33 +139,35 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
           control={form.control}
           name="icon"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Icon</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="grid grid-cols-8 gap-2 pt-2"
-                >
-                  {availableIcons.map(({ name, icon: Icon }) => (
-                    <FormItem key={name} className="flex items-center justify-center">
-                      <FormControl>
-                        <RadioGroupItem value={name} className="sr-only" />
-                      </FormControl>
-                      <FormLabel
-                        className={cn(
-                          "flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border-2 border-transparent bg-accent/50",
-                          "ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                           field.value === name && "ring-2 ring-ring ring-offset-2 bg-accent"
-                        )}
-                      >
-                        <Icon className="size-5 text-accent-foreground" />
-                      </FormLabel>
-                    </FormItem>
-                  ))}
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
+            <FormItem className="grid grid-cols-4 items-start gap-x-4 pt-2">
+              <FormLabel className="text-right mt-2">Icon</FormLabel>
+              <div className="col-span-3">
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-8 gap-2"
+                  >
+                    {availableIcons.map(({ name, icon: Icon }) => (
+                      <FormItem key={name} className="flex items-center justify-center">
+                        <FormControl>
+                          <RadioGroupItem value={name} className="sr-only" />
+                        </FormControl>
+                        <FormLabel
+                          className={cn(
+                            "flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border-2 border-transparent bg-accent/50",
+                            "ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                            field.value === name && "ring-2 ring-ring ring-offset-2 bg-accent"
+                          )}
+                        >
+                          <Icon className="size-5 text-accent-foreground" />
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage className="mt-2" />
+              </div>
             </FormItem>
           )}
         />
