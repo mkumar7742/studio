@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,8 +51,10 @@ export default function ExpensesPage() {
             <header className="flex items-center justify-between p-4 sm:p-6">
                 <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
                 <div className="flex items-center gap-2">
-                    <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="mr-2 size-4" /> New expense
+                    <Button asChild className="bg-primary hover:bg-primary/90">
+                        <Link href="/expenses/new">
+                            <Plus className="mr-2 size-4" /> New expense
+                        </Link>
                     </Button>
                     <Button variant="outline" size="icon">
                         <Filter className="size-4" />

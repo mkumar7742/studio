@@ -17,8 +17,7 @@ import {
   ClipboardCheck,
   Settings,
   LifeBuoy,
-  ArrowRightLeft,
-  Shapes,
+  ArrowRightLeft
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 
@@ -30,7 +29,6 @@ export function SidebarNav() {
         { href: '/expenses', label: 'Expenses', icon: CreditCard },
         { href: '/trips', label: 'Trips', icon: Plane },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck },
-        { href: '/categories', label: 'Categories', icon: Shapes },
         { href: '/settings', label: 'Settings', icon: Settings },
         { href: '/support', label: 'Support', icon: LifeBuoy },
     ];
