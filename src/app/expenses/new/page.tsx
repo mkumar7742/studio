@@ -28,33 +28,41 @@ export default function NewExpensePage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
                             
-                            <Label htmlFor="subject" className="flex items-center gap-2 md:justify-self-end">
-                                <PenSquare className="size-4 text-muted-foreground" />
+                            <Label htmlFor="subject" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <PenSquare className="size-4" />
+                                </div>
                                 <span>Subject*</span>
                             </Label>
-                            <Input id="subject" className="bg-muted border-border" />
+                            <Input id="subject" className="bg-card border-border" />
                             
-                            <Label htmlFor="merchant" className="flex items-center gap-2 md:justify-self-end">
-                                <Store className="size-4 text-muted-foreground" />
+                            <Label htmlFor="merchant" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <Store className="size-4" />
+                                </div>
                                 <span>Merchant*</span>
                             </Label>
-                            <Input id="merchant" className="bg-muted border-border" />
+                            <Input id="merchant" className="bg-card border-border" />
 
-                            <Label htmlFor="date" className="flex items-center gap-2 md:justify-self-end">
-                                <CalendarDays className="size-4 text-muted-foreground" />
+                            <Label htmlFor="date" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <CalendarDays className="size-4" />
+                                </div>
                                 <span>Date*</span>
                             </Label>
-                            <Input id="date" type="date" className="bg-muted border-border" />
+                            <Input id="date" type="date" className="bg-card border-border" />
 
-                            <Label htmlFor="total" className="flex items-center gap-2 md:justify-self-end">
-                                <CircleDollarSign className="size-4 text-muted-foreground" />
+                            <Label htmlFor="total" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <CircleDollarSign className="size-4" />
+                                </div>
                                 <span>Total*</span>
                             </Label>
                             <div className="grid grid-cols-3 gap-4">
-                                <Input id="total" type="number" placeholder="0.00" className="col-span-2 bg-muted border-border" />
+                                <Input id="total" type="number" placeholder="0.00" className="col-span-2 bg-card border-border" />
                                 <div className="col-span-1">
                                     <Select>
-                                        <SelectTrigger className="bg-muted border-border">
+                                        <SelectTrigger className="bg-card border-border">
                                             <SelectValue placeholder="Currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -72,12 +80,14 @@ export default function NewExpensePage() {
                                 <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
                             </div>
                             
-                            <Label htmlFor="category" className="flex items-center gap-2 md:justify-self-end">
-                                <Shapes className="size-4 text-muted-foreground" />
+                            <Label htmlFor="category" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <Shapes className="size-4" />
+                                </div>
                                 <span>Category*</span>
                             </Label>
                             <Select>
-                                <SelectTrigger className="bg-muted border-border">
+                                <SelectTrigger className="bg-card border-border">
                                     <SelectValue placeholder="Type" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -89,20 +99,26 @@ export default function NewExpensePage() {
                                 </SelectContent>
                             </Select>
 
-                            <Label htmlFor="description" className="flex items-center gap-2 md:justify-self-end self-start md:pt-2">
-                                <BookText className="size-4 text-muted-foreground" />
+                            <Label htmlFor="description" className="flex items-center gap-4 md:justify-self-end self-start md:pt-2">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <BookText className="size-4" />
+                                </div>
                                 <span>Description</span>
                             </Label>
-                            <Textarea id="description" className="bg-muted border-border" />
+                            <Textarea id="description" className="bg-card border-border" />
                             
-                            <Label htmlFor="member" className="flex items-center gap-2 md:justify-self-end">
-                                <User className="size-4 text-muted-foreground" />
+                            <Label htmlFor="member" className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <User className="size-4" />
+                                </div>
                                 <span>Member*</span>
                             </Label>
-                            <Input id="member" className="bg-muted border-border" />
+                            <Input id="member" className="bg-card border-border" />
                             
-                            <div className="flex items-center gap-2 md:justify-self-end">
-                                <FilePlus2 className="size-4 text-muted-foreground" />
+                            <div className="flex items-center gap-4 md:justify-self-end">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <FilePlus2 className="size-4" />
+                                </div>
                                 <Label>Add to report</Label>
                             </div>
                             <div className="flex items-center gap-6">
@@ -119,8 +135,11 @@ export default function NewExpensePage() {
 
                         <div className="lg:col-span-1">
                             <label className="flex flex-col items-center justify-center w-full h-64 lg:h-full border-2 border-dashed border-border rounded-lg bg-card p-6 text-center cursor-pointer hover:bg-muted/50">
-                                <Plus className="size-10 text-muted-foreground mb-2"/>
+                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4">
+                                    <Plus className="size-10"/>
+                                </div>
                                 <span className="text-base font-semibold">Upload an invoice</span>
+                                <span className="text-sm text-muted-foreground mt-1">or drag and drop</span>
                                 <Input type="file" className="hidden" />
                             </label>
                         </div>
