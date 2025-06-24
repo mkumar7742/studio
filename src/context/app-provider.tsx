@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
@@ -10,7 +10,8 @@ import {
     budgets as initialBudgets,
     pendingTasks as initialPendingTasks,
     trips as initialTrips,
-    approvals as initialApprovals
+    approvals as initialApprovals,
+    members as initialMembers
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
@@ -30,10 +31,12 @@ interface AppContextType {
     pendingTasks: PendingTask[];
     trips: Trip[];
     approvals: Approval[];
+    members: MemberProfile[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+    addMember: (values: Omit<MemberProfile, 'id' | 'avatar' | 'avatarHint'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,6 +49,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks);
     const [trips, setTrips] = useState<Trip[]>(initialTrips);
     const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
+    const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
 
     const addTransaction = (values: AddTransactionValues) => {
         const newTransaction: Transaction = {
@@ -84,6 +88,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCategories(prev => [...prev, newCategory]);
     };
 
+    const addMember = (values: Omit<MemberProfile, 'id' | 'avatar' | 'avatarHint'>) => {
+        const newMember: MemberProfile = {
+            id: `mem-${Date.now()}`,
+            ...values,
+            avatar: 'https://placehold.co/100x100.png',
+            avatarHint: 'person portrait'
+        };
+        setMembers(prev => [...prev, newMember]);
+    };
+
     const value = {
         transactions,
         accounts,
@@ -92,10 +106,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         pendingTasks,
         trips,
         approvals,
+        members,
         addTransaction,
         addBudget,
         addCategory,
         setCategories,
+        addMember,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

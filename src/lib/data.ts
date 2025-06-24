@@ -1,5 +1,12 @@
-import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval } from '@/types';
+
+import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
+
+export const members: MemberProfile[] = [
+  { id: 'mem1', name: 'Janice Chandler', email: 'janice.chandler@example.com', role: 'Admin', avatar: 'https://placehold.co/100x100.png', avatarHint: 'person portrait' },
+  { id: 'mem2', name: 'John Doe', email: 'john.doe@example.com', role: 'Member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'man portrait' },
+  { id: 'mem3', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'woman portrait' },
+];
 
 export const accounts: Account[] = [
   { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
@@ -25,11 +32,11 @@ export const categories: Category[] = [
 
 export const transactions: Transaction[] = [
   { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 250.00, date: '09/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '10/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '11/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '10/11/2022', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '11/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
   { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: '11/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '12/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '16/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '12/11/2022', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '16/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
   { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '20/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
 ];
 

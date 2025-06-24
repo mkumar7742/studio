@@ -1,3 +1,4 @@
+
 'use client';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -18,7 +19,8 @@ import {
   Settings,
   LifeBuoy,
   ArrowRightLeft,
-  Shapes
+  Shapes,
+  Users
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 
@@ -31,6 +33,7 @@ export function SidebarNav() {
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500' },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500' },
+        { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },
     ];

@@ -1,0 +1,79 @@
+
+"use client";
+
+import { PageHeader } from "@/components/page-header";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useAppContext } from "@/context/app-provider";
+import { AddMemberDialog } from "@/components/add-member-dialog";
+
+export default function MembersPage() {
+    const { members } = useAppContext();
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageHeader title="Members" description="Manage your team or family members." />
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Team Members ({members.length})</CardTitle>
+                                <CardDescription>Invite and manage member access.</CardDescription>
+                            </div>
+                            <AddMemberDialog />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {members.map((member) => (
+                                    <TableRow key={member.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.avatarHint} />
+                                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{member.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">{member.email}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={member.role === 'Admin' ? 'default' : 'secondary'} className={member.role === 'Admin' ? 'bg-primary/80' : ''}>
+                                                {member.role}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon">
+                                                <Pencil className="size-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreHorizontal className="size-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </main>
+        </div>
+    );
+}
