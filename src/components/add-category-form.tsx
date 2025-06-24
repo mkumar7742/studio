@@ -10,6 +10,28 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAppContext } from "@/context/app-provider";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+// The list of available icons for category creation
+const availableIcons: { name: string; icon: LucideIcon }[] = [
+    { name: "Briefcase", icon: Briefcase },
+    { name: "Landmark", icon: Landmark },
+    { name: "UtensilsCrossed", icon: UtensilsCrossed },
+    { name: "ShoppingCart", icon: ShoppingCart },
+    { name: "HeartPulse", icon: HeartPulse },
+    { name: "Car", icon: Car },
+    { name: "GraduationCap", icon: GraduationCap },
+    { name: "Film", icon: Film },
+    { name: "Gift", icon: Gift },
+    { name: "Plane", icon: Plane },
+    { name: "Home", icon: Home },
+    { name: "PawPrint", icon: PawPrint },
+    { name: "Receipt", icon: Receipt },
+    { name: "Pizza", icon: Pizza },
+    { name: "Shirt", icon: Shirt },
+    { name: "Sprout", icon: Sprout },
+];
 
 const categoryColors = [
   "hsl(var(--chart-1))",
@@ -25,6 +47,7 @@ const categoryColors = [
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   color: z.string({ required_error: "Please select a color." }),
+  icon: z.string({ required_error: "Please select an icon." }),
 });
 
 type AddCategoryValues = z.infer<typeof formSchema>;
@@ -38,12 +61,12 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
 
   const form = useForm<AddCategoryValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", color: categoryColors[0] },
+    defaultValues: { name: "", color: categoryColors[0], icon: availableIcons[0].name },
   });
 
   function onSubmit(values: AddCategoryValues) {
     addCategory(values);
-    form.reset({ name: "", color: categoryColors[0] });
+    form.reset({ name: "", color: categoryColors[0], icon: availableIcons[0].name });
     if (onFinished) {
       onFinished();
     }
@@ -90,6 +113,40 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
                         )}
                         style={{ backgroundColor: color }}
                       />
+                    </FormItem>
+                  ))}
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="icon"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Icon</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="grid grid-cols-8 gap-2 pt-2"
+                >
+                  {availableIcons.map(({ name, icon: Icon }) => (
+                    <FormItem key={name} className="flex items-center justify-center">
+                      <FormControl>
+                        <RadioGroupItem value={name} className="sr-only" />
+                      </FormControl>
+                      <FormLabel
+                        className={cn(
+                          "flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border-2 border-transparent bg-accent/50",
+                          "ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                           field.value === name && "ring-2 ring-ring ring-offset-2 bg-accent"
+                        )}
+                      >
+                        <Icon className="size-5 text-accent-foreground" />
+                      </FormLabel>
                     </FormItem>
                   ))}
                 </RadioGroup>

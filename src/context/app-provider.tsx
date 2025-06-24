@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
@@ -10,7 +11,13 @@ import {
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
-import { Shapes } from 'lucide-react';
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
+
+// Create a map of icon names to Lucide components
+const iconMap: { [key: string]: LucideIcon } = {
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes
+};
 
 interface AppContextType {
     transactions: Transaction[];
@@ -19,7 +26,7 @@ interface AppContextType {
     budgets: Budget[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
-    addCategory: (values: { name: string; color: string }) => void;
+    addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
@@ -53,12 +60,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setBudgets(prev => [...prev, newBudget]);
     }
 
-    const addCategory = (values: { name: string; color: string }) => {
+    const addCategory = (values: { name: string; color: string; icon: string }) => {
         const newCategory: Category = {
             id: `cat-${Date.now()}`,
             name: values.name,
             color: values.color,
-            icon: Shapes,
+            icon: iconMap[values.icon] || Shapes,
         };
         setCategories(prev => [...prev, newCategory]);
     };
