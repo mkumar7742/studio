@@ -1,6 +1,59 @@
 
-import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role } from '@/types';
+import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
+
+export const allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[] = [
+  {
+    group: 'Dashboard',
+    permissions: [{ id: 'dashboard:view', label: 'View Dashboard' }],
+  },
+  {
+    group: 'Expenses',
+    permissions: [
+      { id: 'expenses:view', label: 'View Expenses' },
+      { id: 'expenses:create', label: 'Create Expenses' },
+      { id: 'expenses:edit', label: 'Edit Expenses' },
+      { id: 'expenses:delete', label: 'Delete Expenses' },
+    ],
+  },
+  {
+    group: 'Trips',
+    permissions: [
+      { id: 'trips:view', label: 'View Trips' },
+      { id: 'trips:create', label: 'Create Trips' },
+    ],
+  },
+  {
+    group: 'Approvals',
+    permissions: [
+      { id: 'approvals:view', label: 'View Approvals' },
+      { id: 'approvals:action', label: 'Action Approvals' },
+    ],
+  },
+  {
+    group: 'Categories',
+    permissions: [
+      { id: 'categories:view', label: 'View Categories' },
+      { id: 'categories:create', label: 'Create Categories' },
+      { id: 'categories:edit', label: 'Edit Categories' },
+      { id: 'categories:delete', label: 'Delete Categories' },
+    ],
+  },
+  {
+    group: 'Members',
+    permissions: [
+      { id: 'members:view', label: 'View Members' },
+      { id: 'members:create', label: 'Create Members' },
+      { id: 'members:edit', label: 'Edit Members' },
+      { id: 'members:delete', label: 'Delete Members' },
+    ],
+  },
+  {
+    group: 'Roles',
+    permissions: [{ id: 'roles:manage', label: 'Manage Roles & Permissions' }],
+  },
+];
+
 
 export const roles: Role[] = [
   {

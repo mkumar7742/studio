@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,9 +12,29 @@ import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useAppContext } from "@/context/app-provider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { RequirePermission } from "@/components/require-permission";
+import type { MemberProfile } from "@/types";
+import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 
 export default function MembersPage() {
-    const { members, getMemberRole } = useAppContext();
+    const { members, getMemberRole, deleteMember, currentUser } = useAppContext();
+    const [memberToEdit, setMemberToEdit] = useState<MemberProfile | null>(null);
+    const [memberToDelete, setMemberToDelete] = useState<MemberProfile | null>(null);
+
+    const handleEditClick = (member: MemberProfile) => {
+        setMemberToEdit(member);
+    };
+
+    const handleDeleteClick = (member: MemberProfile) => {
+        setMemberToDelete(member);
+    };
+
+    const handleConfirmDelete = () => {
+        if (memberToDelete) {
+            deleteMember(memberToDelete.id);
+            setMemberToDelete(null);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -44,6 +65,7 @@ export default function MembersPage() {
                             <TableBody>
                                 {members.map((member) => {
                                     const role = getMemberRole(member);
+                                    const isCurrentUser = member.id === currentUser.id;
                                     return (
                                         <TableRow key={member.id}>
                                             <TableCell>
@@ -63,12 +85,12 @@ export default function MembersPage() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <RequirePermission permission="members:edit">
-                                                    <Button variant="ghost" size="icon">
+                                                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
                                                         <Pencil className="size-4" />
                                                     </Button>
                                                 </RequirePermission>
                                                 <RequirePermission permission="members:delete">
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteClick(member)} disabled={isCurrentUser}>
                                                         <Trash2 className="size-4" />
                                                     </Button>
                                                 </RequirePermission>
@@ -84,6 +106,18 @@ export default function MembersPage() {
                     </CardContent>
                 </Card>
             </main>
+            <EditMemberDialog 
+                member={memberToEdit}
+                open={!!memberToEdit}
+                onOpenChange={(isOpen) => !isOpen && setMemberToEdit(null)}
+            />
+            <DeleteConfirmationDialog
+                open={!!memberToDelete}
+                onOpenChange={(isOpen) => !isOpen && setMemberToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Member"
+                description={`Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.`}
+            />
         </div>
     );
 }

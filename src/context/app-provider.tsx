@@ -12,7 +12,8 @@ import {
     trips as initialTrips,
     approvals as initialApprovals,
     members as initialMembers,
-    roles as initialRoles
+    roles as initialRoles,
+    allPermissions
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
@@ -34,6 +35,7 @@ interface AppContextType {
     approvals: Approval[];
     members: MemberProfile[];
     roles: Role[];
+    allPermissions: typeof allPermissions;
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
     addTransaction: (values: AddTransactionValues) => void;
@@ -41,7 +43,12 @@ interface AppContextType {
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
+    editMember: (memberId: string, values: { roleId: string }) => void;
+    deleteMember: (memberId: string) => void;
     getMemberRole: (member: MemberProfile) => Role | undefined;
+    addRole: (values: { name: string; permissions: Permission[] }) => void;
+    editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => void;
+    deleteRole: (roleId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -118,6 +125,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setMembers(prev => [...prev, newMember]);
     };
 
+    const editMember = (memberId: string, values: { roleId: string }) => {
+        setMembers(prev => prev.map(m => m.id === memberId ? { ...m, ...values } : m));
+    };
+    
+    const deleteMember = (memberId: string) => {
+        setMembers(prev => prev.filter(m => m.id !== memberId));
+    };
+
+    const addRole = (values: { name: string; permissions: Permission[] }) => {
+        const newRole: Role = {
+            id: `role-${Date.now()}`,
+            name: values.name,
+            permissions: values.permissions,
+        };
+        setRoles(prev => [...prev, newRole]);
+    };
+
+    const editRole = (roleId: string, values: { name: string; permissions: Permission[] }) => {
+        setRoles(prev => prev.map(r => r.id === roleId ? { ...r, ...values } : r));
+    };
+
+    const deleteRole = (roleId: string) => {
+        setRoles(prev => prev.filter(r => r.id !== roleId));
+    };
+
     const value = {
         transactions,
         accounts,
@@ -128,6 +160,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         approvals,
         members,
         roles,
+        allPermissions,
         currentUser,
         currentUserPermissions,
         addTransaction,
@@ -135,7 +168,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addCategory,
         setCategories,
         addMember,
-        getMemberRole
+        editMember,
+        deleteMember,
+        getMemberRole,
+        addRole,
+        editRole,
+        deleteRole
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
