@@ -40,9 +40,10 @@ export function SortableCategoryList({ items, setItems }: SortableCategoryListPr
             <SortableCategoryItem key={item.id} id={item.id} item={item} />
           ))}
            {items.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
-              No categories yet. Add one to get started!
-            </p>
+            <div className="text-center text-muted-foreground py-8">
+              <p className="text-4xl font-bold">0</p>
+              <p className="mt-2 text-sm">No categories yet. Add one to get started!</p>
+            </div>
           )}
         </div>
       </SortableContext>

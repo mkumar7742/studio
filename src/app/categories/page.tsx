@@ -21,7 +21,7 @@ export default function CategoriesPage() {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>Your Categories</CardTitle>
+                                <CardTitle>Your Categories ({categories.length})</CardTitle>
                                 <CardDescription>Drag and drop to reorder.</CardDescription>
                             </div>
                             <AddCategoryDialog />
