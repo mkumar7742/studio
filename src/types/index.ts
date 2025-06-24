@@ -7,6 +7,7 @@ export interface Transaction {
   description: string;
   amount: number;
   date: string;
+  accountId: string;
 }
 
 export interface Account {

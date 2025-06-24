@@ -22,14 +22,14 @@ const today = new Date();
 const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5500.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 1)) },
-  { id: 'txn2', type: 'expense', category: 'Rent', description: 'Apartment Rent', amount: 1650.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 2)) },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Grocery Shopping', amount: 124.50, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 3)) },
-  { id: 'txn4', type: 'expense', category: 'Transport', description: 'Gasoline', amount: 55.20, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 4)) },
-  { id: 'txn5', type: 'expense', category: 'Entertainment', description: 'Movie Tickets', amount: 32.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 5)) },
-  { id: 'txn6', type: 'expense', category: 'Shopping', description: 'New Shoes', amount: 89.99, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 6)) },
-  { id: 'txn7', type: 'expense', category: 'Food', description: 'Restaurant Dinner', amount: 78.60, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 7)) },
-  { id: 'txn8', type: 'expense', category: 'Health', description: 'Pharmacy', amount: 25.10, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 8)) },
+  { id: 'txn1', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5500.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 1)), accountId: 'acc1' },
+  { id: 'txn2', type: 'expense', category: 'Rent', description: 'Apartment Rent', amount: 1650.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 2)), accountId: 'acc1' },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Grocery Shopping', amount: 124.50, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 3)), accountId: 'acc1' },
+  { id: 'txn4', type: 'expense', category: 'Transport', description: 'Gasoline', amount: 55.20, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 4)), accountId: 'acc1' },
+  { id: 'txn5', type: 'expense', category: 'Entertainment', description: 'Movie Tickets', amount: 32.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 5)), accountId: 'acc3' },
+  { id: 'txn6', type: 'expense', category: 'Shopping', description: 'New Shoes', amount: 89.99, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 6)), accountId: 'acc3' },
+  { id: 'txn7', type: 'expense', category: 'Food', description: 'Restaurant Dinner', amount: 78.60, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 7)), accountId: 'acc3' },
+  { id: 'txn8', type: 'expense', category: 'Health', description: 'Pharmacy', amount: 25.10, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 8)), accountId: 'acc1' },
 ];
 
 export const budgets: Budget[] = [
@@ -46,7 +46,3 @@ export const monthlySpendingData = [
     { month: 'May', total: 1890 },
     { month: 'Jun', total: 2390 },
 ];
-
-export const categorySpendingData = transactions
-    .filter(t => t.type === 'expense')
-    .map(t => ({ category: t.category, amount: t.amount }));

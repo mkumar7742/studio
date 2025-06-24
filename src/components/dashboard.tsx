@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { accounts, transactions, categories, budgets } from "@/lib/data";
+import { accounts, categories, budgets } from "@/lib/data";
 import { AIFinancialInsights } from "@/components/ai-financial-insights";
 import { SpendingCharts } from "@/components/spending-charts";
 import type { Account, Transaction, Budget } from "@/types";
@@ -46,14 +49,20 @@ const AccountCard = ({ account }: { account: Account }) => (
   </Card>
 );
 
-const BudgetCard = ({ budget }: { budget: Budget }) => {
-  const progress = (budget.spent / budget.allocated) * 100;
+const BudgetCard = ({ budget, transactions }: { budget: Budget, transactions: Transaction[] }) => {
+  const spent = useMemo(() => {
+    return transactions
+      .filter((t) => t.type === 'expense' && t.category === budget.category)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions, budget.category]);
+
+  const progress = (spent / budget.allocated) * 100;
   return (
     <div>
       <div className="mb-1 flex justify-between">
         <span className="text-sm font-medium">{budget.category}</span>
         <span className="text-sm text-muted-foreground">
-          ${budget.spent.toLocaleString()} / ${budget.allocated.toLocaleString()}
+          ${spent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} / ${budget.allocated.toLocaleString()}
         </span>
       </div>
       <Progress value={progress} className="h-2" />
@@ -61,7 +70,12 @@ const BudgetCard = ({ budget }: { budget: Budget }) => {
   );
 };
 
-export function Dashboard() {
+
+interface DashboardProps {
+    transactions: Transaction[];
+}
+
+export function Dashboard({ transactions }: DashboardProps) {
   return (
     <main className="grid gap-4 p-4 sm:p-6 md:gap-6 lg:grid-cols-3">
       <div className="grid gap-4 md:gap-6 lg:col-span-2">
@@ -71,7 +85,7 @@ export function Dashboard() {
           ))}
         </div>
 
-        <SpendingCharts />
+        <SpendingCharts transactions={transactions} />
 
         <Card>
           <CardHeader>
@@ -91,36 +105,44 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((txn: Transaction) => (
-                  <TableRow key={txn.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <CategoryIcon categoryName={txn.category} />
-                        <div>
-                          <p className="font-medium">{txn.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {txn.category}
-                          </p>
+                {transactions.length > 0 ? (
+                  transactions.slice(0, 5).map((txn: Transaction) => (
+                    <TableRow key={txn.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <CategoryIcon categoryName={txn.category} />
+                          <div>
+                            <p className="font-medium">{txn.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {txn.category}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">{txn.date}</TableCell>
-                    <TableCell
-                      className={`text-right font-medium ${
-                        txn.type === "income"
-                          ? "text-green-600"
-                          : "text-foreground"
-                      }`}
-                    >
-                      {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="size-8">
-                          <MoreHorizontal className="size-4" />
-                      </Button>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">{txn.date}</TableCell>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          txn.type === "income"
+                            ? "text-green-600"
+                            : "text-foreground"
+                        }`}
+                      >
+                        {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" className="size-8">
+                            <MoreHorizontal className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      No transactions found.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -137,7 +159,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent className="grid gap-4">
             {budgets.map((b) => (
-              <BudgetCard key={b.category} budget={b} />
+              <BudgetCard key={b.category} budget={b} transactions={transactions} />
             ))}
           </CardContent>
         </Card>

@@ -3,8 +3,10 @@
 import { Bar, BarChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { monthlySpendingData, categorySpendingData, categories } from '@/lib/data';
+import { monthlySpendingData, categories } from '@/lib/data';
 import type { ChartConfig } from '@/components/ui/chart';
+import type { Transaction } from '@/types';
+import { useMemo } from 'react';
 
 const chartConfig = {
   total: {
@@ -18,7 +20,23 @@ const categoryColors = categories.reduce((acc, category) => {
     return acc;
 }, {} as ChartConfig);
 
-export function SpendingCharts() {
+interface SpendingChartsProps {
+    transactions: Transaction[];
+}
+
+export function SpendingCharts({ transactions }: SpendingChartsProps) {
+    const categorySpendingData = useMemo(() => {
+        const spending = new Map<string, number>();
+        transactions
+            .filter(t => t.type === 'expense')
+            .forEach(t => {
+                const currentAmount = spending.get(t.category) || 0;
+                spending.set(t.category, currentAmount + t.amount);
+            });
+        return Array.from(spending.entries()).map(([category, amount]) => ({ category, amount }));
+    }, [transactions]);
+
+
   return (
     <Card>
       <CardHeader>
