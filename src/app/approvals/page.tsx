@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,10 +10,18 @@ import { useAppContext } from "@/context/app-provider";
 import { cn } from "@/lib/utils";
 import type { Approval } from "@/types";
 import { Check, Eye, Filter, ListFilter, MoreHorizontal, X } from "lucide-react";
+import { ApprovalRequestDialog } from "@/components/approval-request-dialog";
 
 
 export default function ApprovalsPage() {
     const { approvals } = useAppContext();
+    const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const handleViewClick = (approval: Approval) => {
+        setSelectedApproval(approval);
+        setIsDialogOpen(true);
+    };
 
     const getCategoryBadgeClasses = (category: Approval['category']) => {
         switch (category) {
@@ -85,7 +94,7 @@ export default function ApprovalsPage() {
                                         <TableCell>{approval.frequency}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-4">
-                                                <button className="text-muted-foreground hover:text-foreground">
+                                                <button className="text-muted-foreground hover:text-foreground" onClick={() => handleViewClick(approval)}>
                                                     <Eye className="size-5" />
                                                 </button>
                                                 <button className="text-green-500 hover:text-green-400">
@@ -103,6 +112,11 @@ export default function ApprovalsPage() {
                     </CardContent>
                 </Card>
             </main>
+            <ApprovalRequestDialog
+                approval={selectedApproval}
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+            />
         </div>
     )
 }

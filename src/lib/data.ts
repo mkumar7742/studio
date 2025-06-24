@@ -57,13 +57,13 @@ export const trips: Trip[] = [
 ];
 
 export const approvals: Approval[] = [
-  { id: 'appr1', owner: { name: 'Samson Zap', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 780.00, frequency: 'Once' },
-  { id: 'appr2', owner: { name: 'Jessica Bowers', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 430.00, frequency: 'Once' },
-  { id: 'appr3', owner: { name: 'John Wilson', title: 'Account Executive', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Food', amount: 95.50, frequency: 'Monthly' },
-  { id: 'appr4', owner: { name: 'Hannah Gomez', title: 'Product Manager', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 560.00, frequency: 'Monthly' },
-  { id: 'appr5', owner: { name: 'Laura Polis', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 120.00, frequency: 'Bi-Monthly' },
-  { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, frequency: 'Bi-Monthly' },
-  { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, frequency: 'Monthly' },
+  { id: 'appr1', owner: { name: 'Samson Zap', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 780.00, frequency: 'Once', project: 'Client Design', description: "Travel to client's HQ for pitch presentation.", team: 'Websites', status: 'Pending' },
+  { id: 'appr2', owner: { name: 'Jessica Bowers', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 430.00, frequency: 'Once', project: 'Internal Workshop', description: 'Travel for company-wide design workshop.', team: 'Design', status: 'Pending' },
+  { id: 'appr3', owner: { name: 'John Wilson', title: 'Account Executive', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Food', amount: 95.50, frequency: 'Monthly', project: 'Client Lunch', description: 'Monthly recurring client lunch.', team: 'Sales', status: 'Pending' },
+  { id: 'appr4', owner: { name: 'Hannah Gomez', title: 'Product Manager', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 560.00, frequency: 'Monthly', project: 'User Research', description: 'Travel for on-site user research.', team: 'Product', status: 'Pending' },
+  { id: 'appr5', owner: { name: 'Laura Polis', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 120.00, frequency: 'Bi-Monthly', project: 'Design Tools', description: 'Subscription for new design software.', team: 'Design', status: 'Pending' },
+  { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, frequency: 'Bi-Monthly', project: 'Analytics Platform', description: 'Subscription for marketing analytics tool.', team: 'Marketing', status: 'Pending' },
+  { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, frequency: 'Monthly', project: 'Team Offsite', description: 'Monthly travel budget for team events.', team: 'Engineering', status: 'Pending' },
 ];
 
 export const teamSpendingData = [

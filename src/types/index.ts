@@ -64,4 +64,8 @@ export interface Approval {
   category: 'Travel' | 'Food' | 'Software';
   amount: number;
   frequency: 'Once' | 'Monthly' | 'Bi-Monthly';
+  project: string;
+  description: string;
+  team: string;
+  status: 'Pending' | 'Approved' | 'Declined';
 }
