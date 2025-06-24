@@ -61,8 +61,8 @@ export function SidebarNav() {
                                 )}
                             >
                                 <Link href={item.href}>
-                                    <div className={cn("flex size-7 items-center justify-center rounded-lg", !isActive && item.color)}>
-                                        <item.icon className={cn("size-4", !isActive && "text-white")} />
+                                    <div className={cn("flex size-7 items-center justify-center rounded-lg", item.color)}>
+                                        <item.icon className="size-4 text-white" />
                                     </div>
                                     <span>{item.label}</span>
                                 </Link>
