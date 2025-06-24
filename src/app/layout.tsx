@@ -46,9 +46,7 @@ export default function RootLayout({
                   <SidebarNav />
                 </Sidebar>
                 <SidebarInset>
-                  <div className="h-screen">
-                    {children}
-                  </div>
+                  {children}
                 </SidebarInset>
               </div>
             </SidebarProvider>
