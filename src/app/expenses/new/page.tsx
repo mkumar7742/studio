@@ -27,66 +27,71 @@ export default function NewExpensePage() {
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         <div className="lg:col-span-2 space-y-6">
-                            <div>
-                                <Label htmlFor="subject">Subject*</Label>
-                                <Input id="subject" className="mt-1 bg-muted border-border" />
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="subject" className="text-right">Subject*</Label>
+                                <Input id="subject" className="col-span-3 bg-muted border-border" />
                             </div>
-                            <div>
-                                <Label htmlFor="merchant">Merchant*</Label>
-                                <Input id="merchant" className="mt-1 bg-muted border-border" />
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="merchant" className="text-right">Merchant*</Label>
+                                <Input id="merchant" className="col-span-3 bg-muted border-border" />
                             </div>
-                            <div>
-                                <Label htmlFor="date">Date*</Label>
-                                <Input id="date" type="date" className="mt-1 bg-muted border-border" />
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="date" className="text-right">Date*</Label>
+                                <Input id="date" type="date" className="col-span-3 bg-muted border-border" />
                             </div>
-                            <div className="grid grid-cols-3 gap-4 items-end">
-                                <div className="col-span-2">
-                                    <Label htmlFor="total">Total*</Label>
-                                    <Input id="total" type="number" placeholder="0.00" className="mt-1 bg-muted border-border" />
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="total" className="text-right">Total*</Label>
+                                <div className="col-span-3 grid grid-cols-3 gap-4">
+                                    <Input id="total" type="number" placeholder="0.00" className="col-span-2 bg-muted border-border" />
+                                    <div className="col-span-1">
+                                        <Select>
+                                            <SelectTrigger className="bg-muted border-border">
+                                                <SelectValue placeholder="Currency" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="eur">EUR</SelectItem>
+                                                <SelectItem value="usd">USD</SelectItem>
+                                                <SelectItem value="gbp">GBP</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                                <div>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <div />
+                                <div className="col-span-3 flex items-center space-x-2">
+                                    <Checkbox id="reimbursable" defaultChecked />
+                                    <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="category" className="text-right">Category*</Label>
+                                <div className="col-span-3">
                                     <Select>
                                         <SelectTrigger className="bg-muted border-border">
-                                            <SelectValue placeholder="Currency" />
+                                            <SelectValue placeholder="Type" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="eur">EUR</SelectItem>
-                                            <SelectItem value="usd">USD</SelectItem>
-                                            <SelectItem value="gbp">GBP</SelectItem>
+                                            {categories.filter(c => c.name !== 'Income').map((cat) => (
+                                                <SelectItem key={cat.name} value={cat.name}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-2 pt-2">
-                                <Checkbox id="reimbursable" defaultChecked />
-                                <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
+                            <div className="grid grid-cols-4 items-start gap-x-4">
+                                <Label htmlFor="description" className="text-right pt-2">Description</Label>
+                                <Textarea id="description" className="col-span-3 bg-muted border-border" />
                             </div>
-                            <div>
-                                <Label htmlFor="category">Category*</Label>
-                                <Select>
-                                    <SelectTrigger className="mt-1 bg-muted border-border">
-                                        <SelectValue placeholder="Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.filter(c => c.name !== 'Income').map((cat) => (
-                                            <SelectItem key={cat.name} value={cat.name}>
-                                                {cat.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label htmlFor="member" className="text-right">Member*</Label>
+                                <Input id="member" className="col-span-3 bg-muted border-border" />
                             </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" className="mt-1 bg-muted border-border" />
-                            </div>
-                            <div>
-                                <Label htmlFor="member">Member*</Label>
-                                <Input id="member" className="mt-1 bg-muted border-border" />
-                            </div>
-                            <div>
-                                <Label className="mb-2 block">Add to report</Label>
-                                <div className="flex items-center gap-6">
+                            <div className="grid grid-cols-4 items-center gap-x-4">
+                                <Label className="text-right">Add to report</Label>
+                                <div className="col-span-3 flex items-center gap-6">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="report-yes" checked />
                                         <Label htmlFor="report-yes" className="font-normal">Yes</Label>
