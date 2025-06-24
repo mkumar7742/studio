@@ -117,12 +117,7 @@ export default function NewTripPage() {
 
                 {/* Accommodation */}
                 <div className="space-y-6">
-                     <h3 className="font-semibold text-foreground flex items-center gap-4">
-                        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-500 text-white">
-                            <BedDouble className="size-4" />
-                        </div>
-                        <span>ACCOMMODATION</span>
-                     </h3>
+                    <h2 className="text-base font-semibold uppercase tracking-wider text-muted-foreground">ACCOMMODATION</h2>
                     <div className="space-y-6 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
                         <Label htmlFor="check-in" className="flex items-center gap-4">
                             <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-teal-500 text-white">
