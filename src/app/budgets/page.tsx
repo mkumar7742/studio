@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,7 +73,10 @@ export default function BudgetsPage() {
         <div className="flex flex-col h-full">
             <PageHeader title="Budgets" description="Create and manage your spending budgets." />
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-end gap-2 mb-4">
+                    <Button asChild variant="outline">
+                        <Link href="/categories">Manage Categories</Link>
+                    </Button>
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button>Create Budget</Button>

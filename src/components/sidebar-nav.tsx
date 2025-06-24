@@ -18,6 +18,7 @@ import {
   Settings,
   LifeBuoy,
   ArrowRightLeft,
+  Shapes,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ export function SidebarNav() {
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-pink-500' },
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-green-500' },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-amber-500' },
+        { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-orange-500' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-violet-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-blue-500' },
     ];
