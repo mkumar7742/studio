@@ -1,5 +1,5 @@
 import type { Account, Transaction, Category, Budget, PendingTask } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Clock, Plane, Receipt, CalendarClock, Undo2 } from 'lucide-react';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Clock, Plane, Receipt, CalendarClock, Undo2, Wrench, Home } from 'lucide-react';
 
 export const accounts: Account[] = [
   { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
@@ -16,6 +16,9 @@ export const categories: Category[] = [
   { id: 'cat-6', name: 'Transport', icon: Car, color: 'hsl(var(--chart-1))' },
   { id: 'cat-7', name: 'Education', icon: GraduationCap, color: 'hsl(var(--chart-2))' },
   { id: 'cat-8', name: 'Entertainment', icon: Film, color: 'hsl(var(--chart-3))' },
+  { id: 'cat-9', name: 'Supplies', icon: Wrench, color: 'hsl(var(--chart-4))' },
+  { id: 'cat-10', name: 'Travel', icon: Plane, color: 'hsl(var(--chart-5))' },
+  { id: 'cat-11', name: 'Accommodation', icon: Home, color: 'hsl(var(--chart-1))' },
 ];
 
 const today = new Date();
