@@ -61,8 +61,10 @@ export default function TripsPage() {
             <header className="flex items-center justify-between p-4 sm:p-6">
                 <h1 className="text-3xl font-bold tracking-tight">Trips</h1>
                 <div className="flex items-center gap-2">
-                    <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="mr-2 size-4" /> New trip
+                    <Button asChild className="bg-primary hover:bg-primary/90">
+                        <Link href="/trips/new">
+                            <Plus className="mr-2 size-4" /> New trip
+                        </Link>
                     </Button>
                     <Button variant="outline" size="icon">
                         <Filter className="size-4" />
@@ -127,7 +129,7 @@ export default function TripsPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button asChild variant="link" size="sm" className="font-semibold">
+                                            <Button asChild variant="link" size="sm" className="font-semibold text-cyan-400 hover:text-cyan-500">
                                                 <Link href={`/trips/${trip.id}`}>
                                                     <Eye className="size-4" />
                                                     View
