@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useMemo } from "react";
 import { PageHeader } from "@/components/page-header";
 import { AddCategoryDialog } from "@/components/add-category-dialog";
 import { SortableCategoryList } from "@/components/sortable-category-list";
@@ -8,7 +9,14 @@ import { useAppContext } from "@/context/app-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CategoriesPage() {
-    const { categories, setCategories } = useAppContext();
+    const { categories, setCategories, transactions } = useAppContext();
+
+    const categoryCounts = useMemo(() => {
+        return transactions.reduce((acc, t) => {
+            acc.set(t.category, (acc.get(t.category) || 0) + 1);
+            return acc;
+        }, new Map<string, number>());
+    }, [transactions]);
 
     return (
         <div className="flex flex-col h-full">
@@ -28,7 +36,7 @@ export default function CategoriesPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <SortableCategoryList items={categories} setItems={setCategories} />
+                        <SortableCategoryList items={categories} setItems={setCategories} categoryCounts={categoryCounts} />
                     </CardContent>
                 </Card>
             </main>

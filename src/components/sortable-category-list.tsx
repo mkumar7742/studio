@@ -10,9 +10,10 @@ import type { Category } from '@/types';
 interface SortableCategoryListProps {
   items: Category[];
   setItems: (items: Category[]) => void;
+  categoryCounts: Map<string, number>;
 }
 
-export function SortableCategoryList({ items, setItems }: SortableCategoryListProps) {
+export function SortableCategoryList({ items, setItems, categoryCounts }: SortableCategoryListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -37,7 +38,7 @@ export function SortableCategoryList({ items, setItems }: SortableCategoryListPr
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <div className="space-y-2">
           {items.map((item) => (
-            <SortableCategoryItem key={item.id} id={item.id} item={item} />
+            <SortableCategoryItem key={item.id} id={item.id} item={item} count={categoryCounts.get(item.name) || 0} />
           ))}
            {items.length === 0 && (
             <div className="text-center text-muted-foreground py-8">

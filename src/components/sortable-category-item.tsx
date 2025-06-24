@@ -12,9 +12,10 @@ import { Button } from '@/components/ui/button';
 interface SortableCategoryItemProps {
   id: string;
   item: Category;
+  count: number;
 }
 
-export function SortableCategoryItem({ id, item }: SortableCategoryItemProps) {
+export function SortableCategoryItem({ id, item, count }: SortableCategoryItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -38,6 +39,7 @@ export function SortableCategoryItem({ id, item }: SortableCategoryItemProps) {
             <Icon className="size-4 text-primary-foreground" />
         </div>
       <span className="flex-grow font-medium truncate">{item.name}</span>
+      <span className="text-sm font-semibold text-muted-foreground">{count}</span>
     </div>
   );
 }
