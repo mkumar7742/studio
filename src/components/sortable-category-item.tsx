@@ -8,6 +8,7 @@ import { GripVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface SortableCategoryItemProps {
   id: string;
@@ -41,8 +42,10 @@ export function SortableCategoryItem({ id, item, count }: SortableCategoryItemPr
       <span className="flex-grow font-medium truncate">{item.name}</span>
       <span className="text-sm font-semibold text-muted-foreground">{count}</span>
       <div className="ml-auto flex items-center gap-1">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+          <Link href={`/categories/${item.id}`}>
             <Eye className="size-4" />
+          </Link>
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8">
             <Pencil className="size-4" />
