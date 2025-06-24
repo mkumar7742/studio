@@ -11,6 +11,9 @@ export interface Transaction {
   receiptUrl: string | null;
   employee: string;
   team: string;
+  merchant: string;
+  report: string;
+  status: 'Submitted' | 'Not Submitted';
 }
 
 export interface Account {
@@ -37,4 +40,5 @@ export interface PendingTask {
     icon: LucideIcon;
     label: string;
     value: string | number;
+    color: string;
 }

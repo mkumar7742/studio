@@ -1,13 +1,136 @@
-import { PageHeader } from "@/components/page-header";
+"use client";
+
+import { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAppContext } from "@/context/app-provider";
+import { cn } from '@/lib/utils';
+import { Filter, MoreHorizontal, Plus } from 'lucide-react';
+import type { Category, Transaction } from '@/types';
 
 export default function ExpensesPage() {
+    const { transactions, categories } = useAppContext();
+    const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+
+    const handleSelectAll = (checked: boolean | 'indeterminate') => {
+        if (checked === true) {
+            setSelectedRows(new Set(transactions.map(t => t.id)));
+        } else {
+            setSelectedRows(new Set());
+        }
+    };
+
+    const handleSelectRow = (id: string, checked: boolean) => {
+        const newSelectedRows = new Set(selectedRows);
+        if (checked) {
+            newSelectedRows.add(id);
+        } else {
+            newSelectedRows.delete(id);
+        }
+        setSelectedRows(newSelectedRows);
+    };
+
+    const allRowsSelected = transactions.length > 0 && selectedRows.size === transactions.length;
+    const someRowsSelected = selectedRows.size > 0 && selectedRows.size < transactions.length;
+
+    const getCategory = (categoryName: string): Category | undefined => {
+        return categories.find(c => c.name === categoryName);
+    }
+    
+    const euroFormatter = new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+    });
+
     return (
         <div className="flex flex-col h-full">
-            <PageHeader title="Expenses" description="Manage your expenses." />
-            <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground">Expenses page coming soon.</p>
+            <header className="flex items-center justify-between p-4 sm:p-6">
+                <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
+                <div className="flex items-center gap-2">
+                    <Button className="bg-primary hover:bg-primary/90">
+                        <Plus className="mr-2 size-4" /> New expense
+                    </Button>
+                    <Button variant="outline" size="icon">
+                        <Filter className="size-4" />
+                    </Button>
+                     <Button variant="outline" size="icon">
+                        <MoreHorizontal className="size-4" />
+                    </Button>
                 </div>
+            </header>
+            <main className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6">
+                <Card className="bg-card">
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-border/50">
+                                    <TableHead className="w-[50px] pl-4">
+                                        <Checkbox 
+                                            checked={allRowsSelected || (someRowsSelected ? 'indeterminate' : false)}
+                                            onCheckedChange={handleSelectAll}
+                                        />
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">MERCHANT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">REPORT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.map((txn) => {
+                                    const category = getCategory(txn.category);
+                                    const Icon = category?.icon;
+                                    const color = category?.color;
+
+                                    return (
+                                        <TableRow key={txn.id} className="border-border/20 font-medium">
+                                            <TableCell className="pl-4">
+                                                <Checkbox
+                                                    checked={selectedRows.has(txn.id)}
+                                                    onCheckedChange={(checked) => handleSelectRow(txn.id, !!checked)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    {Icon && color && (
+                                                        <div
+                                                        className="flex size-8 shrink-0 items-center justify-center rounded-md"
+                                                        style={{ backgroundColor: color }}
+                                                        >
+                                                        <Icon className="size-4 text-white" />
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <div className="text-xs text-muted-foreground">{txn.date}</div>
+                                                        <div className="font-semibold">{txn.description}</div>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{txn.merchant}</TableCell>
+                                            <TableCell>{euroFormatter.format(txn.amount)}</TableCell>
+                                            <TableCell>{txn.report}</TableCell>
+                                            <TableCell>
+                                                <Badge 
+                                                    variant="outline"
+                                                    className={cn("border-none rounded-md text-xs font-semibold py-1 px-2.5", 
+                                                        txn.status === 'Submitted' && 'bg-violet-500/20 text-violet-400',
+                                                        txn.status === 'Not Submitted' && 'bg-pink-500/20 text-pink-400'
+                                                    )}
+                                                >
+                                                    {txn.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </main>
         </div>
     )

@@ -26,13 +26,13 @@ export function SidebarNav() {
     const pathname = usePathname();
 
     const menuItems = [
-        { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500' },
-        { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-pink-500' },
-        { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-green-500' },
-        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-amber-500' },
-        { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-orange-500' },
-        { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-violet-500' },
-        { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-blue-500' },
+        { href: '/', label: 'Home', icon: Home },
+        { href: '/expenses', label: 'Expenses', icon: CreditCard },
+        { href: '/trips', label: 'Trips', icon: Plane },
+        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck },
+        { href: '/categories', label: 'Categories', icon: Shapes },
+        { href: '/settings', label: 'Settings', icon: Settings },
+        { href: '/support', label: 'Support', icon: LifeBuoy },
     ];
 
     return <>
@@ -63,9 +63,7 @@ export function SidebarNav() {
                                 )}
                             >
                                 <Link href={item.href}>
-                                    <div className={cn("flex size-7 items-center justify-center rounded-lg", item.color)}>
-                                        <item.icon className="size-4 text-white" />
-                                    </div>
+                                    <item.icon className="size-5" />
                                     <span>{item.label}</span>
                                 </Link>
                             </SidebarMenuButton>

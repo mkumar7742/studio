@@ -16,21 +16,22 @@ export const categories: Category[] = [
   { id: 'cat-6', name: 'Transport', icon: Car, color: 'hsl(var(--chart-1))' },
   { id: 'cat-7', name: 'Education', icon: GraduationCap, color: 'hsl(var(--chart-2))' },
   { id: 'cat-8', name: 'Entertainment', icon: Film, color: 'hsl(var(--chart-3))' },
-  { id: 'cat-9', name: 'Supplies', icon: PenSquare, color: 'hsl(var(--chart-4))' },
-  { id: 'cat-10', name: 'Travel', icon: Plane, color: 'hsl(var(--chart-5))' },
-  { id: 'cat-11', name: 'Accommodation', icon: Home, color: 'hsl(var(--chart-1))' },
+  { id: 'cat-9', name: 'Supplies', icon: PenSquare, color: 'hsl(206, 81%, 50%)' },
+  { id: 'cat-10', name: 'Travel', icon: Plane, color: 'hsl(14, 88%, 58%)' },
+  { id: 'cat-11', name: 'Accommodation', icon: Home, color: 'hsl(130, 71%, 48%)' },
+  { id: 'cat-12', name: 'News Subscription', icon: Receipt, color: 'hsl(26, 88%, 58%)' },
 ];
-
-const today = new Date();
-const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'John Smith', team: 'Marketing' },
-  { id: 'txn2', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'Sarah Jade', team: 'Marketing' },
-  { id: 'txn3', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: formatDate(today), accountId: 'acc1', receiptUrl: null, employee: 'Mike Brown', team: 'Operations' },
-  { id: 'txn4', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'Jennifer Lee', team: 'Marketing' },
-  { id: 'txn5', type: 'expense', category: 'Accommodation', description: 'Hotel', amount: 275.75, date: formatDate(today), accountId: 'acc1', receiptUrl: null, employee: 'David Wilson', team: 'Finance' },
+  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 250.00, date: '09/11/2022', accountId: 'acc3', receiptUrl: null, employee: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '10/11/2022', accountId: 'acc3', receiptUrl: null, employee: 'Janice Chandler', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '11/11/2022', accountId: 'acc1', receiptUrl: null, employee: 'Janice Chandler', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: '11/11/2022', accountId: 'acc3', receiptUrl: null, employee: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '12/11/2022', accountId: 'acc1', receiptUrl: null, employee: 'Janice Chandler', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '16/11/2022', accountId: 'acc1', receiptUrl: null, employee: 'Janice Chandler', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '20/11/2022', accountId: 'acc3', receiptUrl: null, employee: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
 ];
+
 
 export const budgets: Budget[] = [
     { category: 'Food', allocated: 500, spent: 203.10 },
