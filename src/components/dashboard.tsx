@@ -70,9 +70,11 @@ export function Dashboard() {
           <CardContent className='space-y-4'>
             {pendingTasks.map((task: PendingTask) => (
               <div key={task.label} className="flex items-center">
-                <task.icon className="size-4 text-muted-foreground mr-4" />
+                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", task.color)}>
+                    <task.icon className="size-4" />
+                </div>
                 <span className="flex-grow text-sm">{task.label}</span>
-                <span className="text-sm font-semibold">{typeof task.value === 'number' ? task.value : euroFormatter.format(0)}</span>
+                <span className="text-sm font-semibold">{task.value}</span>
               </div>
             ))}
           </CardContent>

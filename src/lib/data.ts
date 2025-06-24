@@ -36,11 +36,11 @@ export const budgets: Budget[] = [
 ];
 
 export const pendingTasks: PendingTask[] = [
-  { icon: Clock, label: 'Pending Approvals', value: 5 },
-  { icon: Plane, label: 'New Trips Registered', value: 1 },
-  { icon: Receipt, label: 'Unreported Expenses', value: 4 },
-  { icon: CalendarClock, label: 'Upcoming Expenses', value: 0 },
-  { icon: Undo2, label: 'Unreported Advances', value: '€0.00' }
+  { icon: Clock, label: 'Pending Approvals', value: 5, color: 'bg-pink-600' },
+  { icon: Plane, label: 'New Trips Registered', value: 1, color: 'bg-blue-600' },
+  { icon: Receipt, label: 'Unreported Expenses', value: 4, color: 'bg-emerald-600' },
+  { icon: CalendarClock, label: 'Upcoming Expenses', value: 0, color: 'bg-orange-500' },
+  { icon: Undo2, label: 'Unreported Advances', value: '€0.00', color: 'bg-purple-500' }
 ];
 
 export const teamSpendingData = [
