@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -21,7 +22,7 @@ import { Progress } from "@/components/ui/progress";
 import { AIFinancialInsights } from "@/components/ai-financial-insights";
 import { SpendingCharts } from "@/components/spending-charts";
 import type { Account, Transaction, Budget, Category } from "@/types";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useAppContext } from '@/context/app-provider';
 
 const CategoryIcon = ({ categoryName, categories }: { categoryName: string, categories: Category[] }) => {
@@ -33,21 +34,6 @@ const CategoryIcon = ({ categoryName, categories }: { categoryName: string, cate
     </div>
   ) : null;
 };
-
-const AccountCard = ({ account }: { account: Account }) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{account.name}</CardTitle>
-      <account.icon className="size-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">${account.balance.toLocaleString()}</div>
-      <p className="text-xs text-muted-foreground">
-        Available Balance
-      </p>
-    </CardContent>
-  </Card>
-);
 
 const BudgetCard = ({ budget, transactions }: { budget: Budget, transactions: Transaction[] }) => {
   const spent = useMemo(() => {
@@ -73,13 +59,52 @@ const BudgetCard = ({ budget, transactions }: { budget: Budget, transactions: Tr
 export function Dashboard() {
   const { transactions, accounts, budgets, categories } = useAppContext();
 
+  const { totalBalance, totalIncome, totalExpenses } = useMemo(() => {
+    const income = transactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const expenses = transactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const balance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    return { totalBalance: balance, totalIncome: income, totalExpenses: expenses };
+  }, [transactions, accounts]);
+
   return (
     <main className="grid gap-4 p-4 sm:p-6 md:gap-6 lg:grid-cols-3">
-      <div className="grid gap-4 md:gap-6 lg:col-span-2">
+      <div className="grid auto-rows-max gap-4 md:gap-6 lg:col-span-2">
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {accounts.map((acc) => (
-            <AccountCard key={acc.id} account={acc} />
-          ))}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+                    <Wallet className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <p className="text-xs text-muted-foreground">Across all accounts</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Income this month</CardTitle>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-emerald-600">+${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                     <p className="text-xs text-muted-foreground">Total earnings</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Expenses this month</CardTitle>
+                    <ArrowDownRight className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <p className="text-xs text-muted-foreground">Total spending</p>
+                </CardContent>
+            </Card>
         </div>
 
         <SpendingCharts transactions={transactions} />
@@ -146,7 +171,32 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:gap-6 lg:col-span-1">
+      <div className="grid auto-rows-max gap-4 md:gap-6 lg:col-span-1">
+        <Card>
+            <CardHeader>
+                <CardTitle>Your Accounts</CardTitle>
+                <CardDescription>A summary of your connected accounts.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+                {accounts.map(account => {
+                    const AccountIcon = account.icon;
+                    return (
+                        <div key={account.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+                                    <AccountIcon className="size-4 text-muted-foreground" />
+                                </div>
+                                <span className="font-medium">{account.name}</span>
+                            </div>
+                            <div className={`font-semibold ${account.balance < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                                ${account.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                        </div>
+                    )
+                })}
+            </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Budget Status</CardTitle>
