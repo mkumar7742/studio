@@ -25,12 +25,12 @@ export function SidebarNav() {
     const pathname = usePathname();
 
     const menuItems = [
-        { href: '/', label: 'Home', icon: Home },
-        { href: '/expenses', label: 'Expenses', icon: CreditCard },
-        { href: '/trips', label: 'Trips', icon: Plane },
-        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck },
-        { href: '/settings', label: 'Settings', icon: Settings },
-        { href: '/support', label: 'Support', icon: LifeBuoy },
+        { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500' },
+        { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500' },
+        { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500' },
+        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500' },
+        { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
+        { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },
     ];
 
     return <>
@@ -61,7 +61,9 @@ export function SidebarNav() {
                                 )}
                             >
                                 <Link href={item.href}>
-                                    <item.icon className="size-5" />
+                                    <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-md text-primary-foreground", item.color)}>
+                                        <item.icon className="size-5" />
+                                    </div>
                                     <span>{item.label}</span>
                                 </Link>
                             </SidebarMenuButton>
