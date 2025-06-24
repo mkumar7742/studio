@@ -22,7 +22,7 @@ interface ApprovalRequestDialogProps {
 const DetailRow = ({ label, children }: { label: string, children: React.ReactNode }) => (
     <div className="grid grid-cols-[100px_1fr] items-start gap-4">
         <span className="font-bold text-foreground">{label}</span>
-        <div className="text-foreground font-bold">
+        <div className="text-foreground">
             {children}
         </div>
     </div>
@@ -65,7 +65,7 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
 
                 <div className="space-y-4 my-6">
                     <DetailRow label="Amount">
-                        {euroFormatter.format(approval.amount)}
+                        <span className="font-bold">{euroFormatter.format(approval.amount)}</span>
                     </DetailRow>
                     <DetailRow label="Category">
                         <div className="flex items-center gap-2">
@@ -77,14 +77,14 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
                         {approval.project}
                     </DetailRow>
                     <DetailRow label="Description">
-                        <span className="font-normal">{approval.description}</span>
+                        {approval.description}
                     </DetailRow>
                     <DetailRow label="Team">
                         {approval.team}
                     </DetailRow>
                 </div>
 
-                <DialogFooter className="gap-2 sm:justify-start">
+                <DialogFooter className="gap-2 justify-start">
                     <Button type="button" variant="secondary" className="bg-muted hover:bg-border/50 text-muted-foreground font-bold px-6">
                         Approve
                     </Button>
