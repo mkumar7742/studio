@@ -4,7 +4,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -32,14 +32,25 @@ export function SortableCategoryItem({ id, item, count }: SortableCategoryItemPr
       style={style}
       className={cn("flex items-center gap-4 rounded-lg border bg-card p-3 shadow-sm", isDragging && "shadow-lg")}
     >
-        <Button variant="ghost" size="icon" className="cursor-grab touch-none" {...attributes} {...listeners}>
-            <GripVertical className="size-5 text-muted-foreground" />
+        <Button variant="ghost" size="icon" className="cursor-grab touch-none h-8 w-8" {...attributes} {...listeners}>
+            <GripVertical className="size-4 text-muted-foreground" />
         </Button>
         <div className="flex size-8 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: item.color }}>
             <Icon className="size-4 text-primary-foreground" />
         </div>
       <span className="flex-grow font-medium truncate">{item.name}</span>
       <span className="text-sm font-semibold text-muted-foreground">{count}</span>
+      <div className="ml-auto flex items-center gap-1">
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Eye className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Pencil className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+            <Trash2 className="size-4" />
+        </Button>
+      </div>
     </div>
   );
 }
