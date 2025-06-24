@@ -127,10 +127,10 @@ export default function TripsPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button asChild variant="ghost" size="icon">
+                                            <Button asChild variant="link" size="sm" className="font-semibold">
                                                 <Link href={`/trips/${trip.id}`}>
                                                     <Eye className="size-4" />
-                                                    <span className="sr-only">View trip</span>
+                                                    View
                                                 </Link>
                                             </Button>
                                         </TableCell>
