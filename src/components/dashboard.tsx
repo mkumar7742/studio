@@ -1,5 +1,7 @@
+
 "use client";
 
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -54,7 +56,7 @@ const quickAccessItems = [
 ]
 
 export function Dashboard() {
-  const { transactions, pendingTasks, categories } = useAppContext();
+  const { transactions, pendingTasks, categories, members } = useAppContext();
 
   const euroFormatter = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -114,6 +116,7 @@ export function Dashboard() {
                       const category = categories.find(c => c.name === txn.category);
                       const Icon = category?.icon;
                       const color = category?.color;
+                      const member = members.find(m => m.name === txn.member);
 
                       return (
                         <TableRow key={txn.id} className="border-border/50">
@@ -130,7 +133,15 @@ export function Dashboard() {
                               <span className="font-medium">{txn.description}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell">{txn.member}</TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                             {member ? (
+                                <Link href={`/members/${member.id}`} className="hover:underline">
+                                    {txn.member}
+                                </Link>
+                            ) : (
+                                txn.member
+                            )}
+                          </TableCell>
                           <TableCell className="hidden md:table-cell">
                             <Badge
                               variant="outline"

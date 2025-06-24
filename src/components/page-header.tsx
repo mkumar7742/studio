@@ -1,3 +1,4 @@
+
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -5,9 +6,10 @@ interface PageHeaderProps {
     title: string;
     description: string;
     showAddTransaction?: boolean;
+    children?: React.ReactNode;
 }
 
-export function PageHeader({ title, description, showAddTransaction = false }: PageHeaderProps) {
+export function PageHeader({ title, description, showAddTransaction = false, children }: PageHeaderProps) {
     return (
         <header className="flex items-center justify-between p-4 sm:p-6 border-b bg-background sticky top-0 z-10">
             <div className="flex items-center gap-4">
@@ -18,6 +20,7 @@ export function PageHeader({ title, description, showAddTransaction = false }: P
                 </div>
             </div>
             <div className="flex items-center gap-4">
+                {children}
                 {showAddTransaction && (
                     <AddTransactionDialog />
                 )}

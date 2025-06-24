@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from "react";
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,7 @@ import { ApprovalRequestDialog } from "@/components/approval-request-dialog";
 
 
 export default function ApprovalsPage() {
-    const { approvals } = useAppContext();
+    const { approvals, members } = useAppContext();
     const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -71,42 +73,53 @@ export default function ApprovalsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {approvals.map((approval) => (
-                                    <TableRow key={approval.id} className="border-border/20 font-medium">
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="size-8">
-                                                    <AvatarImage src={approval.owner.avatar} alt={approval.owner.name} data-ai-hint={approval.owner.avatarHint} />
-                                                    <AvatarFallback>{approval.owner.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="font-semibold">{approval.owner.name}</div>
-                                                    <div className="text-xs text-muted-foreground">{approval.owner.title}</div>
+                                {approvals.map((approval) => {
+                                    const member = members.find(m => m.name === approval.owner.name);
+                                    return (
+                                        <TableRow key={approval.id} className="border-border/20 font-medium">
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="size-8">
+                                                        <AvatarImage src={approval.owner.avatar} alt={approval.owner.name} data-ai-hint={approval.owner.avatarHint} />
+                                                        <AvatarFallback>{approval.owner.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <div className="font-semibold">
+                                                            {member ? (
+                                                                <Link href={`/members/${member.id}`} className="hover:underline">
+                                                                    {approval.owner.name}
+                                                                </Link>
+                                                            ) : (
+                                                                approval.owner.name
+                                                            )}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">{approval.owner.title}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className={cn("rounded-md font-semibold", getCategoryBadgeClasses(approval.category))}>
-                                                {approval.category}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{euroFormatter.format(approval.amount)}</TableCell>
-                                        <TableCell>{approval.frequency}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-4">
-                                                <button className="text-muted-foreground hover:text-foreground" onClick={() => handleViewClick(approval)}>
-                                                    <Eye className="size-5" />
-                                                </button>
-                                                <button className="text-green-500 hover:text-green-400">
-                                                    <Check className="size-5" />
-                                                </button>
-                                                <button className="text-red-500 hover:text-red-400">
-                                                    <X className="size-5" />
-                                                </button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className={cn("rounded-md font-semibold", getCategoryBadgeClasses(approval.category))}>
+                                                    {approval.category}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>{euroFormatter.format(approval.amount)}</TableCell>
+                                            <TableCell>{approval.frequency}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-4">
+                                                    <button className="text-muted-foreground hover:text-foreground" onClick={() => handleViewClick(approval)}>
+                                                        <Eye className="size-5" />
+                                                    </button>
+                                                    <button className="text-green-500 hover:text-green-400">
+                                                        <Check className="size-5" />
+                                                    </button>
+                                                    <button className="text-red-500 hover:text-red-400">
+                                                        <X className="size-5" />
+                                                    </button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </CardContent>

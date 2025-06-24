@@ -1,5 +1,7 @@
+
 "use client";
 
+import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,7 +20,7 @@ const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
 };
 
 export default function TransactionsPage() {
-    const { transactions } = useAppContext();
+    const { transactions, members } = useAppContext();
 
     return (
         <div className="flex flex-col h-full">
@@ -40,14 +42,25 @@ export default function TransactionsPage() {
                             </TableHeader>
                             <TableBody>
                                 {transactions.length > 0 ? (
-                                transactions.map((txn: Transaction) => (
+                                transactions.map((txn: Transaction) => {
+                                    const member = members.find(m => m.name === txn.member);
+                                    return (
                                     <TableRow key={txn.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <CategoryIcon categoryName={txn.category} />
                                                 <div>
                                                     <div className="font-medium">{txn.description}</div>
-                                                    <div className="text-sm text-muted-foreground">{txn.category} &middot; {txn.member}</div>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {txn.category} &middot;{' '}
+                                                        {member ? (
+                                                            <Link href={`/members/${member.id}`} className="hover:underline">
+                                                                {txn.member}
+                                                            </Link>
+                                                        ) : (
+                                                            txn.member
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -62,7 +75,8 @@ export default function TransactionsPage() {
                                             {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                         </TableCell>
                                     </TableRow>
-                                ))
+                                );
+                                })
                                 ) : (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-24 text-center">

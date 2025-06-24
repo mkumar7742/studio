@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -13,7 +14,7 @@ import { Filter, MoreHorizontal, Plus } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 
 export default function ExpensesPage() {
-    const { transactions, categories } = useAppContext();
+    const { transactions, categories, members } = useAppContext();
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
     const handleSelectAll = (checked: boolean | 'indeterminate') => {
@@ -88,6 +89,7 @@ export default function ExpensesPage() {
                                     const category = getCategory(txn.category);
                                     const Icon = category?.icon;
                                     const color = category?.color;
+                                    const member = members.find(m => m.name === txn.member);
 
                                     return (
                                         <TableRow key={txn.id} className="border-border/20 font-medium">
@@ -109,7 +111,15 @@ export default function ExpensesPage() {
                                                     )}
                                                     <div>
                                                         <div className="font-semibold">{txn.description}</div>
-                                                        <div className="text-xs text-muted-foreground">{txn.member} &middot; {txn.date}</div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {member ? (
+                                                                <Link href={`/members/${member.id}`} className="hover:underline">
+                                                                    {txn.member}
+                                                                </Link>
+                                                            ) : (
+                                                                txn.member
+                                                            )} &middot; {txn.date}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </TableCell>

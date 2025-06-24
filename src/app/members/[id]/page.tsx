@@ -10,9 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import type { Transaction } from '@/types';
-import { ArrowLeft, Mail, Phone, MapPin, Link as LinkIcon, Twitter, Linkedin } from 'lucide-react';
+import type { MemberProfile, Transaction } from '@/types';
+import { ArrowLeft, Mail, Phone, MapPin, Link as LinkIcon, Twitter, Linkedin, Pencil } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useState } from 'react';
+import { RequirePermission } from '@/components/require-permission';
+import { EditMemberDialog } from '@/components/edit-member-dialog';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -41,6 +44,7 @@ export default function MemberProfilePage() {
     const router = useRouter();
     const { id } = params as { id: string };
     const { members, transactions, getMemberRole } = useAppContext();
+    const [memberToEdit, setMemberToEdit] = useState<MemberProfile | null>(null);
 
     const member = members.find(m => m.id === id);
     const memberTransactions = transactions.filter(t => t.member === member?.name);
@@ -65,7 +69,13 @@ export default function MemberProfilePage() {
 
     return (
         <div className="flex flex-col h-full">
-            <PageHeader title="Member Profile" description={`Details and activity for ${member.name}.`} />
+            <PageHeader title="Member Profile" description={`Details and activity for ${member.name}.`}>
+                <RequirePermission permission="members:edit">
+                    <Button variant="outline" onClick={() => setMemberToEdit(member)}>
+                        <Pencil className="mr-2 size-4" /> Edit Role
+                    </Button>
+                </RequirePermission>
+            </PageHeader>
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Left Column - Profile Details */}
@@ -175,6 +185,11 @@ export default function MemberProfilePage() {
                     </div>
                 </div>
             </main>
+            <EditMemberDialog 
+                member={memberToEdit}
+                open={!!memberToEdit}
+                onOpenChange={(isOpen) => !isOpen && setMemberToEdit(null)}
+            />
         </div>
     );
 }
