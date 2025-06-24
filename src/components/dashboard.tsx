@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -55,7 +54,7 @@ const quickAccessItems = [
 ]
 
 export function Dashboard() {
-  const { transactions, pendingTasks } = useAppContext();
+  const { transactions, pendingTasks, categories } = useAppContext();
 
   const euroFormatter = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -111,23 +110,41 @@ export function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {transactions.length > 0 ? (
-                    transactions.slice(0, 5).map((txn: Transaction) => (
-                      <TableRow key={txn.id} className="border-border/50">
-                        <TableCell className="font-medium">{txn.description}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{txn.employee}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <Badge
-                            variant="outline"
-                            className={cn("border-none", teamColors[txn.team] || teamColors.default)}
-                          >
-                            {txn.team}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {euroFormatter.format(txn.amount)}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    transactions.slice(0, 5).map((txn: Transaction) => {
+                      const category = categories.find(c => c.name === txn.category);
+                      const Icon = category?.icon;
+                      const color = category?.color;
+
+                      return (
+                        <TableRow key={txn.id} className="border-border/50">
+                           <TableCell>
+                            <div className="flex items-center gap-3">
+                              {Icon && color && (
+                                <div
+                                  className="flex size-8 shrink-0 items-center justify-center rounded-md text-white"
+                                  style={{ backgroundColor: color }}
+                                >
+                                  <Icon className="size-4" />
+                                </div>
+                              )}
+                              <span className="font-medium">{txn.description}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">{txn.employee}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <Badge
+                              variant="outline"
+                              className={cn("border-none", teamColors[txn.team] || teamColors.default)}
+                            >
+                              {txn.team}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {euroFormatter.format(txn.amount)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} className="h-24 text-center">
