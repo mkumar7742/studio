@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useAppContext } from "@/context/app-provider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
+import { RequirePermission } from "@/components/require-permission";
 
 export default function MembersPage() {
-    const { members } = useAppContext();
+    const { members, getMemberRole } = useAppContext();
 
     return (
         <div className="flex flex-col h-full">
@@ -25,7 +26,9 @@ export default function MembersPage() {
                                 <CardTitle>Team Members ({members.length})</CardTitle>
                                 <CardDescription>Invite and manage member access.</CardDescription>
                             </div>
-                            <AddMemberDialog />
+                            <RequirePermission permission="members:create">
+                                <AddMemberDialog />
+                            </RequirePermission>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -39,36 +42,43 @@ export default function MembersPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {members.map((member) => (
-                                    <TableRow key={member.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar>
-                                                    <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.avatarHint} />
-                                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="font-medium">{member.name}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">{member.email}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={member.role === 'Admin' ? 'default' : 'secondary'} className={member.role === 'Admin' ? 'bg-primary/80' : ''}>
-                                                {member.role}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon">
-                                                <Pencil className="size-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                <Trash2 className="size-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="size-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {members.map((member) => {
+                                    const role = getMemberRole(member);
+                                    return (
+                                        <TableRow key={member.id}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar>
+                                                        <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.avatarHint} />
+                                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="font-medium">{member.name}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">{member.email}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
+                                                    {role ? role.name : 'Unknown Role'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <RequirePermission permission="members:edit">
+                                                    <Button variant="ghost" size="icon">
+                                                        <Pencil className="size-4" />
+                                                    </Button>
+                                                </RequirePermission>
+                                                <RequirePermission permission="members:delete">
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </RequirePermission>
+                                                <Button variant="ghost" size="icon">
+                                                    <MoreHorizontal className="size-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </CardContent>

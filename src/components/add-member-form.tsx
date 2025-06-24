@@ -13,7 +13,7 @@ import { useAppContext } from "@/context/app-provider";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  role: z.enum(["Admin", "Member"], { required_error: "Please select a role." }),
+  roleId: z.string({ required_error: "Please select a role." }),
 });
 
 type AddMemberValues = z.infer<typeof formSchema>;
@@ -23,14 +23,14 @@ interface AddMemberFormProps {
 }
 
 export function AddMemberForm({ onFinished }: AddMemberFormProps) {
-  const { addMember } = useAppContext();
+  const { addMember, roles } = useAppContext();
 
   const form = useForm<AddMemberValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
-      role: "Member",
+      roleId: "role-member",
     },
   });
 
@@ -73,7 +73,7 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
         />
         <FormField
           control={form.control}
-          name="role"
+          name="roleId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Role</FormLabel>
@@ -84,8 +84,11 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Member">Member</SelectItem>
+                  {roles.map(role => (
+                    <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -20,20 +20,24 @@ import {
   LifeBuoy,
   ArrowRightLeft,
   Shapes,
-  Users
+  Users,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
+import { RequirePermission } from './require-permission';
+import type { Permission } from '@/types';
 
 export function SidebarNav() {
     const pathname = usePathname();
 
-    const menuItems = [
-        { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500' },
-        { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500' },
-        { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500' },
-        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500' },
-        { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500' },
-        { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500' },
+    const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
+        { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
+        { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
+        { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500', permission: 'trips:view' },
+        { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500', permission: 'approvals:view' },
+        { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
+        { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500', permission: 'members:view' },
+        { href: '/roles', label: 'Roles', icon: ShieldCheck, color: 'bg-yellow-500', permission: 'roles:manage' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },
     ];
@@ -54,26 +58,41 @@ export function SidebarNav() {
             <SidebarMenu>
                 {menuItems.map(item => {
                     const isActive = (item.href === '/') ? pathname === item.href : pathname.startsWith(item.href);
+                    
+                    const menuItemContent = (
+                         <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className={cn(
+                                "justify-start h-12 text-base",
+                                isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
+                                !isActive && "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                            )}
+                        >
+                            <Link href={item.href}>
+                                <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-md text-primary-foreground", item.color)}>
+                                    <item.icon className="size-5" />
+                                </div>
+                                <span>{item.label}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    );
+
+                    if (item.permission) {
+                        return (
+                            <RequirePermission key={item.label} permission={item.permission}>
+                                <SidebarMenuItem>
+                                    {menuItemContent}
+                                </SidebarMenuItem>
+                            </RequirePermission>
+                        );
+                    }
+                    
                     return (
                         <SidebarMenuItem key={item.label}>
-                            <SidebarMenuButton
-                                asChild
-                                isActive={isActive}
-                                className={cn(
-                                    "justify-start h-12 text-base",
-                                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
-                                    !isActive && "hover:bg-sidebar-accent/50 text-sidebar-foreground"
-                                )}
-                            >
-                                <Link href={item.href}>
-                                    <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-md text-primary-foreground", item.color)}>
-                                        <item.icon className="size-5" />
-                                    </div>
-                                    <span>{item.label}</span>
-                                </Link>
-                            </SidebarMenuButton>
+                            {menuItemContent}
                         </SidebarMenuItem>
-                    )
+                    );
                 })}
             </SidebarMenu>
         </SidebarContent>

@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile } from '@/types';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
@@ -11,7 +11,8 @@ import {
     pendingTasks as initialPendingTasks,
     trips as initialTrips,
     approvals as initialApprovals,
-    members as initialMembers
+    members as initialMembers,
+    roles as initialRoles
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
@@ -32,11 +33,15 @@ interface AppContextType {
     trips: Trip[];
     approvals: Approval[];
     members: MemberProfile[];
+    roles: Role[];
+    currentUser: MemberProfile;
+    currentUserPermissions: Permission[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
-    addMember: (values: Omit<MemberProfile, 'id' | 'avatar' | 'avatarHint'>) => void;
+    addMember: (values: { name: string; email: string; roleId: string; }) => void;
+    getMemberRole: (member: MemberProfile) => Role | undefined;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,6 +55,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [trips, setTrips] = useState<Trip[]>(initialTrips);
     const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
     const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
+    const [roles, setRoles] = useState<Role[]>(initialRoles);
+
+    // For demonstration purposes, we assume the logged-in user is the first member.
+    // In a real app, this would come from an authentication provider.
+    const currentUser = useMemo(() => members[0], [members]);
+
+    const getMemberRole = (member: MemberProfile): Role | undefined => {
+        return roles.find(r => r.id === member.roleId);
+    };
+
+    const currentUserRole = useMemo(() => getMemberRole(currentUser), [currentUser, roles]);
+    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
+
 
     const addTransaction = (values: AddTransactionValues) => {
         const newTransaction: Transaction = {
@@ -88,10 +106,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCategories(prev => [...prev, newCategory]);
     };
 
-    const addMember = (values: Omit<MemberProfile, 'id' | 'avatar' | 'avatarHint'>) => {
+    const addMember = (values: { name: string; email: string; roleId: string; }) => {
         const newMember: MemberProfile = {
             id: `mem-${Date.now()}`,
-            ...values,
+            name: values.name,
+            email: values.email,
+            roleId: values.roleId,
             avatar: 'https://placehold.co/100x100.png',
             avatarHint: 'person portrait'
         };
@@ -107,11 +127,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         trips,
         approvals,
         members,
+        roles,
+        currentUser,
+        currentUserPermissions,
         addTransaction,
         addBudget,
         addCategory,
         setCategories,
         addMember,
+        getMemberRole
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -54,11 +54,38 @@ export interface Trip {
   status: 'Approved' | 'Pending' | 'Not Approved';
 }
 
+// A list of all possible permissions in the app
+export type Permission =
+  | 'dashboard:view'
+  | 'expenses:view'
+  | 'expenses:create'
+  | 'expenses:edit'
+  | 'expenses:delete'
+  | 'trips:view'
+  | 'trips:create'
+  | 'approvals:view'
+  | 'approvals:action'
+  | 'categories:view'
+  | 'categories:create'
+  | 'categories:edit'
+  | 'categories:delete'
+  | 'members:view'
+  | 'members:create'
+  | 'members:edit'
+  | 'members:delete'
+  | 'roles:manage';
+
+export interface Role {
+  id: string;
+  name: string;
+  permissions: Permission[];
+}
+
 export interface MemberProfile {
   id: string;
   name: string;
   email: string;
-  role: 'Admin' | 'Member';
+  roleId: string;
   avatar: string;
   avatarHint: string;
 }

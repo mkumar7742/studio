@@ -1,11 +1,48 @@
 
-import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile } from '@/types';
+import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
 
+export const roles: Role[] = [
+  {
+    id: 'role-admin',
+    name: 'Administrator',
+    permissions: [
+      'dashboard:view',
+      'expenses:view', 'expenses:create', 'expenses:edit', 'expenses:delete',
+      'trips:view', 'trips:create',
+      'approvals:view', 'approvals:action',
+      'categories:view', 'categories:create', 'categories:edit', 'categories:delete',
+      'members:view', 'members:create', 'members:edit', 'members:delete',
+      'roles:manage',
+    ],
+  },
+  {
+    id: 'role-manager',
+    name: 'Manager',
+    permissions: [
+      'dashboard:view',
+      'expenses:view', 'expenses:create', 'expenses:edit',
+      'trips:view', 'trips:create',
+      'approvals:view', 'approvals:action',
+      'categories:view',
+      'members:view',
+    ],
+  },
+  {
+    id: 'role-member',
+    name: 'Member',
+    permissions: [
+      'dashboard:view',
+      'expenses:view', 'expenses:create',
+      'trips:view', 'trips:create',
+    ],
+  },
+];
+
 export const members: MemberProfile[] = [
-  { id: 'mem1', name: 'Janice Chandler', email: 'janice.chandler@example.com', role: 'Admin', avatar: 'https://placehold.co/100x100.png', avatarHint: 'person portrait' },
-  { id: 'mem2', name: 'John Doe', email: 'john.doe@example.com', role: 'Member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'man portrait' },
-  { id: 'mem3', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'woman portrait' },
+  { id: 'mem1', name: 'Janice Chandler', email: 'janice.chandler@example.com', roleId: 'role-admin', avatar: 'https://placehold.co/100x100.png', avatarHint: 'person portrait' },
+  { id: 'mem2', name: 'John Doe', email: 'john.doe@example.com', roleId: 'role-manager', avatar: 'https://placehold.co/100x100.png', avatarHint: 'man portrait' },
+  { id: 'mem3', name: 'Jane Smith', email: 'jane.smith@example.com', roleId: 'role-member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'woman portrait' },
 ];
 
 export const accounts: Account[] = [
