@@ -93,9 +93,48 @@ export const roles: Role[] = [
 ];
 
 export const members: MemberProfile[] = [
-  { id: 'mem1', name: 'Janice Chandler', email: 'janice.chandler@example.com', roleId: 'role-admin', avatar: 'https://placehold.co/100x100.png', avatarHint: 'person portrait' },
-  { id: 'mem2', name: 'John Doe', email: 'john.doe@example.com', roleId: 'role-manager', avatar: 'https://placehold.co/100x100.png', avatarHint: 'man portrait' },
-  { id: 'mem3', name: 'Jane Smith', email: 'jane.smith@example.com', roleId: 'role-member', avatar: 'https://placehold.co/100x100.png', avatarHint: 'woman portrait' },
+  { 
+    id: 'mem1', 
+    name: 'Janice Chandler', 
+    email: 'janice.chandler@example.com', 
+    roleId: 'role-admin', 
+    avatar: 'https://placehold.co/100x100.png', 
+    avatarHint: 'person portrait',
+    phone: '123-456-7890',
+    address: '123 Finance Avenue, Suite 100, Budgetown, 54321',
+    socials: {
+      twitter: 'https://twitter.com/janicec',
+      linkedin: 'https://linkedin.com/in/janicechandler'
+    }
+  },
+  { 
+    id: 'mem2', 
+    name: 'John Doe', 
+    email: 'john.doe@example.com', 
+    roleId: 'role-manager', 
+    avatar: 'https://placehold.co/100x100.png', 
+    avatarHint: 'man portrait',
+    phone: '234-567-8901',
+    address: '456 Expense Lane, Cash City, 98765',
+    socials: {
+      twitter: 'https://twitter.com/johndoe',
+      linkedin: 'https://linkedin.com/in/johndoe'
+    }
+  },
+  { 
+    id: 'mem3', 
+    name: 'Jane Smith', 
+    email: 'jane.smith@example.com', 
+    roleId: 'role-member', 
+    avatar: 'https://placehold.co/100x100.png', 
+    avatarHint: 'woman portrait',
+    phone: '345-678-9012',
+    address: '789 Ledger Road, Accountsville, 12345',
+    socials: {
+      twitter: 'https://twitter.com/janesmith',
+      linkedin: 'https://linkedin.com/in/janesmith'
+    }
+  },
 ];
 
 export const accounts: Account[] = [

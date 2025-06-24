@@ -40,16 +40,28 @@ export default function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" defaultValue={currentUser.email} />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone</Label>
+                                <Input id="phone" type="tel" placeholder="e.g. 123-456-7890" defaultValue={currentUser.phone} />
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Role</Label>
+                                <div>
+                                {role && (
+                                    <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
+                                        {role.name}
+                                    </Badge>
+                                )}
+                                </div>
+                            </div>
                         </div>
                          <div className="space-y-2">
-                            <Label>Role</Label>
-                            <div>
-                            {role && (
-                                <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
-                                    {role.name}
-                                </Badge>
-                            )}
-                            </div>
+                            <Label htmlFor="address">Address</Label>
+                            <Textarea
+                                id="address"
+                                placeholder="123 Main St, Anytown, USA"
+                                defaultValue={currentUser.address}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="bio">Bio</Label>
@@ -58,6 +70,17 @@ export default function ProfilePage() {
                                 placeholder="Tell us a little about yourself"
                                 defaultValue="TrackWise user since 2024. Passionate about personal finance and budgeting."
                             />
+                        </div>
+                         <div className="space-y-4">
+                            <Label>Social Media</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="twitter" className="text-sm font-normal text-muted-foreground">Twitter</Label>
+                                <Input id="twitter" placeholder="https://twitter.com/username" defaultValue={currentUser.socials?.twitter} />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="linkedin" className="text-sm font-normal text-muted-foreground">LinkedIn</Label>
+                                <Input id="linkedin" placeholder="https://linkedin.com/in/username" defaultValue={currentUser.socials?.linkedin} />
+                            </div>
                         </div>
                         <div className="flex justify-end">
                             <Button>Save Changes</Button>

@@ -88,6 +88,12 @@ export interface MemberProfile {
   roleId: string;
   avatar: string;
   avatarHint: string;
+  phone?: string;
+  address?: string;
+  socials?: {
+    twitter?: string;
+    linkedin?: string;
+  };
 }
 
 export interface Approval {
