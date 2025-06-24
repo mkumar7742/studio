@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from 'react';
@@ -56,12 +55,16 @@ export function CategorySpending() {
                         const color = item.details?.color;
                         return (
                             <div key={item.name}>
-                                <div className="flex justify-between items-center text-sm mb-1">
-                                    <div className="flex items-center gap-2 font-medium">
-                                        {Icon && <Icon className="size-4" style={{ color }} />}
-                                        <span>{item.name}</span>
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-3">
+                                        {Icon && (
+                                            <div className="flex size-8 items-center justify-center rounded-md" style={{ backgroundColor: color }}>
+                                                <Icon className="size-4 text-white" />
+                                            </div>
+                                        )}
+                                        <span className="font-medium text-sm">{item.name}</span>
                                     </div>
-                                    <span className="font-semibold">{euroFormatter.format(item.amount)}</span>
+                                    <span className="font-semibold text-sm">{euroFormatter.format(item.amount)}</span>
                                 </div>
                                 <Progress value={item.percentage} color={color} className="h-2" />
                             </div>
