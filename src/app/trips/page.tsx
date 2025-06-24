@@ -88,7 +88,7 @@ export default function TripsPage() {
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">PURPOSE</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">REPORT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">TRIP REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -114,7 +114,7 @@ export default function TripsPage() {
                                         </TableCell>
                                         <TableCell>{trip.purpose}</TableCell>
                                         <TableCell>{euroFormatter.format(trip.amount)}</TableCell>
-                                        <TableCell>{trip.report}</TableCell>
+                                        <TableCell>{trip.report.replace('_', ' ')}</TableCell>
                                         <TableCell>
                                             <Badge 
                                                 variant="outline"
