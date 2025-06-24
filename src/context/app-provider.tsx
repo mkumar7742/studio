@@ -49,6 +49,7 @@ interface AppContextType {
     addRole: (values: { name: string; permissions: Permission[] }) => void;
     editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => void;
     deleteRole: (roleId: string) => void;
+    updateCurrentUser: (data: Partial<MemberProfile>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -150,6 +151,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setRoles(prev => prev.filter(r => r.id !== roleId));
     };
 
+    const updateCurrentUser = (data: Partial<MemberProfile>) => {
+        setMembers(prev => {
+            const currentUserFromState = prev.find(m => m.id === currentUser.id);
+            if (!currentUserFromState) return prev;
+
+            const updatedUser = { ...currentUserFromState, ...data };
+            
+            return prev.map(m => m.id === currentUser.id ? updatedUser : m);
+        });
+    };
+
     const value = {
         transactions,
         accounts,
@@ -173,7 +185,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         getMemberRole,
         addRole,
         editRole,
-        deleteRole
+        deleteRole,
+        updateCurrentUser
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -91,9 +91,9 @@ export interface MemberProfile {
   phone?: string;
   address?: string;
   socials?: {
-    twitter?: string;
-    linkedin?: string;
-  };
+    platform: string;
+    url: string;
+  }[];
 }
 
 export interface Approval {

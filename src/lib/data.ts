@@ -102,10 +102,10 @@ export const members: MemberProfile[] = [
     avatarHint: 'person portrait',
     phone: '123-456-7890',
     address: '123 Finance Avenue, Suite 100, Budgetown, 54321',
-    socials: {
-      twitter: 'https://twitter.com/janicec',
-      linkedin: 'https://linkedin.com/in/janicechandler'
-    }
+    socials: [
+      { platform: 'Twitter', url: 'https://twitter.com/janicec' },
+      { platform: 'LinkedIn', url: 'https://linkedin.com/in/janicechandler' }
+    ]
   },
   { 
     id: 'mem2', 
@@ -116,10 +116,10 @@ export const members: MemberProfile[] = [
     avatarHint: 'man portrait',
     phone: '234-567-8901',
     address: '456 Expense Lane, Cash City, 98765',
-    socials: {
-      twitter: 'https://twitter.com/johndoe',
-      linkedin: 'https://linkedin.com/in/johndoe'
-    }
+    socials: [
+      { platform: 'Twitter', url: 'https://twitter.com/johndoe' },
+      { platform: 'LinkedIn', url: 'https://linkedin.com/in/johndoe' }
+    ]
   },
   { 
     id: 'mem3', 
@@ -130,10 +130,10 @@ export const members: MemberProfile[] = [
     avatarHint: 'woman portrait',
     phone: '345-678-9012',
     address: '789 Ledger Road, Accountsville, 12345',
-    socials: {
-      twitter: 'https://twitter.com/janesmith',
-      linkedin: 'https://linkedin.com/in/janesmith'
-    }
+    socials: [
+      { platform: 'Twitter', url: 'https://twitter.com/janesmith' },
+      { platform: 'LinkedIn', url: 'https://linkedin.com/in/janesmith' }
+    ]
   },
 ];
 
