@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,12 +15,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppContext } from '@/context/app-provider';
-import type { Budget, Category } from '@/types';
+import type { Budget } from '@/types';
 import { RequirePermission } from '@/components/require-permission';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Pencil, Plus, Trash2, Archive, ArchiveRestore } from 'lucide-react';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { format, getYear, getMonth, set } from 'date-fns';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+
+const currentYear = getYear(new Date());
 
 const budgetFormSchema = z.object({
   name: z.string().min(3, { message: "Budget name must be at least 3 characters." }),
@@ -28,6 +33,8 @@ const budgetFormSchema = z.object({
   allocated: z.coerce.number().positive({ message: "Allocated amount must be positive." }),
   scope: z.enum(['global', 'member'], { required_error: "Please select a scope." }),
   memberId: z.string().optional(),
+  month: z.coerce.number().min(0).max(11),
+  year: z.coerce.number().min(currentYear - 10).max(currentYear + 10),
 }).refine(data => {
     if (data.scope === 'member') {
         return !!data.memberId;
@@ -39,6 +46,11 @@ const budgetFormSchema = z.object({
 });
 
 type BudgetFormValues = z.infer<typeof budgetFormSchema>;
+
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: i,
+    label: format(set(new Date(), { month: i }), 'MMMM'),
+}));
 
 // Budget Form Component
 interface BudgetFormProps {
@@ -58,6 +70,8 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
             allocated: budget?.allocated || 0,
             scope: budget?.scope || 'global',
             memberId: budget?.memberId || "",
+            month: budget ? budget.month : getMonth(new Date()),
+            year: budget ? budget.year : getYear(new Date()),
         }
     });
 
@@ -65,7 +79,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
 
     function onSubmit(values: BudgetFormValues) {
         if (isEditing && budget) {
-            editBudget(budget.id, values);
+            editBudget(budget.id, { ...values, status: budget.status });
         } else {
             addBudget(values);
         }
@@ -88,6 +102,39 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
                         </FormItem>
                     )}
                 />
+                 <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="month"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Month</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        {monthOptions.map(option => (
+                                            <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="year"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Year</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 2024" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name="scope"
@@ -184,7 +231,7 @@ function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) {
     const isEditing = !!budget;
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? "Edit Budget" : "Create a New Budget"}</DialogTitle>
                     <DialogDescription>
@@ -198,8 +245,9 @@ function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) {
 }
 
 // Budget Card Component
-const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () => void, onDelete: () => void }) => {
+const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, onEdit: () => void, onDelete: () => void, onArchive: () => void }) => {
     const { transactions, members, categories } = useAppContext();
+    const budgetDate = useMemo(() => new Date(budget.year, budget.month), [budget.year, budget.month]);
 
     const categoryDetails = useMemo(() => {
         return categories.find(c => c.name === budget.category);
@@ -213,9 +261,15 @@ const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () =
     }, [members, budget]);
 
     const spent = useMemo(() => {
-        let categoryTransactions = transactions.filter(
-            (t) => t.type === 'expense' && t.category === budget.category
-        );
+        let categoryTransactions = transactions.filter((t) => {
+            const transactionDate = new Date(t.date);
+            return (
+                t.type === 'expense' &&
+                t.category === budget.category &&
+                getYear(transactionDate) === budget.year &&
+                getMonth(transactionDate) === budget.month
+            );
+        });
 
         if (budget.scope === 'member' && member) {
             categoryTransactions = categoryTransactions.filter(t => t.member === member.name);
@@ -240,13 +294,7 @@ const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () =
                         )}
                         <div>
                             <CardTitle className='text-lg'>{budget.name}</CardTitle>
-                            {member ? (
-                                <CardDescription>
-                                    For <Link href={`/members/${member.id}`} className="font-medium text-primary hover:underline">{member.name}</Link>
-                                </CardDescription>
-                            ) : (
-                                <CardDescription>Global budget for all members</CardDescription>
-                            )}
+                             <CardDescription>{format(budgetDate, 'MMMM yyyy')}</CardDescription>
                         </div>
                     </div>
                      <RequirePermission permission="budgets:manage">
@@ -256,6 +304,14 @@ const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () =
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={onEdit}><Pencil className="mr-2 size-4" /> Edit</DropdownMenuItem>
+                                <DropdownMenuItem onClick={onArchive}>
+                                    {budget.status === 'active' ? (
+                                        <><Archive className="mr-2 size-4" /> Archive</>
+                                    ) : (
+                                        <><ArchiveRestore className="mr-2 size-4" /> Unarchive</>
+                                    )}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 size-4" /> Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -263,6 +319,13 @@ const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () =
                 </div>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col justify-end">
+                {member ? (
+                    <CardDescription className="mb-2">
+                        For <Link href={`/members/${member.id}`} className="font-medium text-primary hover:underline">{member.name}</Link>
+                    </CardDescription>
+                ) : (
+                    <CardDescription className="mb-2">Global budget for all members</CardDescription>
+                )}
                 <div className="mb-2 flex justify-between items-baseline">
                     <span className="text-2xl font-bold">${spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     <span className="text-sm text-muted-foreground">
@@ -278,10 +341,11 @@ const BudgetCard = ({ budget, onEdit, onDelete }: { budget: Budget, onEdit: () =
 
 // Main Budgets Page
 export default function BudgetsPage() {
-    const { budgets, deleteBudget } = useAppContext();
+    const { budgets, deleteBudget, archiveBudget } = useAppContext();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
     const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null);
+    const [showArchived, setShowArchived] = useState(false);
 
     const handleCreateClick = () => {
         setBudgetToEdit(null);
@@ -296,6 +360,10 @@ export default function BudgetsPage() {
     const handleDeleteClick = (budget: Budget) => {
         setBudgetToDelete(budget);
     };
+
+    const handleArchiveClick = (budget: Budget) => {
+        archiveBudget(budget.id, budget.status === 'active' ? 'archived' : 'active');
+    };
     
     const handleConfirmDelete = () => {
         if (budgetToDelete) {
@@ -304,36 +372,55 @@ export default function BudgetsPage() {
         }
     };
 
+    const displayedBudgets = useMemo(() => {
+        const sorted = [...budgets].sort((a,b) => b.year - a.year || b.month - a.month);
+        return sorted.filter(b => showArchived ? b.status === 'archived' : b.status === 'active');
+    }, [budgets, showArchived]);
+
+
     return (
         <div className="flex flex-col h-full">
             <PageHeader title="Budgets" description="Create and manage your spending budgets." />
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <div className="flex justify-end gap-2 mb-4">
-                    <Button asChild variant="outline">
-                        <Link href="/categories">Manage Categories</Link>
-                    </Button>
-                    <RequirePermission permission="budgets:manage">
-                        <Button onClick={handleCreateClick}><Plus className="mr-2 size-4" /> Create Budget</Button>
-                    </RequirePermission>
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="show-archived"
+                            checked={showArchived}
+                            onCheckedChange={setShowArchived}
+                        />
+                        <Label htmlFor="show-archived">Show Archived</Label>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button asChild variant="outline">
+                            <Link href="/categories">Manage Categories</Link>
+                        </Button>
+                        <RequirePermission permission="budgets:manage">
+                            <Button onClick={handleCreateClick}><Plus className="mr-2 size-4" /> Create Budget</Button>
+                        </RequirePermission>
+                    </div>
                 </div>
-                {budgets.length > 0 ? (
+                {displayedBudgets.length > 0 ? (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {budgets.map(budget => (
+                        {displayedBudgets.map(budget => (
                             <BudgetCard 
                                 key={budget.id} 
                                 budget={budget} 
                                 onEdit={() => handleEditClick(budget)}
                                 onDelete={() => handleDeleteClick(budget)}
+                                onArchive={() => handleArchiveClick(budget)}
                             />
                         ))}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full rounded-lg border-2 border-dashed border-border py-24">
-                        <h3 className="text-2xl font-semibold tracking-tight">No Budgets Found</h3>
-                        <p className="text-muted-foreground mt-2">Get started by creating a new budget.</p>
-                        <RequirePermission permission="budgets:manage">
-                            <Button onClick={handleCreateClick} className="mt-4"><Plus className="mr-2 size-4" /> Create Budget</Button>
-                        </RequirePermission>
+                        <h3 className="text-2xl font-semibold tracking-tight">{showArchived ? 'No Archived Budgets' : 'No Active Budgets'}</h3>
+                        <p className="text-muted-foreground mt-2">{showArchived ? 'You have no archived budgets.' : 'Get started by creating a new budget.'}</p>
+                        {!showArchived && (
+                            <RequirePermission permission="budgets:manage">
+                                <Button onClick={handleCreateClick} className="mt-4"><Plus className="mr-2 size-4" /> Create Budget</Button>
+                            </RequirePermission>
+                        )}
                     </div>
                 )}
             </main>

@@ -1,6 +1,7 @@
 
 import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission } from '@/types';
 import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
+import { getYear, getMonth } from 'date-fns';
 
 export const allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[] = [
   {
@@ -166,21 +167,23 @@ export const categories: Category[] = [
 ];
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 250.00, date: '09/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '10/11/2022', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '11/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: '11/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '12/11/2022', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '16/11/2022', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '20/11/2022', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 250.00, date: '2022-11-09', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '2022-11-10', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '2022-11-11', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: '2022-11-11', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
 ];
 
+const currentMonth = getMonth(new Date());
+const currentYear = getYear(new Date());
 
 export const budgets: Budget[] = [
-    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, scope: 'global' },
-    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, scope: 'global' },
-    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, scope: 'member', memberId: 'mem3' },
-    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, scope: 'member', memberId: 'mem2' },
+    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, scope: 'member', memberId: 'mem3', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, scope: 'member', memberId: 'mem2', month: currentMonth, year: currentYear, status: 'archived' },
 ];
 
 export const pendingTasks: PendingTask[] = [

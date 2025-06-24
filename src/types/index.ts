@@ -7,7 +7,7 @@ export interface Transaction {
   category: string;
   description: string;
   amount: number;
-  date: string;
+  date: string; // yyyy-MM-dd
   accountId: string;
   receiptUrl: string | null;
   member: string;
@@ -38,6 +38,9 @@ export interface Budget {
     allocated: number;
     scope: 'global' | 'member';
     memberId?: string;
+    month: number; // 0-11
+    year: number;
+    status: 'active' | 'archived';
 }
 
 export interface PendingTask {

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import type { Transaction } from '@/types';
 import { ArrowLeft } from 'lucide-react';
+import { format } from 'date-fns';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -86,7 +87,7 @@ export default function CategoryDetailPage() {
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{txn.date}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{format(new Date(txn.date), 'PPP')}</TableCell>
                                         <TableCell
                                             className={`text-right font-medium ${
                                             txn.type === "income"

@@ -16,7 +16,7 @@ import {
     allPermissions
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
-import { format } from 'date-fns';
+import { format, getMonth, getYear } from 'date-fns';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2 } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 
@@ -39,9 +39,10 @@ interface AppContextType {
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
     addTransaction: (values: AddTransactionValues) => void;
-    addBudget: (values: Omit<Budget, 'id'>) => void;
+    addBudget: (values: Omit<Budget, 'id' | 'status'>) => void;
     editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => void;
     deleteBudget: (budgetId: string) => void;
+    archiveBudget: (budgetId: string, status: 'active' | 'archived') => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
@@ -87,7 +88,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             amount: values.amount,
             category: values.category,
             accountId: values.accountId,
-            date: format(values.date, "MMMM d"),
+            date: format(values.date, "yyyy-MM-dd"),
             receiptUrl: values.receipt ? URL.createObjectURL(values.receipt) : null,
             member: values.member,
             team: 'Personal',
@@ -98,10 +99,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setTransactions(prev => [newTransaction, ...prev]);
     };
 
-    const addBudget = (values: Omit<Budget, 'id'>) => {
+    const addBudget = (values: Omit<Budget, 'id' | 'status'>) => {
         const newBudget: Budget = {
             id: `bud-${Date.now()}`,
             ...values,
+            status: 'active',
         };
         setBudgets(prev => [...prev, newBudget]);
     }
@@ -112,6 +114,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const deleteBudget = (budgetId: string) => {
         setBudgets(prev => prev.filter(b => b.id !== budgetId));
+    };
+
+    const archiveBudget = (budgetId: string, status: 'active' | 'archived') => {
+        setBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, status } : b));
     };
 
     const addCategory = (values: { name: string; color: string; icon: string }) => {
@@ -189,6 +195,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addBudget,
         editBudget,
         deleteBudget,
+        archiveBudget,
         addCategory,
         setCategories,
         addMember,

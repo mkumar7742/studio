@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Filter, MoreHorizontal, Plus } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
 
 export default function ExpensesPage() {
     const { transactions, categories, members } = useAppContext();
@@ -128,7 +129,7 @@ export default function ExpensesPage() {
                                                                 </Link>
                                                             ) : (
                                                                 txn.member
-                                                            )} &middot; {txn.date}
+                                                            )} &middot; {format(new Date(txn.date), 'MMM d, yyyy')}
                                                         </div>
                                                     </div>
                                                 </div>

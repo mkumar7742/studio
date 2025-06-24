@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { RequirePermission } from '@/components/require-permission';
 import { EditMemberDialog } from '@/components/edit-member-dialog';
+import { format } from 'date-fns';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -161,7 +162,7 @@ export default function MemberProfilePage() {
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="hidden sm:table-cell">{txn.date}</TableCell>
+                                                    <TableCell className="hidden sm:table-cell">{format(new Date(txn.date), 'PPP')}</TableCell>
                                                     <TableCell
                                                         className={`text-right font-medium ${
                                                         txn.type === "income" ? "text-emerald-600" : "text-foreground"
