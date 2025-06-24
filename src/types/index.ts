@@ -37,5 +37,4 @@ export interface PendingTask {
     icon: LucideIcon;
     label: string;
     value: string | number;
-    color: string;
 }

@@ -52,6 +52,15 @@ const quickAccessItems = [
   },
 ]
 
+const taskColorClasses: { [key: string]: string } = {
+  'Pending Approvals': 'bg-pink-600',
+  'New Trips Registered': 'bg-blue-600',
+  'Unreported Expenses': 'bg-emerald-600',
+  'Upcoming Expenses': 'bg-orange-500',
+  'Unreported Advances': 'bg-purple-500',
+};
+
+
 export function Dashboard() {
   const { transactions, pendingTasks } = useAppContext();
 
@@ -70,7 +79,7 @@ export function Dashboard() {
           <CardContent className='space-y-4'>
             {pendingTasks.map((task: PendingTask) => (
               <div key={task.label} className="flex items-center">
-                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", task.color)}>
+                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label])}>
                     <task.icon className="size-4" />
                 </div>
                 <span className="flex-grow text-sm">{task.label}</span>
