@@ -3,12 +3,11 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { useAppContext } from "@/context/app-provider";
-import { categories } from "@/lib/data";
 import type { Transaction } from "@/types";
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
+    const { categories } = useAppContext();
     const category = categories.find((c) => c.name === categoryName);
     const Icon = category?.icon;
     return Icon ? (
@@ -36,7 +35,6 @@ export default function TransactionsPage() {
                                 <TableRow>
                                 <TableHead>Description</TableHead>
                                 <TableHead className="hidden sm:table-cell">Date</TableHead>
-                                <TableHead className="hidden md:table-cell">Category</TableHead>
                                 <TableHead className="text-right">Amount</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -47,13 +45,13 @@ export default function TransactionsPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <CategoryIcon categoryName={txn.category} />
-                                                <div className="font-medium">{txn.description}</div>
+                                                <div>
+                                                    <div className="font-medium">{txn.description}</div>
+                                                    <div className="text-sm text-muted-foreground">{txn.category}</div>
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">{txn.date}</TableCell>
-                                        <TableCell className="hidden md:table-cell">
-                                            <Badge variant="outline">{txn.category}</Badge>
-                                        </TableCell>
                                         <TableCell
                                             className={`text-right font-medium ${
                                             txn.type === "income"
@@ -67,7 +65,7 @@ export default function TransactionsPage() {
                                 ))
                                 ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">
+                                    <TableCell colSpan={3} className="h-24 text-center">
                                     No transactions found.
                                     </TableCell>
                                 </TableRow>

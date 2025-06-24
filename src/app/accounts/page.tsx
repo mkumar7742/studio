@@ -3,6 +3,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppContext } from "@/context/app-provider";
+import { cn } from "@/lib/utils";
 
 export default function AccountsPage() {
     const { accounts } = useAppContext();
@@ -19,7 +20,12 @@ export default function AccountsPage() {
                                 <account.icon className="size-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">${account.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className={cn(
+                                    "text-2xl font-bold",
+                                    account.balance < 0 ? "text-destructive" : "text-foreground"
+                                )}>
+                                    ${account.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
                                 <p className="text-xs text-muted-foreground">
                                     Available Balance
                                 </p>
