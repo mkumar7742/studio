@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Approval } from "@/types";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
 
 interface ApprovalRequestDialogProps {
   approval: Approval | null;
@@ -50,17 +49,13 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md p-8 bg-card border-border">
-                <DialogHeader className="flex flex-row justify-between items-center space-y-0">
+                <DialogHeader>
                     <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-4">
                         Expense Request
                         {approval.status === 'Pending' && (
                             <Badge className="bg-pink-600 hover:bg-pink-600/90 text-white border-none text-sm">{approval.status}</Badge>
                         )}
                     </DialogTitle>
-                    <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="shrink-0">
-                        <X className="size-5" />
-                        <span className="sr-only">Close</span>
-                    </Button>
                 </DialogHeader>
 
                 <div className="space-y-4 my-6">
