@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppContext } from "@/context/app-provider";
 import type { Category } from '@/types';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 const getCategoryDetails = (categories: Category[], categoryName: string) => {
     return categories.find(c => c.name === categoryName);
 };
 
-export function CategorySpending() {
+export function CategorySpending({ className }: { className?: string }) {
     const { transactions, categories } = useAppContext();
 
     const spendingData = useMemo(() => {
@@ -44,11 +45,11 @@ export function CategorySpending() {
     });
 
     return (
-        <Card className="bg-card">
+        <Card className={cn("bg-card flex flex-col", className)}>
             <CardHeader>
                 <CardTitle>Spending by Category</CardTitle>
             </CardHeader>
-            <CardContent className='space-y-4'>
+            <CardContent className='flex-grow space-y-4'>
                 {spendingData.length > 0 ? (
                     spendingData.map((item) => {
                         const Icon = item.details?.icon;
@@ -71,7 +72,9 @@ export function CategorySpending() {
                         )
                     })
                 ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No spending data available.</p>
+                    <div className="flex h-full items-center justify-center">
+                        <p className="text-sm text-muted-foreground text-center py-4">No spending data available.</p>
+                    </div>
                 )}
             </CardContent>
         </Card>

@@ -54,15 +54,6 @@ const quickAccessItems = [
   },
 ]
 
-const taskColorClasses: { [key: string]: string } = {
-  'Pending Approvals': 'bg-pink-600',
-  'New Trips Registered': 'bg-blue-600',
-  'Unreported Expenses': 'bg-emerald-600',
-  'Upcoming Expenses': 'bg-orange-500',
-  'Unreported Advances': 'bg-purple-500',
-};
-
-
 export function Dashboard() {
   const { transactions, pendingTasks } = useAppContext();
 
@@ -70,6 +61,15 @@ export function Dashboard() {
     style: 'currency',
     currency: 'EUR',
   });
+
+  const taskColorClasses: { [key: string]: string } = {
+    'Pending Approvals': 'bg-pink-600',
+    'New Trips Registered': 'bg-blue-600',
+    'Unreported Expenses': 'bg-emerald-600',
+    'Upcoming Expenses': 'bg-orange-500',
+    'Unreported Advances': 'bg-purple-500',
+  };
+
 
   return (
     <main className="flex-1 overflow-y-auto flex flex-col gap-6 p-4 md:p-6">
@@ -91,7 +91,7 @@ export function Dashboard() {
               ))}
             </CardContent>
           </Card>
-          <CategorySpending />
+          <CategorySpending className="flex-1" />
         </div>
         
         <div className="lg:col-span-2 flex flex-col gap-6">
@@ -104,8 +104,8 @@ export function Dashboard() {
                 <TableHeader>
                   <TableRow className="border-border/50">
                     <TableHead>Subject</TableHead>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Team</TableHead>
+                    <TableHead className="hidden sm:table-cell">Employee</TableHead>
+                    <TableHead className="hidden md:table-cell">Team</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -114,8 +114,8 @@ export function Dashboard() {
                     transactions.slice(0, 5).map((txn: Transaction) => (
                       <TableRow key={txn.id} className="border-border/50">
                         <TableCell className="font-medium">{txn.description}</TableCell>
-                        <TableCell>{txn.employee}</TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">{txn.employee}</TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <Badge
                             variant="outline"
                             className={cn("border-none", teamColors[txn.team] || teamColors.default)}
@@ -139,11 +139,11 @@ export function Dashboard() {
               </Table>
             </CardContent>
           </Card>
-          <Card className="bg-card">
+          <Card className="bg-card flex flex-col">
             <CardHeader>
               <CardTitle>Quick Access</CardTitle>
             </CardHeader>
-            <CardContent className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+            <CardContent className='flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
               {quickAccessItems.map(item => (
                 <Button key={item.label} variant="outline" className='h-16 justify-start p-4 bg-muted hover:bg-border/50'>
                   <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md", item.color)}>
