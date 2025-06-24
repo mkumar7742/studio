@@ -32,10 +32,21 @@ export function SidebarNav() {
     ];
 
     return <>
-        <SidebarHeader className="flex h-16 items-center justify-between p-4">
+        <SidebarHeader className="flex flex-col items-start gap-4 p-4">
+            <Link href="/profile" className='flex items-center gap-3'>
+                <Avatar className="size-10">
+                    <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait" />
+                    <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                <div>
+                    <p className='font-semibold'>John Doe</p>
+                    <p className='text-xs text-muted-foreground'>john.doe@example.com</p>
+                </div>
+            </Link>
+
             <Link href="/" className="flex items-center gap-2">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <Banknote className="size-5" />
+                <div className="flex size-9 items-center justify-center rounded-lg bg-card text-foreground">
+                    <Banknote className="size-5 text-primary" />
                 </div>
                 <span className="text-lg font-semibold text-foreground">TrackWise</span>
             </Link>
@@ -61,17 +72,6 @@ export function SidebarNav() {
                         <Link href="/settings">
                             <Settings />
                             Settings
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname.startsWith('/profile')}>
-                        <Link href="/profile">
-                            <Avatar className="size-7">
-                                <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait" />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
-                            <span>User Profile</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

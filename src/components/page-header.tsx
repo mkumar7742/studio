@@ -1,6 +1,5 @@
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PageHeaderProps {
     title: string;
@@ -22,10 +21,6 @@ export function PageHeader({ title, description, showAddTransaction = false }: P
                 {showAddTransaction && (
                     <AddTransactionDialog />
                 )}
-                <Avatar className="hidden sm:block">
-                    <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait"/>
-                    <AvatarFallback>U</AvatarFallback>
-                </Avatar>
             </div>
         </header>
     )
