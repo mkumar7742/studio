@@ -12,6 +12,7 @@ import { useAppContext } from "@/context/app-provider";
 import { cn } from '@/lib/utils';
 import { Filter, MoreHorizontal, Plus, Plane, ListFilter, Eye } from 'lucide-react';
 import type { Trip } from '@/types';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function TripsPage() {
     const { trips } = useAppContext();
@@ -72,9 +73,17 @@ export default function TripsPage() {
                     <Button variant="outline" size="icon">
                         <ListFilter className="size-4" />
                     </Button>
-                     <Button variant="outline" size="icon">
-                        <MoreHorizontal className="size-4" />
-                    </Button>
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon">
+                                <MoreHorizontal className="size-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+                            <DropdownMenuItem>View Archived</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </header>
             <main className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6">

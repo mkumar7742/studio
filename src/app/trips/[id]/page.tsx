@@ -1,8 +1,10 @@
+
 'use client';
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Plane, BedDouble, Car, MoreHorizontal, X, Check, ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
@@ -47,9 +49,19 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex items-center gap-2">
                     <Button className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold">Edit</Button>
-                    <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="size-5" />
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="size-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>Share</DropdownMenuItem>
+                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:bg-destructive/80 focus:text-destructive-foreground">Delete Trip</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <Link href="/trips">
                         <Button variant="ghost" size="icon">
                             <X className="size-5" />

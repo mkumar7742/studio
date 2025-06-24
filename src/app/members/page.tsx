@@ -9,13 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useAppContext } from "@/context/app-provider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { RequirePermission } from "@/components/require-permission";
 import type { MemberProfile } from "@/types";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function MembersPage() {
     const { members, getMemberRole, deleteMember, currentUser } = useAppContext();
@@ -87,19 +88,33 @@ export default function MembersPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <RequirePermission permission="members:edit">
-                                                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
-                                                        <Pencil className="size-4" />
-                                                    </Button>
-                                                </RequirePermission>
-                                                <RequirePermission permission="members:delete">
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteClick(member)} disabled={isCurrentUser}>
-                                                        <Trash2 className="size-4" />
-                                                    </Button>
-                                                </RequirePermission>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="size-4" />
-                                                </Button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <MoreHorizontal className="size-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/members/${member.id}`}>View Profile</Link>
+                                                        </DropdownMenuItem>
+                                                        <RequirePermission permission="members:edit">
+                                                            <DropdownMenuItem onClick={() => handleEditClick(member)}>
+                                                                Edit Member
+                                                            </DropdownMenuItem>
+                                                        </RequirePermission>
+                                                        <RequirePermission permission="members:delete">
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                className="focus:bg-destructive/80 focus:text-destructive-foreground text-destructive"
+                                                                onClick={() => handleDeleteClick(member)}
+                                                                disabled={isCurrentUser}
+                                                            >
+                                                                Delete Member
+                                                            </DropdownMenuItem>
+                                                        </RequirePermission>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </TableCell>
                                         </TableRow>
                                     );
