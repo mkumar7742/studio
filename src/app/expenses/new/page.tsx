@@ -28,32 +28,32 @@ export default function NewExpensePage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
                             
-                            <Label htmlFor="subject" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="subject" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-blue-500 text-white">
                                     <PenSquare className="size-4" />
                                 </div>
                                 <span>Subject*</span>
                             </Label>
                             <Input id="subject" className="bg-card border-border" />
                             
-                            <Label htmlFor="merchant" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="merchant" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-emerald-500 text-white">
                                     <Store className="size-4" />
                                 </div>
                                 <span>Merchant*</span>
                             </Label>
                             <Input id="merchant" className="bg-card border-border" />
 
-                            <Label htmlFor="date" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="date" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-orange-500 text-white">
                                     <CalendarDays className="size-4" />
                                 </div>
                                 <span>Date*</span>
                             </Label>
                             <Input id="date" type="date" className="bg-card border-border" />
 
-                            <Label htmlFor="total" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="total" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-green-500 text-white">
                                     <CircleDollarSign className="size-4" />
                                 </div>
                                 <span>Total*</span>
@@ -80,8 +80,8 @@ export default function NewExpensePage() {
                                 <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
                             </div>
                             
-                            <Label htmlFor="category" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="category" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-purple-500 text-white">
                                     <Shapes className="size-4" />
                                 </div>
                                 <span>Category*</span>
@@ -99,28 +99,28 @@ export default function NewExpensePage() {
                                 </SelectContent>
                             </Select>
 
-                            <Label htmlFor="description" className="flex items-center gap-4 md:justify-self-end self-start md:pt-2">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="description" className="flex items-center gap-4 self-start pt-2">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-500 text-white">
                                     <BookText className="size-4" />
                                 </div>
                                 <span>Description</span>
                             </Label>
                             <Textarea id="description" className="bg-card border-border" />
                             
-                            <Label htmlFor="member" className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label htmlFor="member" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-teal-500 text-white">
                                     <User className="size-4" />
                                 </div>
                                 <span>Member*</span>
                             </Label>
                             <Input id="member" className="bg-card border-border" />
                             
-                            <div className="flex items-center gap-4 md:justify-self-end">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                            <Label className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-pink-500 text-white">
                                     <FilePlus2 className="size-4" />
                                 </div>
-                                <Label>Add to report</Label>
-                            </div>
+                                <span>Add to report</span>
+                            </Label>
                             <div className="flex items-center gap-6">
                                 <div className="flex items-center space-x-2">
                                     <Checkbox id="report-yes" checked />
