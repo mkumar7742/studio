@@ -41,14 +41,12 @@ export default function RootLayout({
         >
           <AppProvider>
             <SidebarProvider>
-              <div className="flex min-h-screen bg-background">
                 <Sidebar className="bg-sidebar">
                   <SidebarNav />
                 </Sidebar>
                 <SidebarInset>
                   {children}
                 </SidebarInset>
-              </div>
             </SidebarProvider>
             <Toaster />
           </AppProvider>
