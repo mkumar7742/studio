@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -74,7 +75,9 @@ export default function MembersPage() {
                                                         <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.avatarHint} />
                                                         <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium">{member.name}</span>
+                                                     <Link href={`/members/${member.id}`} className="font-medium hover:underline">
+                                                        {member.name}
+                                                    </Link>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">{member.email}</TableCell>
