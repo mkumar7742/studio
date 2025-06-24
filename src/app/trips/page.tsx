@@ -86,7 +86,7 @@ export default function TripsPage() {
                                         />
                                     </TableHead>
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">MOVIE</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">PURPOSE</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
