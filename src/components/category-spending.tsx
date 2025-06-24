@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -55,19 +56,19 @@ export function CategorySpending({ className }: { className?: string }) {
                         const Icon = item.details?.icon;
                         const color = item.details?.color;
                         return (
-                            <div key={item.name}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-3">
-                                        {Icon && (
-                                            <div className="flex size-8 items-center justify-center rounded-md" style={{ backgroundColor: color }}>
-                                                <Icon className="size-4 text-white" />
-                                            </div>
-                                        )}
-                                        <span className="font-medium text-sm">{item.name}</span>
+                            <div key={item.name} className="flex items-center gap-3">
+                                {Icon && (
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md" style={{ backgroundColor: color }}>
+                                        <Icon className="size-4 text-white" />
                                     </div>
-                                    <span className="font-semibold text-sm">{euroFormatter.format(item.amount)}</span>
+                                )}
+                                <div className="flex-grow space-y-1">
+                                    <div className="flex justify-between">
+                                        <span className="font-medium text-sm">{item.name}</span>
+                                        <span className="font-semibold text-sm">{euroFormatter.format(item.amount)}</span>
+                                    </div>
+                                    <Progress value={item.percentage} color={color} className="h-2" />
                                 </div>
-                                <Progress value={item.percentage} color={color} className="h-2" />
                             </div>
                         )
                     })
