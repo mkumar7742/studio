@@ -25,7 +25,7 @@ export default function NewExpensePage() {
             </header>
             <form className="flex-1 flex flex-col">
                 <main className="flex-1 overflow-y-auto p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
                             
                             <Label htmlFor="subject" className="flex items-center gap-2 md:justify-self-end">
