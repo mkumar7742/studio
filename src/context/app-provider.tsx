@@ -2,12 +2,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import type { Transaction, Account, Category, Budget } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
     transactions as initialTransactions,
     budgets as initialBudgets,
+    pendingTasks as initialPendingTasks
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format } from 'date-fns';
@@ -24,6 +25,7 @@ interface AppContextType {
     accounts: Account[];
     categories: Category[];
     budgets: Budget[];
+    pendingTasks: PendingTask[];
     addTransaction: (values: AddTransactionValues) => void;
     addBudget: (budget: Omit<Budget, 'spent'>) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
@@ -37,6 +39,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [budgets, setBudgets] = useState<Budget[]>(initialBudgets);
+    const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks);
 
     const addTransaction = (values: AddTransactionValues) => {
         const newTransaction: Transaction = {
@@ -48,6 +51,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             accountId: values.accountId,
             date: format(values.date, "MMMM d"),
             receiptUrl: values.receipt ? URL.createObjectURL(values.receipt) : null,
+            employee: 'You',
+            team: 'Personal'
         };
         setTransactions(prev => [newTransaction, ...prev]);
     };
@@ -75,6 +80,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         accounts,
         categories,
         budgets,
+        pendingTasks,
         addTransaction,
         addBudget,
         addCategory,

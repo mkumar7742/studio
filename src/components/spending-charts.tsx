@@ -1,94 +1,98 @@
 "use client";
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import type { Transaction } from '@/types';
 import { useMemo } from 'react';
-import { useAppContext } from '@/context/app-provider';
-import { monthlySpendingData } from '@/lib/data';
+import { teamSpendingData, dayToDayExpensesData } from '@/lib/data';
 
 interface SpendingChartsProps {
     transactions: Transaction[];
 }
 
+const renderTooltip = (props: any) => {
+    const { active, payload, label } = props;
+
+    if (active && payload && payload.length) {
+        return (
+            <div className="rounded-lg border bg-card p-2 shadow-sm text-card-foreground">
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col">
+                        <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            {label}
+                        </span>
+                        <span className="font-bold">
+                           {payload[0].value.toLocaleString()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+
 export function SpendingCharts({ transactions }: SpendingChartsProps) {
-    const { categories } = useAppContext();
-    
-    const categorySpendingData = useMemo(() => {
-        const spending = new Map<string, number>();
-        transactions
-            .filter(t => t.type === 'expense')
-            .forEach(t => {
-                const currentAmount = spending.get(t.category) || 0;
-                spending.set(t.category, currentAmount + t.amount);
-            });
-
-        return Array.from(spending.entries()).map(([category, amount]) => ({
-            name: category,
-            total: amount,
-            fill: categories.find(c => c.name === category)?.color || 'hsl(var(--primary))'
-        }));
-    }, [transactions, categories]);
-
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
         <div className="h-[300px] w-full">
-            <h3 className="text-lg font-semibold mb-2">Team Spending Trend</h3>
+            <h3 className="text-lg font-semibold mb-4">Team Spending Trend</h3>
             <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlySpendingData}>
+            <BarChart data={teamSpendingData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <XAxis
-                dataKey="month"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
                 />
                 <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `$${value/1000}K`}
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value/1000}K`}
                 />
                 <Tooltip
-                cursor={{fill: 'hsla(var(--muted))'}}
-                contentStyle={{
-                    background: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 'var(--radius)',
-                }}
+                    cursor={{fill: 'hsla(var(--muted))'}}
+                    content={renderTooltip}
                 />
-                <Bar dataKey="total" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    {teamSpendingData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"} />
+                    ))}
+                </Bar>
             </BarChart>
             </ResponsiveContainer>
         </div>
         <div className="h-[300px] w-full">
-            <h3 className="text-lg font-semibold mb-2">Day-to-Day Expenses</h3>
+            <h3 className="text-lg font-semibold mb-4">Day-to-Day Expenses</h3>
             <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categorySpendingData}>
+            <BarChart data={dayToDayExpensesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <XAxis
-                dataKey="name"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
                 />
                 <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `$${value}`}
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip
-                cursor={{fill: 'hsla(var(--muted))'}}
-                contentStyle={{
-                    background: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 'var(--radius)',
-                }}
+                    cursor={{fill: 'hsla(var(--muted))'}}
+                    content={renderTooltip}
                 />
-                <Bar dataKey="total" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} >
+                    {dayToDayExpensesData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--chart-2))" : "hsl(var(--chart-1))"} />
+                    ))}
+                </Bar>
             </BarChart>
             </ResponsiveContainer>
         </div>

@@ -3,7 +3,6 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
-import { BottomNavigation } from '@/components/bottom-navigation';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AppProvider } from '@/context/app-provider';
 
@@ -37,22 +36,21 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          enableSystem={false}
           disableTransitionOnChange
         >
           <AppProvider>
             <SidebarProvider>
-              <div className="flex min-h-screen">
-                <Sidebar>
+              <div className="flex min-h-screen bg-background">
+                <Sidebar className="bg-sidebar">
                   <SidebarNav />
                 </Sidebar>
                 <SidebarInset>
-                  <div className="h-screen pb-16 md:pb-0">
+                  <div className="h-screen">
                     {children}
                   </div>
                 </SidebarInset>
               </div>
-              <BottomNavigation />
             </SidebarProvider>
             <Toaster />
           </AppProvider>

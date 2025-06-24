@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,96 +17,104 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SpendingCharts } from "@/components/spending-charts";
-import type { Transaction, Budget, Category } from "@/types";
-import { Plus, Receipt, FileText, Briefcase } from "lucide-react";
+import type { Transaction, PendingTask } from "@/types";
+import { CreditCard, Receipt, FileText, Plane } from "lucide-react";
 import { useAppContext } from '@/context/app-provider';
-import { AddTransactionDialog } from './add-transaction-dialog';
 import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 
-const CategoryIcon = ({ categoryName, categories }: { categoryName: string, categories: Category[] }) => {
-  const category = categories.find((c) => c.name === categoryName);
-  const Icon = category?.icon;
-  return Icon ? (
-    <div className="flex size-8 items-center justify-center rounded-full bg-muted">
-      <Icon className="size-4 text-muted-foreground" />
-    </div>
-  ) : null;
+const teamColors: { [key: string]: string } = {
+  Marketing: "bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/50",
+  Operations: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+  Finance: "bg-emerald-500/20 text-emerald-400 border-emerald-500/50",
+  default: "bg-muted text-muted-foreground border-border",
 };
 
-export function Dashboard() {
-  const { transactions, budgets, categories } = useAppContext();
+const quickAccessItems = [
+  {
+    label: "+ New expense",
+    icon: CreditCard,
+    color: "bg-pink-500/20 text-pink-400",
+  },
+  {
+    label: "+ Add receipt",
+    icon: Receipt,
+    color: "bg-blue-500/20 text-blue-400",
+  },
+  {
+    label: "+ Create report",
+    icon: FileText,
+    color: "bg-emerald-500/20 text-emerald-400",
+  },
+  {
+    label: "+ Create trip",
+    icon: Plane,
+    color: "bg-red-500/20 text-red-400",
+  },
+]
 
-  const budgetStatus = useMemo(() => {
-    return budgets.map(budget => {
-      const spent = transactions
-        .filter((t) => t.type === 'expense' && t.category === budget.category)
-        .reduce((sum, t) => sum + t.amount, 0);
-      return { ...budget, spent };
-    })
-  }, [budgets, transactions]);
+export function Dashboard() {
+  const { transactions, pendingTasks } = useAppContext();
+
+  const euroFormatter = new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+  });
 
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <main className="flex-1 overflow-y-auto flex flex-col gap-6 p-4 md:p-6">
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 bg-card">
           <CardHeader>
-            <CardTitle>Budget Status</CardTitle>
-            <CardDescription>Your progress on monthly spending goals.</CardDescription>
+            <CardTitle>Pending Tasks</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4'>
-            {budgetStatus.map(budget => (
-              <div key={budget.category}>
-                <div className='flex justify-between items-center'>
-                  <span className='font-medium'>{budget.category}</span>
-                  <span className='text-sm text-muted-foreground'>
-                    ${(budget.allocated - budget.spent).toLocaleString()} left
-                  </span>
-                </div>
+            {pendingTasks.map((task: PendingTask) => (
+              <div key={task.label} className="flex items-center">
+                <task.icon className="size-4 text-muted-foreground mr-4" />
+                <span className="flex-grow text-sm">{task.label}</span>
+                <span className="text-sm font-semibold">{task.value}</span>
               </div>
             ))}
           </CardContent>
         </Card>
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-card">
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>A log of your recent income and expenses.</CardDescription>
+            <CardTitle>Recent Expenses</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Description</TableHead>
+                <TableRow className="border-border">
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Team</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {transactions.length > 0 ? (
                   transactions.slice(0, 5).map((txn: Transaction) => (
-                    <TableRow key={txn.id}>
+                    <TableRow key={txn.id} className="border-border">
+                      <TableCell className="font-medium">{txn.description}</TableCell>
+                      <TableCell>{txn.employee}</TableCell>
                       <TableCell>
-                        <div className="font-medium">{txn.description}</div>
                         <Badge
                           variant="outline"
-                          className="mt-1 text-xs font-normal"
-                          style={{
-                            borderColor: categories.find(c => c.name === txn.category)?.color,
-                            color: categories.find(c => c.name === txn.category)?.color
-                          }}
+                          className={cn("border", teamColors[txn.team] || teamColors.default)}
                         >
-                          {txn.category}
+                          {txn.team}
                         </Badge>
                       </TableCell>
-                      <TableCell
-                        className={`text-right font-medium ${txn.type === "income" ? "text-primary" : "text-foreground"}`}
-                      >
-                        {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <TableCell className="text-right font-medium">
+                        {euroFormatter.format(txn.amount)}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      No transactions found.
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      No expenses found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -117,31 +124,25 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Quick Access</CardTitle>
         </CardHeader>
-        <CardContent className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-          <AddTransactionDialog />
-          <Button variant="outline" className='h-20 flex-col gap-2'>
-            <Receipt />
-            Add Receipt
-          </Button>
-          <Button variant="outline" className='h-20 flex-col gap-2'>
-            <FileText />
-            Create Report
-          </Button>
-          <Button variant="outline" className='h-20 flex-col gap-2'>
-            <Briefcase />
-            New Budget
-          </Button>
+        <CardContent className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          {quickAccessItems.map(item => (
+            <Button key={item.label} variant="outline" className='h-16 justify-start p-4 bg-muted hover:bg-border/50'>
+              <div className={cn("mr-4 flex size-8 items-center justify-center rounded-full", item.color)}>
+                  <item.icon className="size-4" />
+              </div>
+              <span className='font-semibold'>{item.label}</span>
+            </Button>
+          ))}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Monthly Report</CardTitle>
-          <CardDescription>Visualizing your financial habits over time.</CardDescription>
         </CardHeader>
         <CardContent>
           <SpendingCharts transactions={transactions} />

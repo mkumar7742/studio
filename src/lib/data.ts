@@ -1,5 +1,5 @@
-import type { Account, Transaction, Category, Budget } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes } from 'lucide-react';
+import type { Account, Transaction, Category, Budget, PendingTask } from '@/types';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Clock, Plane, Receipt, Calendar, Undo2 } from 'lucide-react';
 
 export const accounts: Account[] = [
   { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
@@ -22,14 +22,11 @@ const today = new Date();
 const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5500.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 1)), accountId: 'acc1', receiptUrl: null },
-  { id: 'txn2', type: 'expense', category: 'Rent', description: 'Apartment Rent', amount: 1650.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 2)), accountId: 'acc1', receiptUrl: null },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Grocery Shopping', amount: 124.50, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 3)), accountId: 'acc1', receiptUrl: null },
-  { id: 'txn4', type: 'expense', category: 'Transport', description: 'Gasoline', amount: 55.20, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 4)), accountId: 'acc1', receiptUrl: null },
-  { id: 'txn5', type: 'expense', category: 'Entertainment', description: 'Movie Tickets', amount: 32.00, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 5)), accountId: 'acc3', receiptUrl: null },
-  { id: 'txn6', type: 'expense', category: 'Shopping', description: 'New Shoes', amount: 89.99, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 6)), accountId: 'acc3', receiptUrl: null },
-  { id: 'txn7', type: 'expense', category: 'Food', description: 'Restaurant Dinner', amount: 78.60, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 7)), accountId: 'acc3', receiptUrl: null },
-  { id: 'txn8', type: 'expense', category: 'Health', description: 'Pharmacy', amount: 25.10, date: formatDate(new Date(today.getFullYear(), today.getMonth(), 8)), accountId: 'acc1', receiptUrl: null },
+  { id: 'txn1', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'John Smith', team: 'Marketing' },
+  { id: 'txn2', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'Sarah Jade', team: 'Marketing' },
+  { id: 'txn3', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: formatDate(today), accountId: 'acc1', receiptUrl: null, employee: 'Mike Brown', team: 'Operations' },
+  { id: 'txn4', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: formatDate(today), accountId: 'acc3', receiptUrl: null, employee: 'Jennifer Lee', team: 'Marketing' },
+  { id: 'txn5', type: 'expense', category: 'Accommodation', description: 'Hotel', amount: 275.75, date: formatDate(today), accountId: 'acc1', receiptUrl: null, employee: 'David Wilson', team: 'Finance' },
 ];
 
 export const budgets: Budget[] = [
@@ -38,11 +35,28 @@ export const budgets: Budget[] = [
     { category: 'Entertainment', allocated: 150, spent: 32.00 },
 ];
 
-export const monthlySpendingData = [
-    { month: 'Jan', total: 2400 },
-    { month: 'Feb', total: 2210 },
-    { month: 'Mar', total: 2290 },
-    { month: 'Apr', total: 2780 },
-    { month: 'May', total: 1890 },
-    { month: 'Jun', total: 2390 },
+export const pendingTasks: PendingTask[] = [
+  { icon: Clock, label: 'Pending Approvals', value: 5 },
+  { icon: Plane, label: 'New Trips Registered', value: 1 },
+  { icon: Receipt, label: 'Unreported Expenses', value: 4 },
+  { icon: Calendar, label: 'Upcoming Expenses', value: 0 },
+  { icon: Undo2, label: 'Unreported Advances', value: '€0.00' }
+];
+
+export const teamSpendingData = [
+    { name: 'PJ', total: 80000 },
+    { name: 'SJ', total: 35000 },
+    { name: 'MB', total: 72000 },
+    { name: 'IS', total: 65000 },
+    { name: 'DW', total: 28000 },
+    { name: 'ND', total: 55000 },
+    { name: 'BS', total: 95000 },
+];
+
+export const dayToDayExpensesData = [
+  { name: 'Accommodation', value: 45 },
+  { name: 'Comms', value: 15 },
+  { name: 'Services', value: 80 },
+  { name: 'Food', value: 65 },
+  { name: 'Fuel', value: 20 },
 ];

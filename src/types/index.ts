@@ -9,6 +9,8 @@ export interface Transaction {
   date: string;
   accountId: string;
   receiptUrl: string | null;
+  employee: string;
+  team: string;
 }
 
 export interface Account {
@@ -29,4 +31,10 @@ export interface Budget {
     category: string;
     allocated: number;
     spent: number;
+}
+
+export interface PendingTask {
+    icon: LucideIcon;
+    label: string;
+    value: string | number;
 }
