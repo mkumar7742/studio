@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import type { Transaction } from '@/types';
-import { ArrowLeft, Mail, Phone, MapPin, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Link as LinkIcon, Twitter, Linkedin } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -23,6 +24,17 @@ const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
       </div>
     ) : null;
 };
+
+const socialIconMap: { [key: string]: LucideIcon } = {
+    twitter: Twitter,
+    linkedin: Linkedin,
+};
+
+const SocialIcon = ({ platform }: { platform: string }) => {
+    const Icon = socialIconMap[platform.toLowerCase()] || LinkIcon;
+    return <Icon className="size-4 text-muted-foreground" />;
+};
+
 
 export default function MemberProfilePage() {
     const params = useParams();
@@ -92,7 +104,7 @@ export default function MemberProfilePage() {
                                         <h3 className="font-semibold text-sm text-muted-foreground">Social Media</h3>
                                         {member.socials.map((social, index) => (
                                             <div key={index} className="flex items-center gap-3 text-sm">
-                                                <LinkIcon className="size-4 text-muted-foreground" />
+                                                <SocialIcon platform={social.platform} />
                                                 <a href={social.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                                                     {social.platform}
                                                 </a>
