@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
 import { cn } from '@/lib/utils';
-import { Filter, MoreHorizontal, Plus, Plane, ListFilter } from 'lucide-react';
+import { Filter, MoreHorizontal, Plus, Plane, ListFilter, Eye } from 'lucide-react';
 import type { Trip } from '@/types';
 
 export default function TripsPage() {
@@ -90,6 +92,7 @@ export default function TripsPage() {
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">TRIP REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
+                                    <TableHead><span className="sr-only">Actions</span></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -122,6 +125,14 @@ export default function TripsPage() {
                                             >
                                                 {trip.status}
                                             </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button asChild variant="ghost" size="icon">
+                                                <Link href={`/trips/${trip.id}`}>
+                                                    <Eye className="size-4" />
+                                                    <span className="sr-only">View trip</span>
+                                                </Link>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
