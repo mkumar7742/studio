@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
 import { BottomNavigation } from '@/components/bottom-navigation';
+import { ThemeProvider } from '@/components/theme-provider';
+import { AppProvider } from '@/context/app-provider';
 
 export const metadata: Metadata = {
   title: 'TrackWise',
@@ -32,20 +34,29 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="font-body antialiased">
-        <SidebarProvider>
-          <div className="flex min-h-screen">
-            <Sidebar>
-              <SidebarNav />
-            </Sidebar>
-            <SidebarInset>
-              <div className="h-screen pb-16 md:pb-0">
-                {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AppProvider>
+            <SidebarProvider>
+              <div className="flex min-h-screen">
+                <Sidebar>
+                  <SidebarNav />
+                </Sidebar>
+                <SidebarInset>
+                  <div className="h-screen pb-16 md:pb-0">
+                    {children}
+                  </div>
+                </SidebarInset>
               </div>
-            </SidebarInset>
-          </div>
-          <BottomNavigation />
-        </SidebarProvider>
-        <Toaster />
+              <BottomNavigation />
+            </SidebarProvider>
+            <Toaster />
+          </AppProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

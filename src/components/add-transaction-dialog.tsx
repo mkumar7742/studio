@@ -10,14 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { AddTransactionForm, type AddTransactionValues } from "./add-transaction-form";
+import { AddTransactionForm } from "./add-transaction-form";
 import { useState } from "react";
 
-interface AddTransactionDialogProps {
-    onAddTransaction: (values: AddTransactionValues) => void;
-}
-
-export function AddTransactionDialog({ onAddTransaction }: AddTransactionDialogProps) {
+export function AddTransactionDialog() {
     const [open, setOpen] = useState(false);
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -33,7 +29,7 @@ export function AddTransactionDialog({ onAddTransaction }: AddTransactionDialogP
                         Enter the details of your transaction below.
                     </DialogDescription>
                 </DialogHeader>
-                <AddTransactionForm onSubmit={onAddTransaction} onFinished={() => setOpen(false)} />
+                <AddTransactionForm onFinished={() => setOpen(false)} />
             </DialogContent>
         </Dialog>
     )

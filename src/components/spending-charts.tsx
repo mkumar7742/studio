@@ -3,10 +3,11 @@
 import { Bar, BarChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { monthlySpendingData, categories } from '@/lib/data';
+import { monthlySpendingData } from '@/lib/data';
 import type { ChartConfig } from '@/components/ui/chart';
 import type { Transaction } from '@/types';
 import { useMemo } from 'react';
+import { useAppContext } from '@/context/app-provider';
 
 const chartConfig = {
   total: {
@@ -15,16 +16,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const categoryColors = categories.reduce((acc, category) => {
-    acc[category.name] = { color: category.color, label: category.name };
-    return acc;
-}, {} as ChartConfig);
-
 interface SpendingChartsProps {
     transactions: Transaction[];
 }
 
 export function SpendingCharts({ transactions }: SpendingChartsProps) {
+    const { categories } = useAppContext();
+    
+    const categoryColors = useMemo(() => categories.reduce((acc, category) => {
+        acc[category.name] = { color: category.color, label: category.name };
+        return acc;
+    }, {} as ChartConfig), [categories]);
+
     const categorySpendingData = useMemo(() => {
         const spending = new Map<string, number>();
         transactions
@@ -106,8 +109,10 @@ export function SpendingCharts({ transactions }: SpendingChartsProps) {
                                 const x = cx + radius * Math.cos(-midAngle * RADIAN);
                                 const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
+                                if (percent < 0.05) return null;
+
                                 return (
-                                    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+                                    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12px">
                                         {`${(percent * 100).toFixed(0)}%`}
                                     </text>
                                 );

@@ -1,16 +1,14 @@
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { AddTransactionValues } from "./add-transaction-form";
 
 interface PageHeaderProps {
     title: string;
     description: string;
     showAddTransaction?: boolean;
-    onAddTransaction?: (values: AddTransactionValues) => void;
 }
 
-export function PageHeader({ title, description, showAddTransaction = false, onAddTransaction }: PageHeaderProps) {
+export function PageHeader({ title, description, showAddTransaction = false }: PageHeaderProps) {
     return (
         <header className="flex items-center justify-between p-4 sm:p-6 border-b bg-background sticky top-0 z-10">
             <div className="flex items-center gap-4">
@@ -21,8 +19,8 @@ export function PageHeader({ title, description, showAddTransaction = false, onA
                 </div>
             </div>
             <div className="flex items-center gap-4">
-                {showAddTransaction && onAddTransaction && (
-                    <AddTransactionDialog onAddTransaction={onAddTransaction} />
+                {showAddTransaction && (
+                    <AddTransactionDialog />
                 )}
                 <Avatar className="hidden sm:block">
                     <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait"/>

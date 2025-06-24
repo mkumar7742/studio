@@ -17,6 +17,7 @@ import {
   PiggyBank,
   Settings,
   Banknote,
+  TrendingUp,
 } from "lucide-react";
 
 export function SidebarNav() {
@@ -27,6 +28,7 @@ export function SidebarNav() {
         { href: '/accounts', label: 'Accounts', icon: Wallet },
         { href: '/transactions', label: 'Transactions', icon: ArrowDownUp },
         { href: '/budgets',label: 'Budgets', icon: PiggyBank },
+        { href: '/subscriptions', label: 'Subscriptions', icon: TrendingUp },
     ];
 
     return <>

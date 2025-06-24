@@ -8,10 +8,11 @@ export interface Transaction {
   amount: number;
   date: string;
   accountId: string;
+  receiptUrl: string | null;
 }
 
 export interface Account {
-  id: string;
+  id:string;
   name: string;
   balance: number;
   icon: LucideIcon;

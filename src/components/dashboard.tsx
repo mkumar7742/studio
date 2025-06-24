@@ -18,13 +18,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { accounts, categories, budgets } from "@/lib/data";
 import { AIFinancialInsights } from "@/components/ai-financial-insights";
 import { SpendingCharts } from "@/components/spending-charts";
-import type { Account, Transaction, Budget } from "@/types";
+import type { Account, Transaction, Budget, Category } from "@/types";
 import { MoreHorizontal } from "lucide-react";
+import { useAppContext } from '@/context/app-provider';
 
-const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
+const CategoryIcon = ({ categoryName, categories }: { categoryName: string, categories: Category[] }) => {
   const category = categories.find((c) => c.name === categoryName);
   const Icon = category?.icon;
   return Icon ? (
@@ -43,7 +43,7 @@ const AccountCard = ({ account }: { account: Account }) => (
     <CardContent>
       <div className="text-2xl font-bold">${account.balance.toLocaleString()}</div>
       <p className="text-xs text-muted-foreground">
-        {account.id === "acc3" ? "Remaining Credit" : "Available Balance"}
+        Available Balance
       </p>
     </CardContent>
   </Card>
@@ -70,12 +70,9 @@ const BudgetCard = ({ budget, transactions }: { budget: Budget, transactions: Tr
   );
 };
 
+export function Dashboard() {
+  const { transactions, accounts, budgets, categories } = useAppContext();
 
-interface DashboardProps {
-    transactions: Transaction[];
-}
-
-export function Dashboard({ transactions }: DashboardProps) {
   return (
     <main className="grid gap-4 p-4 sm:p-6 md:gap-6 lg:grid-cols-3">
       <div className="grid gap-4 md:gap-6 lg:col-span-2">
@@ -110,7 +107,7 @@ export function Dashboard({ transactions }: DashboardProps) {
                     <TableRow key={txn.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <CategoryIcon categoryName={txn.category} />
+                          <CategoryIcon categoryName={txn.category} categories={categories} />
                           <div>
                             <p className="font-medium">{txn.description}</p>
                             <p className="text-sm text-muted-foreground">
@@ -123,7 +120,7 @@ export function Dashboard({ transactions }: DashboardProps) {
                       <TableCell
                         className={`text-right font-medium ${
                           txn.type === "income"
-                            ? "text-green-600"
+                            ? "text-emerald-600"
                             : "text-foreground"
                         }`}
                       >

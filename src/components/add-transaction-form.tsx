@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,10 +24,11 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Paperclip, X } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { categories, accounts } from "@/lib/data";
+import { useAppContext } from "@/context/app-provider";
+import Image from "next/image";
 
 const formSchema = z.object({
   type: z.enum(["income", "expense"], {
@@ -46,17 +48,19 @@ const formSchema = z.object({
   }),
   accountId: z.string({
       required_error: "Please select an account."
-  })
+  }),
+  receipt: z.custom<File>().optional(),
 });
 
 export type AddTransactionValues = z.infer<typeof formSchema>;
 
 interface AddTransactionFormProps {
-  onSubmit: (values: AddTransactionValues) => void;
   onFinished?: () => void;
 }
 
-export function AddTransactionForm({ onSubmit, onFinished }: AddTransactionFormProps) {
+export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
+  const { addTransaction, categories, accounts } = useAppContext();
+  
   const form = useForm<AddTransactionValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,9 +70,13 @@ export function AddTransactionForm({ onSubmit, onFinished }: AddTransactionFormP
     },
   });
 
+  const receiptFile = form.watch('receipt');
+
   function handleFormSubmit(values: AddTransactionValues) {
-    onSubmit(values);
-    form.reset();
+    addTransaction({
+        ...values,
+    });
+    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, receipt: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -127,7 +135,7 @@ export function AddTransactionForm({ onSubmit, onFinished }: AddTransactionFormP
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="0.00" {...field} />
+                <Input type="number" step="0.01" placeholder="0.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -221,6 +229,54 @@ export function AddTransactionForm({ onSubmit, onFinished }: AddTransactionFormP
                 <FormMessage />
                 </FormItem>
             )}
+        />
+        <FormField
+          control={form.control}
+          name="receipt"
+          render={({ field: { onChange, value, ...rest } }) => (
+            <FormItem>
+              <FormLabel>Receipt</FormLabel>
+              {receiptFile ? (
+                <div className="relative w-full h-24">
+                  <Image src={URL.createObjectURL(receiptFile)} alt="Receipt preview" fill className="object-contain rounded-md border" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                    onClick={() => form.setValue('receipt', undefined)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <FormControl>
+                  <Button asChild variant="outline" className="w-full">
+                    <label className="cursor-pointer">
+                      <Paperclip className="mr-2" />
+                      Attach a file
+                      <Input
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            onChange(file);
+                          }
+                        }}
+                        {...rest}
+                      />
+                    </label>
+                  </Button>
+                </FormControl>
+              )}
+              <FormDescription>
+                You can attach a photo of your receipt.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <Button type="submit" className="w-full">Add Transaction</Button>
       </form>
