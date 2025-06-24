@@ -52,6 +52,10 @@ export const allPermissions: { group: string; permissions: { id: Permission; lab
     group: 'Roles',
     permissions: [{ id: 'roles:manage', label: 'Manage Roles & Permissions' }],
   },
+  {
+    group: 'Budgets',
+    permissions: [{ id: 'budgets:manage', label: 'Manage Budgets' }],
+  },
 ];
 
 
@@ -67,6 +71,7 @@ export const roles: Role[] = [
       'categories:view', 'categories:create', 'categories:edit', 'categories:delete',
       'members:view', 'members:create', 'members:edit', 'members:delete',
       'roles:manage',
+      'budgets:manage',
     ],
   },
   {
@@ -79,6 +84,7 @@ export const roles: Role[] = [
       'approvals:view', 'approvals:action',
       'categories:view',
       'members:view',
+      'budgets:manage',
     ],
   },
   {
@@ -171,9 +177,10 @@ export const transactions: Transaction[] = [
 
 
 export const budgets: Budget[] = [
-    { category: 'Food', allocated: 500, spent: 203.10 },
-    { category: 'Shopping', allocated: 300, spent: 89.99 },
-    { category: 'Entertainment', allocated: 150, spent: 32.00 },
+    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, scope: 'global' },
+    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, scope: 'global' },
+    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, scope: 'member', memberId: 'mem3' },
+    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, scope: 'member', memberId: 'mem2' },
 ];
 
 export const pendingTasks: PendingTask[] = [

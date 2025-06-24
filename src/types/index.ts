@@ -32,9 +32,12 @@ export interface Category {
 }
 
 export interface Budget {
+    id: string;
+    name: string;
     category: string;
     allocated: number;
-    spent: number;
+    scope: 'global' | 'member';
+    memberId?: string;
 }
 
 export interface PendingTask {
@@ -73,7 +76,8 @@ export type Permission =
   | 'members:create'
   | 'members:edit'
   | 'members:delete'
-  | 'roles:manage';
+  | 'roles:manage'
+  | 'budgets:manage';
 
 export interface Role {
   id: string;

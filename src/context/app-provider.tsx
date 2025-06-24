@@ -39,7 +39,7 @@ interface AppContextType {
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
     addTransaction: (values: AddTransactionValues) => void;
-    addBudget: (budget: Omit<Budget, 'spent'>) => void;
+    addBudget: (values: Omit<Budget, 'id'>) => void;
     addCategory: (values: { name: string; color: string; icon: string }) => void;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     addMember: (values: { name: string; email: string; roleId: string; }) => void;
@@ -96,10 +96,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setTransactions(prev => [newTransaction, ...prev]);
     };
 
-    const addBudget = (budget: Omit<Budget, 'spent'>) => {
+    const addBudget = (values: Omit<Budget, 'id'>) => {
         const newBudget: Budget = {
-            ...budget,
-            spent: 0
+            id: `bud-${Date.now()}`,
+            ...values,
         };
         setBudgets(prev => [...prev, newBudget]);
     }
