@@ -7,8 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAppContext } from "@/context/app-provider";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
+    const { currentUser, getMemberRole } = useAppContext();
+    const role = getMemberRole(currentUser);
+
     return (
         <div className="flex flex-col h-full">
             <PageHeader title="User Profile" description="Manage your profile and account settings." />
@@ -21,19 +26,29 @@ export default function ProfilePage() {
                     <CardContent className="space-y-6">
                         <div className="flex items-center space-x-4">
                             <Avatar className="h-20 w-20">
-                                <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />
+                                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <Button variant="outline">Change Photo</Button>
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="fullName">Full Name</Label>
-                                <Input id="fullName" defaultValue="John Doe" />
+                                <Input id="fullName" defaultValue={currentUser.name} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                                <Input id="email" type="email" defaultValue={currentUser.email} />
+                            </div>
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Role</Label>
+                            <div>
+                            {role && (
+                                <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
+                                    {role.name}
+                                </Badge>
+                            )}
                             </div>
                         </div>
                         <div className="space-y-2">

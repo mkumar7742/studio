@@ -26,9 +26,11 @@ import {
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
 import type { Permission } from '@/types';
+import { useAppContext } from '@/context/app-provider';
 
 export function SidebarNav() {
     const pathname = usePathname();
+    const { currentUser } = useAppContext();
 
     const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
         { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
@@ -46,11 +48,11 @@ export function SidebarNav() {
         <SidebarHeader className="p-4">
             <Link href="/profile" className='flex flex-col items-center gap-3 w-full text-center'>
                 <Avatar className="size-16">
-                    <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="person portrait" />
-                    <AvatarFallback>JC</AvatarFallback>
+                    <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <p className='font-semibold text-base'>Janice Chandler</p>
+                    <p className='font-semibold text-base'>{currentUser.name}</p>
                 </div>
             </Link>
         </SidebarHeader>
