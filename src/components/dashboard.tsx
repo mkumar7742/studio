@@ -197,7 +197,7 @@ export function Dashboard() {
 
   return (
     <main className="flex flex-col flex-1 gap-6 p-4 md:p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         <SummaryCard />
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
@@ -321,5 +321,3 @@ export function Dashboard() {
     </main>
   );
 }
-
-    
