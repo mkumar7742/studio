@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Calendar,
   Repeat,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -47,6 +48,7 @@ export function SidebarNav() {
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500', permission: 'members:view' },
+        { href: '/chat', label: 'Chat', icon: MessageSquare, color: 'bg-cyan-500' },
         { href: '/roles', label: 'Roles', icon: ShieldCheck, color: 'bg-yellow-500', permission: 'roles:manage' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },

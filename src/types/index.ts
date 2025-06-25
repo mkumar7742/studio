@@ -145,3 +145,15 @@ export interface Approval {
   team: string;
   status: 'Pending' | 'Approved' | 'Declined';
 }
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  text: string;
+  timestamp: number;
+}
+
+export interface Conversation {
+  memberId: string; // The ID of the other member in the conversation
+  messages: ChatMessage[];
+}

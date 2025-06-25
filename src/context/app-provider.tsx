@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
@@ -16,13 +16,13 @@ import {
     subscriptions as initialSubscriptions,
 } from '@/lib/data';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2 } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 
 // Create a map of icon names to Lucide components
 const iconMap: { [key: string]: LucideIcon } = {
-    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
@@ -41,6 +41,7 @@ interface AppContextType {
     allPermissions: typeof allPermissions;
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
+    conversations: Conversation[];
     addTransaction: (values: FullTransaction) => void;
     deleteTransactions: (transactionIds: string[]) => void;
     addBudget: (values: Omit<Budget, 'id' | 'status'>) => void;
@@ -63,6 +64,7 @@ interface AppContextType {
     addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
     addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
     deleteSubscription: (subscriptionId: string) => void;
+    sendMessage: (receiverId: string, text: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -77,6 +79,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
     const [roles, setRoles] = useState<Role[]>(initialRoles);
     const [subscriptions, setSubscriptions] = useState<Subscription[]>(initialSubscriptions);
+    const [conversations, setConversations] = useState<Conversation[]>([
+      {
+        memberId: 'mem2', // John Doe
+        messages: [
+          { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: Date.now() - 1000 * 60 * 5 },
+          { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: Date.now() - 1000 * 60 * 4 },
+          { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: Date.now() - 1000 * 60 * 3 },
+        ]
+      },
+      {
+        memberId: 'mem3', // Jane Smith
+        messages: [
+          { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: Date.now() - 1000 * 60 * 20 },
+        ]
+      }
+    ]);
 
     // For demonstration purposes, we assume the logged-in user is the first member.
     // In a real app, this would come from an authentication provider.
@@ -280,6 +298,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
     };
 
+    const sendMessage = (receiverId: string, text: string) => {
+        const newMessage: ChatMessage = {
+            id: `msg-${Date.now()}`,
+            senderId: currentUser.id,
+            text,
+            timestamp: Date.now(),
+        };
+
+        setConversations(prev => {
+            const conversationExists = prev.some(c => c.memberId === receiverId);
+            if (conversationExists) {
+                return prev.map(c => 
+                    c.memberId === receiverId
+                        ? { ...c, messages: [...c.messages, newMessage] }
+                        : c
+                );
+            } else {
+                const newConversation: Conversation = {
+                    memberId: receiverId,
+                    messages: [newMessage],
+                };
+                return [...prev, newConversation];
+            }
+        });
+    };
+
     const value = {
         transactions,
         accounts,
@@ -294,6 +338,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         allPermissions,
         currentUser,
         currentUserPermissions,
+        conversations,
         addTransaction,
         deleteTransactions,
         addBudget,
@@ -315,7 +360,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         updateApprovalStatus,
         addApproval,
         addTrip,
-        deleteSubscription
+        deleteSubscription,
+        sendMessage,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
