@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -166,31 +166,36 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
     const { members, currentUser, conversations } = useAppContext();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const otherMembers = useMemo(() => members.filter(m => m.id !== currentUser.id), [members, currentUser.id]);
+    const membersWithChatInfo = useMemo(() => {
+        const otherMembers = members.filter(m => m.id !== currentUser.id);
+
+        return otherMembers.map(member => {
+            const conversation = conversations.find(c => c.memberId === member.id);
+            let lastMessage = { text: "No messages yet", timestamp: null };
+
+            if (conversation && conversation.messages.length > 0) {
+                const sortedMessages = [...conversation.messages].sort((a,b) => b.timestamp - a.timestamp);
+                const lastMsg = sortedMessages[0];
+                lastMessage = {
+                    text: lastMsg.text,
+                    timestamp: lastMsg.timestamp,
+                };
+            }
+
+            return {
+                ...member,
+                lastMessage,
+                unreadCount: conversation?.unreadCount || 0
+            };
+        });
+    }, [members, currentUser.id, conversations]);
 
     const filteredMembers = useMemo(() => {
-        if (!searchTerm) return otherMembers;
-        return otherMembers.filter(member => 
+        if (!searchTerm) return membersWithChatInfo;
+        return membersWithChatInfo.filter(member => 
             member.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [searchTerm, otherMembers]);
-
-
-    const getLastMessage = (memberId: string) => {
-        const conversation = conversations.find(c => c.memberId === memberId);
-        if (!conversation || conversation.messages.length === 0) {
-            return { text: "No messages yet", timestamp: null };
-        }
-        const lastMsg = [...conversation.messages].sort((a, b) => b.timestamp - a.timestamp)[0];
-        return {
-            text: lastMsg.text,
-            timestamp: lastMsg.timestamp,
-        };
-    };
-
-    const getConversation = (memberId: string) => {
-        return conversations.find(c => c.memberId === memberId);
-    }
+    }, [searchTerm, membersWithChatInfo]);
 
     return (
         <Card className="h-full flex flex-col">
@@ -208,8 +213,6 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
             <ScrollArea className="flex-1">
                 <ul className="divide-y divide-border">
                     {filteredMembers.map(member => {
-                        const lastMessage = getLastMessage(member.id);
-                        const conversation = getConversation(member.id);
                         return (
                             <li key={member.id}>
                                 <button onClick={() => onSelectMember(member)} className="flex items-center gap-4 p-4 w-full text-left hover:bg-accent transition-colors">
@@ -220,15 +223,15 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
                                     <div className="flex-1 overflow-hidden">
                                         <div className="flex justify-between items-center">
                                             <h3 className="font-semibold truncate">{member.name}</h3>
-                                            {conversation?.unreadCount && conversation.unreadCount > 0 ? (
+                                            {member.unreadCount > 0 ? (
                                                 <Badge className="bg-primary text-primary-foreground rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                                                    {conversation.unreadCount}
+                                                    {member.unreadCount}
                                                 </Badge>
-                                            ) : lastMessage.timestamp && (
-                                                <ClientRelativeTime timestamp={lastMessage.timestamp} className="text-xs text-muted-foreground shrink-0" />
+                                            ) : member.lastMessage.timestamp && (
+                                                <ClientRelativeTime timestamp={member.lastMessage.timestamp} className="text-xs text-muted-foreground shrink-0" />
                                             )}
                                         </div>
-                                        <p className="text-sm text-muted-foreground truncate">{lastMessage.text}</p>
+                                        <p className="text-sm text-muted-foreground truncate">{member.lastMessage.text}</p>
                                     </div>
                                 </button>
                             </li>
@@ -255,10 +258,10 @@ export default function ChatPage() {
     const [selectedMember, setSelectedMember] = useState<MemberProfile | null>(null);
     const { markConversationAsRead } = useAppContext();
 
-    const handleSelectMember = (member: MemberProfile) => {
+    const handleSelectMember = useCallback((member: MemberProfile) => {
         setSelectedMember(member);
         markConversationAsRead(member.id);
-    };
+    }, [markConversationAsRead]);
 
     useEffect(() => {
         if(selectedMember) {
