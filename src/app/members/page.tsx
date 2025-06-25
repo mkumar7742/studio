@@ -46,7 +46,7 @@ export default function MembersPage() {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>Team Members ({members.length})</CardTitle>
+                                <CardTitle>Members ({members.length})</CardTitle>
                                 <CardDescription>Invite and manage member access.</CardDescription>
                             </div>
                             <RequirePermission permission="members:create">

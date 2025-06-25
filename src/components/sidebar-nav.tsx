@@ -107,7 +107,7 @@ export function SidebarNav() {
         <SidebarFooter className="p-4">
             <div className="flex items-center gap-2">
                 <ArrowRightLeft className="size-6 text-primary" />
-                <span className="text-xl font-bold text-foreground">EXPENSIO</span>
+                <span className="text-xl font-bold text-foreground">TrackWise</span>
             </div>
         </SidebarFooter>
     </>

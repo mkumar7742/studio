@@ -96,7 +96,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
                         <FormItem>
                             <FormLabel>Budget Name</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., Monthly Marketing" {...field} />
+                                <Input placeholder="e.g., Monthly Groceries" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

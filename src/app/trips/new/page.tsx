@@ -109,7 +109,7 @@ export default function NewTripPage() {
                             <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-green-500 text-white">
                                 <CircleDollarSign className="size-4" />
                             </div>
-                            <span>Budget limit*</span>
+                            <span>Trip Budget*</span>
                         </Label>
                         <Input id="budget-limit" type="number" className="bg-card border-border" />
                     </div>

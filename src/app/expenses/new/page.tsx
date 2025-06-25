@@ -119,7 +119,7 @@ export default function NewExpensePage() {
                                 <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-pink-500 text-white">
                                     <FilePlus2 className="size-4" />
                                 </div>
-                                <span>Add to report</span>
+                                <span>Add to Expense Report</span>
                             </Label>
                             <div className="flex items-center gap-6">
                                 <div className="flex items-center space-x-2">
@@ -138,7 +138,7 @@ export default function NewExpensePage() {
                                 <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4">
                                     <Plus className="size-10"/>
                                 </div>
-                                <span className="text-base font-semibold">Upload an invoice</span>
+                                <span className="text-base font-semibold">Upload a receipt or invoice</span>
                                 <span className="text-sm text-muted-foreground mt-1">or drag and drop</span>
                                 <Input type="file" className="hidden" />
                             </label>

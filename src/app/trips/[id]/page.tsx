@@ -154,10 +154,10 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                         <Card className="bg-card sticky top-6">
                             <CardContent className="p-6 space-y-6">
                                 <InfoRow label="Approved by:" value="Clara from Ops Team" />
-                                <InfoRow label="Policy:" value="Basic/Company" />
+                                <InfoRow label="Travel Policy:" value="Basic/Company" />
                                 <InfoRow label="Travel documents:" value="Provided" />
                                 <InfoRow label="Purpose:" value="Client Visit" />
-                                <InfoRow label="Spending budget:" value={euroFormatter.format(1500)} />
+                                <InfoRow label="Trip Budget:" value={euroFormatter.format(1500)} />
                             </CardContent>
                         </Card>
                     </div>

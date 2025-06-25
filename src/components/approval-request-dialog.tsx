@@ -74,7 +74,7 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
                     <DetailRow label="Description">
                         {approval.description}
                     </DetailRow>
-                    <DetailRow label="Team">
+                    <DetailRow label="Group">
                         {approval.team}
                     </DetailRow>
                 </div>

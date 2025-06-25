@@ -93,7 +93,7 @@ export default function ExpensesPage() {
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">MERCHANT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">REPORT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">EXPENSE REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                 </TableRow>
                             </TableHeader>

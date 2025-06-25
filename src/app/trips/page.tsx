@@ -101,7 +101,7 @@ export default function TripsPage() {
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">PURPOSE</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">TRIP REPORT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">EXPENSE REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                     <TableHead><span className="sr-only">Actions</span></TableHead>
                                 </TableRow>
