@@ -46,21 +46,23 @@ const SummaryCard = () => {
                     View all <ArrowRight className="size-4" />
                 </Link>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-center p-4 space-y-3 text-sm">
-                <div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Balance:</span>
-                        <span className="font-semibold text-primary">{formatCurrency(balance, 'USD')}</span>
+            <CardContent className="flex-grow flex flex-col justify-center p-4">
+                <div className="space-y-3 text-sm">
+                    <div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Balance:</span>
+                            <span className="font-semibold text-primary">{formatCurrency(balance, 'USD')}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Credit cards:</span>
+                            <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'USD')}</span>
+                        </div>
                     </div>
+                    <Separator className="my-2 bg-border/50" />
                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Credit cards:</span>
-                        <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'USD')}</span>
+                        <span className="font-semibold text-muted-foreground">Total:</span>
+                        <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'USD')}</span>
                     </div>
-                </div>
-                <Separator className="my-2 bg-border/50" />
-                <div className="flex justify-between items-center">
-                    <span className="font-semibold text-muted-foreground">Total:</span>
-                    <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'USD')}</span>
                 </div>
             </CardContent>
         </Card>
@@ -98,45 +100,47 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
                     View all <ArrowRight className="size-4" />
                 </Link>
             </CardHeader>
-            <CardContent className="flex-grow flex items-center gap-4 p-4">
-                 <div className="w-24 h-24">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsla(var(--muted))' }} />
-                            <Pie
-                                data={chartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={30}
-                                outerRadius={40}
-                                dataKey="value"
-                                strokeWidth={0}
-                            >
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="flex-1 space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-muted-foreground">
-                            <ArrowUp className="size-4 mr-2 text-primary shrink-0" />
-                            <span>Income</span>
+            <CardContent className="flex-grow flex items-center justify-center p-4">
+                 <div className="flex w-full items-center gap-4">
+                    <div className="w-24 h-24">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsla(var(--muted))' }} />
+                                <Pie
+                                    data={chartData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={30}
+                                    outerRadius={40}
+                                    dataKey="value"
+                                    strokeWidth={0}
+                                >
+                                    {chartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex-1 space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center text-muted-foreground">
+                                <ArrowUp className="size-4 mr-2 text-primary shrink-0" />
+                                <span>Income</span>
+                            </div>
+                            <span className="font-semibold text-primary">{formatCurrency(income, 'USD')}</span>
                         </div>
-                        <span className="font-semibold text-primary">{formatCurrency(income, 'USD')}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                         <div className="flex items-center text-muted-foreground">
-                            <ArrowDown className="size-4 mr-2 text-destructive shrink-0" />
-                            <span>Expenses</span>
-                         </div>
-                         <span className="font-semibold text-destructive">{formatCurrency(expenses, 'USD')}</span>
-                    </div>
-                     <Separator className="my-2 bg-border/50" />
-                    <div className="text-right">
-                        <span className="font-bold text-lg text-foreground">{formatCurrency(net, 'USD')}</span>
+                        <div className="flex items-center justify-between">
+                             <div className="flex items-center text-muted-foreground">
+                                <ArrowDown className="size-4 mr-2 text-destructive shrink-0" />
+                                <span>Expenses</span>
+                             </div>
+                             <span className="font-semibold text-destructive">{formatCurrency(expenses, 'USD')}</span>
+                        </div>
+                         <Separator className="my-2 bg-border/50" />
+                        <div className="text-right">
+                            <span className="font-bold text-lg text-foreground">{formatCurrency(net, 'USD')}</span>
+                        </div>
                     </div>
                 </div>
             </CardContent>
@@ -204,12 +208,13 @@ export function Dashboard() {
                     View full <ArrowRight className="size-4" />
                 </Link>
             </CardHeader>
-            <CardContent className="flex-grow p-0 flex items-center">
+            <CardContent className="flex-grow flex items-center justify-center p-0">
                 <Calendar
                     month={calendarDate}
                     className="w-full"
                     classNames={{
-                        months: "flex flex-col sm:flex-row space-y-1 w-full",
+                        root: "p-3 w-full",
+                        table: "w-full border-collapse",
                         month: "space-y-2 w-full",
                         caption: "hidden",
                         head_row: "flex w-full",
