@@ -15,15 +15,17 @@ import {
     allPermissions,
     subscriptions as initialSubscriptions,
 } from '@/lib/data';
-import type { AddTransactionValues } from '@/components/add-transaction-form';
-import { format } from 'date-fns';
+import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2 } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
+import { convertToUsd, formatCurrency } from '@/lib/currency';
 
 // Create a map of icon names to Lucide components
 const iconMap: { [key: string]: LucideIcon } = {
     Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2
 };
+
+export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
 
 interface AppContextType {
     transactions: Transaction[];
@@ -39,7 +41,7 @@ interface AppContextType {
     allPermissions: typeof allPermissions;
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
-    addTransaction: (values: AddTransactionValues) => void;
+    addTransaction: (values: FullTransaction) => void;
     addBudget: (values: Omit<Budget, 'id' | 'status'>) => void;
     editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => void;
     deleteBudget: (budgetId: string) => void;
@@ -56,6 +58,9 @@ interface AppContextType {
     editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => void;
     deleteRole: (roleId: string) => void;
     updateCurrentUser: (data: Partial<MemberProfile>) => void;
+    updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
+    addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
+    deleteSubscription: (subscriptionId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -111,35 +116,36 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             visibleApprovals = pendingApprovalsCount;
         }
 
+        const now = new Date();
+        const next30Days = addDays(now, 30);
+        const upcomingSubscriptionsCount = subscriptions.filter(s => {
+            const paymentDate = parseISO(s.nextPaymentDate);
+            return isAfter(paymentDate, now) && isBefore(paymentDate, next30Days);
+        }).length;
+
+        const pendingReimbursementsAmount = transactions
+            .filter(t => t.reimbursable && t.status === 'Submitted')
+            .reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
+
+
         return [
             { icon: ClipboardCheck, label: 'Pending Approvals', value: visibleApprovals, color: 'bg-pink-600' },
             { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending').length, color: 'bg-blue-600' },
             { icon: Receipt, label: 'My Unsubmitted Expenses', value: unsubmittedCount, color: 'bg-emerald-600' },
-            { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: 0, color: 'bg-orange-500' },
-            { icon: Undo2, label: 'Pending Reimbursements', value: '$0.00', color: 'bg-purple-500' }
-        ].filter(task => task.value > 0 || task.label === 'Pending Reimbursements' || task.label === 'Upcoming Bills & Subscriptions' );
+            { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: upcomingSubscriptionsCount, color: 'bg-orange-500' },
+            { icon: Undo2, label: 'Pending Reimbursements', value: formatCurrency(pendingReimbursementsAmount, 'USD'), color: 'bg-purple-500' }
+        ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
 
-    }, [transactions, trips, approvals, currentUserPermissions]);
+    }, [transactions, trips, approvals, currentUserPermissions, subscriptions]);
 
 
-    const addTransaction = (values: AddTransactionValues) => {
+    const addTransaction = (values: FullTransaction) => {
         const newTransaction: Transaction = {
             id: `txn-${Date.now()}`,
-            type: values.type,
-            description: values.description,
-            amount: values.amount,
-            currency: values.currency,
-            category: values.category,
-            accountId: values.accountId,
-            date: format(values.date, "yyyy-MM-dd"),
-            receiptUrl: values.receipt ? URL.createObjectURL(values.receipt) : null,
-            member: values.member,
+            ...values,
+            accountId: accounts[0].id, // default to first account
             team: 'Personal',
-            merchant: 'N/A',
-            report: 'N/A',
-            status: 'Not Submitted',
-            isRecurring: values.isRecurring,
-            recurrenceFrequency: values.isRecurring ? values.recurrenceFrequency : undefined,
+            receiptUrl: null,
         };
         setAllTransactions(prev => [newTransaction, ...prev]);
     };
@@ -234,6 +240,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
+    const updateApprovalStatus = (approvalId: string, status: 'Approved' | 'Declined') => {
+        setApprovals(prev => prev.map(a => a.id === approvalId ? { ...a, status } : a));
+    };
+
+    const addTrip = (tripData: Omit<Trip, 'id' | 'status' | 'report'>) => {
+        const newTrip: Trip = {
+            id: `trip-${Date.now()}`,
+            ...tripData,
+            status: 'Pending',
+            report: `${format(parseISO(tripData.date), 'MMMM_yyyy')}`
+        };
+        setAllTrips(prev => [...prev, newTrip]);
+    };
+    
+    const deleteSubscription = (subscriptionId: string) => {
+        setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
+    };
+
     const value = {
         transactions,
         accounts,
@@ -264,7 +288,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addRole,
         editRole,
         deleteRole,
-        updateCurrentUser
+        updateCurrentUser,
+        updateApprovalStatus,
+        addTrip,
+        deleteSubscription
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -13,11 +13,13 @@ import { Button } from "@/components/ui/button";
 import type { Approval } from "@/types";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApprovalRequestDialogProps {
   approval: Approval | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAction: (id: string, status: 'Approved' | 'Declined') => void;
 }
 
 const DetailRow = ({ label, children }: { label: string, children: React.ReactNode }) => (
@@ -38,9 +40,14 @@ const getCategoryDotColor = (category: Approval['category']) => {
     }
 }
 
-export function ApprovalRequestDialog({ approval, open, onOpenChange }: ApprovalRequestDialogProps) {
+export function ApprovalRequestDialog({ approval, open, onOpenChange, onAction }: ApprovalRequestDialogProps) {
     if (!approval) {
         return null;
+    }
+
+    const handleAction = (status: 'Approved' | 'Declined') => {
+        onAction(approval.id, status);
+        onOpenChange(false);
     }
 
     return (
@@ -77,10 +84,21 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
                 </div>
 
                 <DialogFooter className="gap-2 justify-start">
-                    <Button type="button" variant="secondary" className="bg-muted hover:bg-border/50 text-muted-foreground font-bold px-6">
+                    <Button 
+                        type="button" 
+                        variant="secondary" 
+                        className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border-none font-bold px-6"
+                        onClick={() => handleAction('Approved')}
+                        disabled={approval.status !== 'Pending'}
+                    >
                         Approve
                     </Button>
-                    <Button type="button" className="bg-cyan-400 hover:bg-cyan-500 text-black border-none font-bold px-6">
+                    <Button 
+                        type="button" 
+                        className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-none font-bold px-6"
+                        onClick={() => handleAction('Declined')}
+                        disabled={approval.status !== 'Pending'}
+                    >
                         Decline
                     </Button>
                 </DialogFooter>

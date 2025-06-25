@@ -195,15 +195,15 @@ export const categories: Category[] = [
 ];
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 270.00, currency: 'USD', date: '2022-11-09', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, currency: 'EUR', date: '2022-11-10', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, currency: 'EUR', date: '2022-11-11', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, currency: 'EUR', date: '2022-11-11', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, currency: 'EUR', date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, currency: 'EUR', date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, currency: 'EUR', date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
-  { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, currency: 'EUR', date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, currency: 'EUR', date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
+  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 270.00, currency: 'USD', date: '2022-11-09', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted', reimbursable: true },
+  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, currency: 'EUR', date: '2022-11-10', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Submitted', reimbursable: true },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, currency: 'EUR', date: '2022-11-11', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Reimbursed', reimbursable: true },
+  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, currency: 'EUR', date: '2022-11-11', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted', reimbursable: false },
+  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, currency: 'EUR', date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted', reimbursable: false },
+  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, currency: 'EUR', date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted', reimbursable: true },
+  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, currency: 'EUR', date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted', isRecurring: true, recurrenceFrequency: 'monthly', reimbursable: false },
+  { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, currency: 'EUR', date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted', reimbursable: false },
+  { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, currency: 'EUR', date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted', isRecurring: true, recurrenceFrequency: 'monthly', reimbursable: false },
 ];
 
 export const subscriptions: Subscription[] = [
@@ -232,11 +232,11 @@ export const pendingTasks: PendingTask[] = [
 ];
 
 export const trips: Trip[] = [
-    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
-    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending', memberId: 'mem2' },
-    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem3' },
-    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
-    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved', memberId: 'mem3' },
+    { id: 'trip1', date: '2022-11-08', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip2', date: '2022-11-10', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending', memberId: 'mem2' },
+    { id: 'trip3', date: '2022-11-11', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem3' },
+    { id: 'trip4', date: '2022-11-11', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip5', date: '2022-11-12', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved', memberId: 'mem3' },
 ];
 
 export const approvals: Approval[] = [

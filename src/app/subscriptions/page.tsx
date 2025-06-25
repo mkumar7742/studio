@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { useAppContext } from "@/context/app-provider";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,9 +10,26 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/currency";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import type { Subscription } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SubscriptionsPage() {
-    const { subscriptions } = useAppContext();
+    const { subscriptions, deleteSubscription } = useAppContext();
+    const [subscriptionToDelete, setSubscriptionToDelete] = useState<Subscription | null>(null);
+    const { toast } = useToast();
+
+    const handleConfirmDelete = () => {
+        if (subscriptionToDelete) {
+            deleteSubscription(subscriptionToDelete.id);
+            toast({
+                title: "Subscription Cancelled",
+                description: `The "${subscriptionToDelete.name}" subscription has been cancelled.`,
+            });
+            setSubscriptionToDelete(null);
+        }
+    };
+
 
     return (
         <div className="flex flex-col h-full">
@@ -38,7 +56,7 @@ export default function SubscriptionsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem><Pencil className="mr-2 size-4" /> Edit</DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setSubscriptionToDelete(sub)}>
                                                     <Trash2 className="mr-2 size-4" /> Cancel
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
@@ -64,6 +82,13 @@ export default function SubscriptionsPage() {
                     </div>
                 )}
             </main>
+            <DeleteConfirmationDialog 
+                open={!!subscriptionToDelete}
+                onOpenChange={(isOpen) => !isOpen && setSubscriptionToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Cancel Subscription"
+                description={`Are you sure you want to cancel the "${subscriptionToDelete?.name}" subscription? This action cannot be undone.`}
+            />
         </div>
     );
 }

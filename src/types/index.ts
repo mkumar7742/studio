@@ -14,9 +14,10 @@ export interface Transaction {
   team: string;
   merchant: string;
   report: string;
-  status: 'Submitted' | 'Not Submitted';
+  status: 'Submitted' | 'Not Submitted' | 'Reimbursed';
   isRecurring?: boolean;
   recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
+  reimbursable?: boolean;
 }
 
 export interface Account {

@@ -4,6 +4,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRef } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ export default function ProfilePage() {
     const { currentUser, getMemberRole, updateCurrentUser } = useAppContext();
     const { toast } = useToast();
     const role = getMemberRole(currentUser);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -61,6 +64,23 @@ export default function ProfilePage() {
         });
     }
 
+    const handlePhotoChangeClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Mocking the upload by just changing the avatar to a random new one
+            const randomId = Math.floor(Math.random() * 1000);
+            updateCurrentUser({ avatar: `https://placehold.co/100x100.png?text=${randomId}` });
+            toast({
+                title: "Photo Updated",
+                description: "Your profile picture has been changed.",
+            });
+        }
+    };
+
     return (
         <div className="flex flex-col h-full">
             <PageHeader title="User Profile" description="Manage your profile and account settings." />
@@ -78,7 +98,14 @@ export default function ProfilePage() {
                                         <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />
                                         <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <Button variant="outline" type="button">Change Photo</Button>
+                                    <Button variant="outline" type="button" onClick={handlePhotoChangeClick}>Change Photo</Button>
+                                    <Input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        className="hidden" 
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
                                 </div>
 
                                 <div className="grid gap-4 sm:grid-cols-2">

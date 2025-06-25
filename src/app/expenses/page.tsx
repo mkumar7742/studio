@@ -186,7 +186,8 @@ export default function ExpensesPage() {
                                                     variant="outline"
                                                     className={cn("border-none rounded-md text-xs font-semibold py-1 px-2.5", 
                                                         txn.status === 'Submitted' && 'bg-violet-500/20 text-violet-400',
-                                                        txn.status === 'Not Submitted' && 'bg-pink-500/20 text-pink-400'
+                                                        txn.status === 'Not Submitted' && 'bg-pink-500/20 text-pink-400',
+                                                        txn.status === 'Reimbursed' && 'bg-green-500/20 text-green-400'
                                                     )}
                                                 >
                                                     {txn.status}

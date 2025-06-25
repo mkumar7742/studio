@@ -15,10 +15,12 @@ import { Check, Eye, Filter, ListFilter, MoreHorizontal, X } from "lucide-react"
 import { ApprovalRequestDialog } from "@/components/approval-request-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/currency";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function ApprovalsPage() {
-    const { approvals, members } = useAppContext();
+    const { approvals, members, updateApprovalStatus } = useAppContext();
+    const { toast } = useToast();
     const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -26,6 +28,14 @@ export default function ApprovalsPage() {
         setSelectedApproval(approval);
         setIsDialogOpen(true);
     };
+
+    const handleApprovalAction = (id: string, status: 'Approved' | 'Declined') => {
+        updateApprovalStatus(id, status);
+        toast({
+            title: `Request ${status}`,
+            description: `The request has been successfully ${status.toLowerCase()}.`
+        });
+    }
 
     const getCategoryBadgeClasses = (category: Approval['category']) => {
         switch (category) {
@@ -39,6 +49,15 @@ export default function ApprovalsPage() {
                 return 'bg-muted text-muted-foreground border-transparent';
         }
     };
+
+    const getStatusBadgeClasses = (status: Approval['status']) => {
+        switch(status) {
+            case 'Approved': return 'bg-green-500/20 text-green-400';
+            case 'Declined': return 'bg-red-500/20 text-red-400';
+            case 'Pending':
+            default: return 'bg-yellow-500/20 text-yellow-400';
+        }
+    }
 
     return (
         <div className="flex flex-col h-full">
@@ -73,7 +92,7 @@ export default function ApprovalsPage() {
                                     <TableHead className="text-muted-foreground font-bold uppercase">Owner</TableHead>
                                     <TableHead className="text-muted-foreground font-bold uppercase">Category</TableHead>
                                     <TableHead className="text-muted-foreground font-bold uppercase">Amount</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold uppercase">Frequency</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold uppercase">Status</TableHead>
                                     <TableHead className="text-muted-foreground font-bold uppercase">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -108,16 +127,20 @@ export default function ApprovalsPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>{formatCurrency(approval.amount, approval.currency)}</TableCell>
-                                            <TableCell>{approval.frequency}</TableCell>
+                                            <TableCell>
+                                                 <Badge variant="outline" className={cn("rounded-md font-semibold border-none", getStatusBadgeClasses(approval.status))}>
+                                                    {approval.status}
+                                                </Badge>
+                                            </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-4">
                                                     <button className="text-muted-foreground hover:text-foreground" onClick={() => handleViewClick(approval)}>
                                                         <Eye className="size-5" />
                                                     </button>
-                                                    <button className="text-green-500 hover:text-green-400">
+                                                    <button disabled={approval.status !== 'Pending'} className="text-green-500 hover:text-green-400 disabled:text-muted-foreground/50 disabled:cursor-not-allowed" onClick={() => handleApprovalAction(approval.id, 'Approved')}>
                                                         <Check className="size-5" />
                                                     </button>
-                                                    <button className="text-red-500 hover:text-red-400">
+                                                    <button disabled={approval.status !== 'Pending'} className="text-red-500 hover:text-red-400 disabled:text-muted-foreground/50 disabled:cursor-not-allowed" onClick={() => handleApprovalAction(approval.id, 'Declined')}>
                                                         <X className="size-5" />
                                                     </button>
                                                 </div>
@@ -134,6 +157,7 @@ export default function ApprovalsPage() {
                 approval={selectedApproval}
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
+                onAction={handleApprovalAction}
             />
         </div>
     )
