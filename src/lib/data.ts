@@ -18,6 +18,15 @@ export const allPermissions: { group: string; permissions: { id: Permission; lab
     ],
   },
   {
+    group: 'Income',
+    permissions: [
+      { id: 'income:view', label: 'View Income' },
+      { id: 'income:create', label: 'Create Income' },
+      { id: 'income:edit', label: 'Edit Income' },
+      { id: 'income:delete', label: 'Delete Income' },
+    ],
+  },
+  {
     group: 'Trips',
     permissions: [
       { id: 'trips:view', label: 'View Trips' },
@@ -67,6 +76,7 @@ export const roles: Role[] = [
     permissions: [
       'dashboard:view',
       'expenses:view', 'expenses:create', 'expenses:edit', 'expenses:delete',
+      'income:view', 'income:create', 'income:edit', 'income:delete',
       'trips:view', 'trips:create',
       'approvals:view', 'approvals:action',
       'categories:view', 'categories:create', 'categories:edit', 'categories:delete',
@@ -81,6 +91,7 @@ export const roles: Role[] = [
     permissions: [
       'dashboard:view',
       'expenses:view', 'expenses:create', 'expenses:edit',
+      'income:view', 'income:create', 'income:edit',
       'trips:view', 'trips:create',
       'approvals:view', 'approvals:action',
       'categories:view',
@@ -94,6 +105,7 @@ export const roles: Role[] = [
     permissions: [
       'dashboard:view',
       'expenses:view', 'expenses:create',
+      'income:view', 'income:create',
       'trips:view', 'trips:create',
     ],
   },
@@ -174,6 +186,8 @@ export const transactions: Transaction[] = [
   { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
   { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
   { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted' },
 ];
 
 const currentMonth = getMonth(new Date());

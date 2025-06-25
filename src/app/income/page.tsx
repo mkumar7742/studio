@@ -10,16 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
 import { cn } from '@/lib/utils';
-import { Filter, MoreHorizontal, Plus } from 'lucide-react';
+import { Filter, MoreHorizontal, Plus, TrendingUp } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 
-export default function ExpensesPage() {
+export default function IncomePage() {
     const { transactions: allTransactions, categories, members } = useAppContext();
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
-    const transactions = allTransactions.filter(t => t.type === 'expense');
+    const transactions = allTransactions.filter(t => t.type === 'income');
 
     const handleSelectAll = (checked: boolean | 'indeterminate') => {
         if (checked === true) {
@@ -54,11 +54,11 @@ export default function ExpensesPage() {
     return (
         <div className="flex flex-col h-full">
             <header className="flex items-center justify-between p-4 sm:p-6">
-                <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Income</h1>
                 <div className="flex items-center gap-2">
                     <Button asChild className="bg-primary hover:bg-primary/90">
-                        <Link href="/expenses/new">
-                            <Plus className="mr-2 size-4" /> New expense
+                        <Link href="/income/new">
+                            <Plus className="mr-2 size-4" /> New Income
                         </Link>
                     </Button>
                     <Button variant="outline" size="icon">
@@ -91,9 +91,8 @@ export default function ExpensesPage() {
                                         />
                                     </TableHead>
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">MERCHANT</TableHead>
+                                    <TableHead className="text-muted-foreground font-bold">SOURCE</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">REPORT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -116,10 +115,10 @@ export default function ExpensesPage() {
                                                 <div className="flex items-center gap-3">
                                                     {Icon && color && (
                                                         <div
-                                                        className="flex size-8 shrink-0 items-center justify-center rounded-md"
-                                                        style={{ backgroundColor: color }}
+                                                            className="flex size-8 shrink-0 items-center justify-center rounded-md text-white"
+                                                            style={{ backgroundColor: color }}
                                                         >
-                                                        <Icon className="size-4 text-white" />
+                                                            <Icon className="size-4" />
                                                         </div>
                                                     )}
                                                     <div>
@@ -137,17 +136,13 @@ export default function ExpensesPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>{txn.merchant}</TableCell>
-                                            <TableCell>{euroFormatter.format(txn.amount)}</TableCell>
-                                            <TableCell>{txn.report}</TableCell>
+                                            <TableCell className="text-primary">{euroFormatter.format(txn.amount)}</TableCell>
                                             <TableCell>
                                                 <Badge 
                                                     variant="outline"
-                                                    className={cn("border-none rounded-md text-xs font-semibold py-1 px-2.5", 
-                                                        txn.status === 'Submitted' && 'bg-violet-500/20 text-violet-400',
-                                                        txn.status === 'Not Submitted' && 'bg-pink-500/20 text-pink-400'
-                                                    )}
+                                                    className="border-none rounded-md text-xs font-semibold py-1 px-2.5 bg-green-500/20 text-green-400"
                                                 >
-                                                    {txn.status}
+                                                   Received
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>
@@ -161,3 +156,4 @@ export default function ExpensesPage() {
         </div>
     )
 }
+

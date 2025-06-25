@@ -23,6 +23,7 @@ import {
   Users,
   ShieldCheck,
   PiggyBank,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -36,6 +37,7 @@ export function SidebarNav() {
     const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
         { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
+        { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500', permission: 'trips:view' },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500', permission: 'approvals:view' },
         { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-teal-500', permission: 'budgets:manage' },

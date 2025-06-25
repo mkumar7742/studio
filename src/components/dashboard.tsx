@@ -57,7 +57,8 @@ const quickAccessItems = [
 ]
 
 export function Dashboard() {
-  const { transactions, pendingTasks, categories, members } = useAppContext();
+  const { transactions: allTransactions, pendingTasks, categories, members } = useAppContext();
+  const transactions = allTransactions.filter(t => t.type === 'expense');
 
   const euroFormatter = new Intl.NumberFormat('de-DE', {
     style: 'currency',
