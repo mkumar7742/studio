@@ -201,11 +201,11 @@ export function Dashboard() {
                 <Button asChild variant="outline" size="sm">
                     <Link href="/calendar">
                         View Full
-                        <ArrowRight className="ml-2" />
+                        <ArrowRight className="ml-2 size-4" />
                     </Link>
                 </Button>
             </CardHeader>
-            <CardContent className="p-0 flex-grow flex items-center justify-center">
+            <CardContent className="p-0 flex-grow">
                 <Calendar
                     month={calendarDate}
                     className="p-3 w-full"
