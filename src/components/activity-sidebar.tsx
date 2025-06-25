@@ -11,7 +11,6 @@ import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Trip } from '@/types';
 import { formatCurrency } from '@/lib/currency';
-import { ScrollArea } from './ui/scroll-area';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3 pr-4">
@@ -63,7 +62,7 @@ const ActivityList = ({ items, type }: { items: (Transaction | Trip)[], type: 'e
       return <p className="text-center text-sm text-muted-foreground py-10">No recent {typeName}.</p>;
     }
     return (
-      <div className="space-y-1 pr-2">
+      <div>
         {items.map(item => {
           if (type === 'expense' || type === 'income') {
             const txn = item as Transaction;
@@ -97,16 +96,16 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
     const recentExpenses = transactions
         .filter(t => t.type === 'expense')
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
+        .slice(0, 7);
 
     const recentIncome = transactions
         .filter(t => t.type === 'income')
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
+        .slice(0, 7);
 
     const recentTrips = trips
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
+        .slice(0, 7);
         
     return (
         <aside className={cn("flex flex-col gap-6", showCalendar ? "sticky top-6" : "h-full")}>
@@ -131,20 +130,14 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0">
-                            <ScrollArea className="h-full">
-                                <ActivityList items={recentExpenses} type="expense" />
-                            </ScrollArea>
+                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0 overflow-y-auto pr-2">
+                            <ActivityList items={recentExpenses} type="expense" />
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2 min-h-0">
-                            <ScrollArea className="h-full">
-                                <ActivityList items={recentIncome} type="income" />
-                            </ScrollArea>
+                        <TabsContent value="income" className="flex-grow mt-2 min-h-0 overflow-y-auto pr-2">
+                            <ActivityList items={recentIncome} type="income" />
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0">
-                             <ScrollArea className="h-full">
-                                <ActivityList items={recentTrips} type="trip" />
-                            </ScrollArea>
+                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0 overflow-y-auto pr-2">
+                            <ActivityList items={recentTrips} type="trip" />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
