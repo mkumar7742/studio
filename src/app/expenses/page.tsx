@@ -48,6 +48,37 @@ export default function ExpensesPage() {
         return categories.find(c => c.name === categoryName);
     }
 
+    const handleExport = () => {
+        const headers = ["Date", "Description", "Member", "Merchant", "Category", "Amount", "Currency", "Status", "Report"];
+        const csvRows = [
+            headers.join(','),
+            ...transactions.map(txn => {
+                const row = [
+                    `"${txn.date}"`,
+                    `"${txn.description.replace(/"/g, '""')}"`,
+                    `"${txn.member}"`,
+                    `"${txn.merchant}"`,
+                    `"${txn.category}"`,
+                    txn.amount,
+                    txn.currency,
+                    `"${txn.status}"`,
+                    `"${txn.report}"`,
+                ];
+                return row.join(',');
+            })
+        ];
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'expenses.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="flex flex-col h-full">
             <header className="flex items-center justify-between p-4 sm:p-6">
@@ -68,7 +99,7 @@ export default function ExpensesPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={handleExport}>Export as CSV</DropdownMenuItem>
                             <DropdownMenuItem>Archive Selected</DropdownMenuItem>
                             <DropdownMenuItem>Delete Selected</DropdownMenuItem>
                         </DropdownMenuContent>
