@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Send, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Send, ArrowLeft, MessageSquare, Smile } from 'lucide-react';
 import { useAppContext } from '@/context/app-provider';
 import type { MemberProfile } from '@/types';
 import { cn } from '@/lib/utils';
@@ -13,11 +13,15 @@ import { formatRelative } from 'date-fns';
 import { PageHeader } from '@/components/page-header';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import Picker, { type EmojiClickData, Theme } from 'emoji-picker-react';
+import { useTheme } from 'next-themes';
 
 const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: () => void }) => {
     const { currentUser, conversations, sendMessage, members } = useAppContext();
     const [message, setMessage] = useState('');
     const conversation = conversations.find(c => c.memberId === member.id);
+    const { theme } = useTheme();
     
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,6 +29,10 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
             sendMessage(member.id, message.trim());
             setMessage('');
         }
+    };
+
+    const handleEmojiClick = (emojiData: EmojiClickData) => {
+        setMessage(currentMessage => currentMessage + emojiData.emoji);
     };
 
     const allMessages = useMemo(() => {
@@ -70,13 +78,26 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
                 </div>
             </ScrollArea>
             <form onSubmit={handleSend} className="flex items-center gap-2 p-4 border-t">
+                 <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="shrink-0">
+                            <Smile />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 border-none mb-2">
+                        <Picker 
+                            onEmojiClick={handleEmojiClick}
+                            theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                        />
+                    </PopoverContent>
+                </Popover>
                 <Input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type a message..."
                     autoComplete="off"
                 />
-                <Button type="submit" size="icon">
+                <Button type="submit" size="icon" className="shrink-0">
                     <Send />
                 </Button>
             </form>
