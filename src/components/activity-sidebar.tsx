@@ -123,27 +123,21 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent className={cn("flex flex-col p-4 pt-0", !showCalendar && "flex-grow min-h-0")}>
-                    <Tabs defaultValue="expenses" className={cn("w-full", !showCalendar && "flex flex-col flex-grow min-h-0")}>
+                <CardContent className={cn("p-4 pt-0 flex-grow min-h-0", !showCalendar && "flex flex-col")}>
+                    <Tabs defaultValue="expenses" className="w-full flex flex-col h-full">
                         <TabsList className="grid w-full grid-cols-3 shrink-0">
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0">
-                            <div className="h-full overflow-y-auto pr-2">
-                                <ActivityList items={recentExpenses} type="expense" />
-                            </div>
+                        <TabsContent value="expenses" className="flex-grow mt-2 overflow-y-auto pr-2">
+                            <ActivityList items={recentExpenses} type="expense" />
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2 min-h-0">
-                             <div className="h-full overflow-y-auto pr-2">
-                                <ActivityList items={recentIncome} type="income" />
-                            </div>
+                        <TabsContent value="income" className="flex-grow mt-2 overflow-y-auto pr-2">
+                             <ActivityList items={recentIncome} type="income" />
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0">
-                             <div className="h-full overflow-y-auto pr-2">
-                                <ActivityList items={recentTrips} type="trip" />
-                            </div>
+                        <TabsContent value="trips" className="flex-grow mt-2 overflow-y-auto pr-2">
+                             <ActivityList items={recentTrips} type="trip" />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
