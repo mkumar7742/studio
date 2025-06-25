@@ -8,7 +8,6 @@ import { Progress } from '@/components/ui/progress';
 import { useAppContext } from "@/context/app-provider";
 import { getMonth, getYear } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
-import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -63,12 +62,9 @@ export function BudgetsOverview({ className }: { className?: string }) {
         <Card className={cn("bg-card flex flex-col", className)}>
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Budgets Overview</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/budgets">
-                        View All
-                        <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                </Button>
+                <Link href="/budgets" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View all <ArrowRight className="size-4" />
+                </Link>
             </CardHeader>
             <CardContent className='flex-grow space-y-4 p-4'>
                 {budgetProgress.length > 0 ? (

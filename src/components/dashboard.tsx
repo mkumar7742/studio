@@ -22,7 +22,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { getMonth, getYear, subMonths, startOfMonth, format } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from './ui/calendar';
-import { Button } from './ui/button';
 
 
 // Summary card for total balance and credit
@@ -43,12 +42,9 @@ const SummaryCard = () => {
         <Card className="h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/accounts">
-                        View All
-                        <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                </Button>
+                <Link href="/accounts" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View all <ArrowRight className="size-4" />
+                </Link>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col justify-center p-4 space-y-3 text-sm">
                 <div>
@@ -98,12 +94,9 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
         <Card className="flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">{title}</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/transactions">
-                        View All
-                        <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                </Button>
+                <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View all <ArrowRight className="size-4" />
+                </Link>
             </CardHeader>
             <CardContent className="flex-grow flex items-center gap-4 p-4">
                  <div className="w-24 h-24">
@@ -207,14 +200,11 @@ export function Dashboard() {
         <Card className="h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/calendar">
-                        View Full
-                        <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                </Button>
+                <Link href="/calendar" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View full <ArrowRight className="size-4" />
+                </Link>
             </CardHeader>
-            <CardContent className="flex-grow p-0 flex items-center justify-center">
+            <CardContent className="flex-grow p-0 flex items-center">
                 <Calendar
                     month={calendarDate}
                     className="w-full"
@@ -243,12 +233,9 @@ export function Dashboard() {
         <Card className="bg-card lg:col-span-2 h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Monthly Report</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/transactions">
-                        View All
-                        <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                </Button>
+                <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View all <ArrowRight className="size-4" />
+                </Link>
             </CardHeader>
           <CardContent className="flex-grow p-4">
             <SpendingCharts transactions={expenseTransactions} />
