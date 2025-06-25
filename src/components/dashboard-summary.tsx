@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useAppContext } from '@/context/app-provider';
+import { getMonth, getYear, subMonths } from 'date-fns';
 
 // Centralized currency formatter
 const euroFormatter = new Intl.NumberFormat('de-DE', {
@@ -13,8 +15,16 @@ const euroFormatter = new Intl.NumberFormat('de-DE', {
 
 // Summary card for total balance and credit
 const SummaryCard = () => {
-    const balance = 13627.71;
-    const creditCards = -249.00;
+    const { accounts } = useAppContext();
+    
+    const balance = accounts
+        .filter(acc => !acc.name.toLowerCase().includes('credit'))
+        .reduce((sum, acc) => sum + acc.balance, 0);
+
+    const creditCards = accounts
+        .filter(acc => acc.name.toLowerCase().includes('credit'))
+        .reduce((sum, acc) => sum + acc.balance, 0);
+
     const total = balance + creditCards;
 
     return (
@@ -119,11 +129,38 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 
 // Main component to render all summary cards
 export function DashboardSummary() {
+    const { transactions } = useAppContext();
+
+    const now = new Date();
+    const thisMonth = getMonth(now);
+    const thisYear = getYear(now);
+    const lastMonthDate = subMonths(now, 1);
+    const lastMonth = getMonth(lastMonthDate);
+    const lastYear = getYear(lastMonthDate);
+
+    const thisMonthStats = transactions.reduce((acc, t) => {
+        const tDate = new Date(t.date);
+        if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
+            if (t.type === 'income') acc.income += t.amount;
+            else acc.expenses += t.amount;
+        }
+        return acc;
+    }, { income: 0, expenses: 0 });
+
+    const lastMonthStats = transactions.reduce((acc, t) => {
+        const tDate = new Date(t.date);
+        if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
+            if (t.type === 'income') acc.income += t.amount;
+            else acc.expenses += t.amount;
+        }
+        return acc;
+    }, { income: 0, expenses: 0 });
+
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <SummaryCard />
-            <MonthStatCard title="This Month" income={1452.00} expenses={573.53} />
-            <MonthStatCard title="Last Month" income={1500.00} expenses={388.76} />
+            <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
+            <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         </div>
     );
 };

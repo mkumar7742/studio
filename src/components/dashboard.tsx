@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
 import { DashboardSummary } from './dashboard-summary';
 import { ActivitySidebar } from './activity-sidebar';
-import { AIFinancialInsights } from './ai-financial-insights';
 
 const quickAccessItems = [
   {
@@ -114,7 +113,6 @@ export function Dashboard() {
 
       {/* Right Sidebar */}
       <div className="lg:col-span-1 flex flex-col gap-6">
-        <AIFinancialInsights />
         <ActivitySidebar />
         <CategorySpending />
       </div>
