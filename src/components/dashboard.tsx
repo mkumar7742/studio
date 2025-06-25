@@ -1,6 +1,7 @@
 
 "use client";
 
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -44,12 +45,12 @@ export function Dashboard() {
   const { transactions: allTransactions, pendingTasks } = useAppContext();
   const transactions = allTransactions.filter(t => t.type === 'expense');
 
-  const taskColorClasses: { [key: string]: string } = {
-    'Pending Approvals': 'bg-pink-600',
-    'New Trips Registered': 'bg-blue-600',
-    'Unreported Expenses': 'bg-emerald-600',
-    'Upcoming Expenses': 'bg-orange-500',
-    'Unreported Advances': 'bg-purple-500',
+  const taskLinks: { [key: string]: string } = {
+    'Pending Approvals': '/approvals',
+    'New Trips Registered': '/trips',
+    'Unsubmitted Expenses': '/expenses',
+    'Upcoming Bills & Subscriptions': '/subscriptions',
+    'Pending Reimbursements': '/expenses',
   };
 
 
@@ -72,16 +73,25 @@ export function Dashboard() {
           <CardHeader>
             <CardTitle>Pending Tasks</CardTitle>
           </CardHeader>
-          <CardContent className='space-y-4'>
-            {pendingTasks.map((task: PendingTask) => (
-              <div key={task.label} className="flex items-center">
-                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label] || 'bg-gray-500')}>
-                    <task.icon className="size-4" />
-                </div>
-                <span className="flex-grow text-sm">{task.label}</span>
-                <span className="text-sm font-semibold">{task.value}</span>
-              </div>
-            ))}
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {pendingTasks.map((task: PendingTask) => {
+                const link = taskLinks[task.label] || '#';
+                return (
+                  <Link href={link} key={task.label} className="block group">
+                    <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
+                      <div className="flex items-start justify-between">
+                        <p className="font-semibold text-foreground/90">{task.label}</p>
+                        <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
+                          <task.icon className="size-4" />
+                        </div>
+                      </div>
+                      <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
         
