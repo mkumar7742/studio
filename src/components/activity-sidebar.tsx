@@ -78,11 +78,11 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
     return (
         <aside className="sticky top-6 flex flex-col gap-6">
             {showCalendar && (
-                <Card>
-                    <CardContent className="p-0">
+                <Card className="h-full flex flex-col">
+                    <CardContent className="p-0 flex-grow">
                         <Calendar
                             mode="single"
-                            className="p-3"
+                            className="p-3 w-full"
                         />
                     </CardContent>
                 </Card>

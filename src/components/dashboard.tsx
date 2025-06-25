@@ -7,20 +7,170 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription
 } from "@/components/ui/card";
 import { SpendingCharts } from "@/components/spending-charts";
 import type { PendingTask } from "@/types";
 import { useAppContext } from '@/context/app-provider';
 import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
-import { DashboardSummary } from './dashboard-summary';
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp } from 'lucide-react';
+import { Separator } from './ui/separator';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { getMonth, getYear, subMonths } from 'date-fns';
+import { convertToUsd, formatCurrency } from '@/lib/currency';
+import { Calendar } from './ui/calendar';
+
+
+// Summary card for total balance and credit
+const SummaryCard = () => {
+    const { accounts } = useAppContext();
+    
+    const balance = accounts
+        .filter(acc => !acc.name.toLowerCase().includes('credit'))
+        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
+
+    const creditCards = accounts
+        .filter(acc => acc.name.toLowerCase().includes('credit'))
+        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
+
+    const total = balance + creditCards;
+
+    return (
+        <Card className="h-full flex flex-col">
+            <CardHeader>
+                <CardTitle className="text-base font-semibold">Summary</CardTitle>
+                <CardDescription>Account balances overview (in USD)</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow flex flex-col justify-end space-y-3 text-sm">
+                <div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Balance:</span>
+                        <span className="font-semibold text-primary">{formatCurrency(balance, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Credit cards:</span>
+                        <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'USD')}</span>
+                    </div>
+                </div>
+                <Separator className="my-2 bg-border/50" />
+                <div className="flex justify-between items-center">
+                    <span className="font-semibold text-muted-foreground">Total:</span>
+                    <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'USD')}</span>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+// Card for monthly statistics with a pie chart
+const MonthStatCard = ({ title, income, expenses }: { title: string, income: number, expenses: number }) => {
+    const net = income - expenses;
+    const total = income + expenses;
+    
+    const chartData = [
+        { name: 'Expenses', value: total > 0 ? (expenses / total) * 100 : 0, color: 'hsl(var(--destructive))', fullValue: expenses },
+        { name: 'Income', value: total > 0 ? (income / total) * 100 : 0, color: 'hsl(var(--primary))', fullValue: income },
+    ];
+    
+    // Custom tooltip for the pie chart
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="rounded-lg border bg-card p-2 shadow-sm text-card-foreground">
+                   <p className="text-sm font-bold">{`${data.name}: ${formatCurrency(data.fullValue, 'USD')}`}</p>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <Card className="flex flex-col h-full">
+             <CardHeader>
+                <CardTitle className="text-base font-semibold">{title}</CardTitle>
+                <CardDescription>Income vs. Expenses (in USD)</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow flex items-center gap-4">
+                 <div className="w-24 h-24">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsla(var(--muted))' }} />
+                            <Pie
+                                data={chartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={30}
+                                outerRadius={40}
+                                dataKey="value"
+                                strokeWidth={0}
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center text-muted-foreground">
+                            <ArrowUp className="size-4 mr-2 text-primary shrink-0" />
+                            <span>Income</span>
+                        </div>
+                        <span className="font-semibold text-primary">{formatCurrency(income, 'USD')}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                         <div className="flex items-center text-muted-foreground">
+                            <ArrowDown className="size-4 mr-2 text-destructive shrink-0" />
+                            <span>Expenses</span>
+                         </div>
+                         <span className="font-semibold text-destructive">{formatCurrency(expenses, 'USD')}</span>
+                    </div>
+                     <Separator className="my-2 bg-border/50" />
+                    <div className="text-right">
+                        <span className="font-bold text-lg text-foreground">{formatCurrency(net, 'USD')}</span>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 export function Dashboard() {
-  const { transactions: allTransactions, pendingTasks } = useAppContext();
-  const transactions = allTransactions.filter(t => t.type === 'expense');
+  const { transactions: allTransactions, pendingTasks, transactions } = useAppContext();
+  const expenseTransactions = allTransactions.filter(t => t.type === 'expense');
+
+  const now = new Date();
+  const thisMonth = getMonth(now);
+  const thisYear = getYear(now);
+  const lastMonthDate = subMonths(now, 1);
+  const lastMonth = getMonth(lastMonthDate);
+  const lastYear = getYear(lastMonthDate);
+
+  const thisMonthStats = transactions.reduce((acc, t) => {
+      const tDate = new Date(t.date);
+      if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
+          const amountInUsd = convertToUsd(t.amount, t.currency);
+          if (t.type === 'income') acc.income += amountInUsd;
+          else acc.expenses += amountInUsd;
+      }
+      return acc;
+  }, { income: 0, expenses: 0 });
+
+  const lastMonthStats = transactions.reduce((acc, t) => {
+      const tDate = new Date(t.date);
+      if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
+          const amountInUsd = convertToUsd(t.amount, t.currency);
+          if (t.type === 'income') acc.income += amountInUsd;
+          else acc.expenses += amountInUsd;
+      }
+      return acc;
+  }, { income: 0, expenses: 0 });
+
 
   const taskLinks: { [key: string]: string } = {
     'Pending Approvals': '/approvals',
@@ -32,94 +182,107 @@ export function Dashboard() {
 
 
   return (
-    <main className="grid flex-1 grid-cols-1 gap-6 p-4 md:p-6 lg:grid-cols-4">
-      {/* Main Content */}
-      <div className="flex flex-col gap-6 lg:col-span-3">
-        <DashboardSummary />
-        
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <Card className="bg-card lg:col-span-2">
-                <CardHeader>
-                    <CardTitle>Monthly Report</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <SpendingCharts transactions={transactions} />
-                </CardContent>
-            </Card>
-            <CategorySpending />
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <BudgetsOverview className="h-full" />
-            <Card className="bg-card flex flex-col h-full">
-              <CardHeader>
-                <CardTitle>Pending Tasks</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
-                  {pendingTasks.map((task: PendingTask) => {
-                    const link = taskLinks[task.label] || '#';
-                    return (
-                      <Link href={link} key={task.label} className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
-                          <div className="flex items-start justify-between">
-                            <p className="font-semibold text-foreground/90">{task.label}</p>
-                            <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
-                              <task.icon className="size-4" />
-                            </div>
-                          </div>
-                          <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card flex flex-col h-full">
-                <CardHeader>
-                    <CardTitle>Quick Access</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
-                    <Link href="/expenses/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                        <CreditCard className="size-8 text-red-500 mb-2" />
-                        <h3 className="font-semibold">New Expense</h3>
-                        <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
-                        </div>
-                    </Link>
-                    <Link href="/income/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                        <TrendingUp className="size-8 text-green-500 mb-2" />
-                        <h3 className="font-semibold">New Income</h3>
-                        <p className="text-sm text-muted-foreground">Record a new source of income.</p>
-                        </div>
-                    </Link>
-                    <Link href="/trips/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                        <Plane className="size-8 text-blue-500 mb-2" />
-                        <h3 className="font-semibold">New Trip</h3>
-                        <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
-                        </div>
-                    </Link>
-                    <Link href="/approvals/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                        <ClipboardCheck className="size-8 text-pink-500 mb-2" />
-                        <h3 className="font-semibold">New Approval</h3>
-                        <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
-                        </div>
-                    </Link>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-        
+    <main className="flex flex-col flex-1 gap-6 p-4 md:p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <SummaryCard />
+        <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
+        <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
+        <Card className="h-full flex flex-col">
+            <CardContent className="p-0 flex-grow">
+                <Calendar
+                    mode="single"
+                    className="p-3 w-full"
+                />
+            </CardContent>
+        </Card>
       </div>
 
-      {/* Right Sidebar */}
-      <div className="lg:col-span-1">
-        <ActivitySidebar />
+      <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Main Content */}
+        <div className="flex flex-col gap-6 lg:col-span-3">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <Card className="bg-card lg:col-span-2">
+                  <CardHeader>
+                      <CardTitle>Monthly Report</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <SpendingCharts transactions={expenseTransactions} />
+                  </CardContent>
+              </Card>
+              <CategorySpending />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <BudgetsOverview className="h-full" />
+              <Card className="bg-card flex flex-col h-full">
+                <CardHeader>
+                  <CardTitle>Pending Tasks</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
+                    {pendingTasks.map((task: PendingTask) => {
+                      const link = taskLinks[task.label] || '#';
+                      return (
+                        <Link href={link} key={task.label} className="block group">
+                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
+                            <div className="flex items-start justify-between">
+                              <p className="font-semibold text-foreground/90">{task.label}</p>
+                              <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
+                                <task.icon className="size-4" />
+                              </div>
+                            </div>
+                            <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card flex flex-col h-full">
+                  <CardHeader>
+                      <CardTitle>Quick Access</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
+                      <Link href="/expenses/new" className="block group">
+                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                          <CreditCard className="size-8 text-red-500 mb-2" />
+                          <h3 className="font-semibold">New Expense</h3>
+                          <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
+                          </div>
+                      </Link>
+                      <Link href="/income/new" className="block group">
+                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                          <TrendingUp className="size-8 text-green-500 mb-2" />
+                          <h3 className="font-semibold">New Income</h3>
+                          <p className="text-sm text-muted-foreground">Record a new source of income.</p>
+                          </div>
+                      </Link>
+                      <Link href="/trips/new" className="block group">
+                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                          <Plane className="size-8 text-blue-500 mb-2" />
+                          <h3 className="font-semibold">New Trip</h3>
+                          <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
+                          </div>
+                      </Link>
+                      <Link href="/approvals/new" className="block group">
+                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                          <ClipboardCheck className="size-8 text-pink-500 mb-2" />
+                          <h3 className="font-semibold">New Approval</h3>
+                          <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
+                          </div>
+                      </Link>
+                      </div>
+                  </CardContent>
+              </Card>
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="lg:col-span-1">
+          <ActivitySidebar showCalendar={false} />
+        </div>
       </div>
     </main>
   );
