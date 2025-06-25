@@ -37,16 +37,19 @@ export function Dashboard() {
       <div className="flex flex-col gap-6 lg:col-span-3">
         <DashboardSummary />
         
-        <Card className="bg-card">
-          <CardHeader>
-            <CardTitle>Monthly Report</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SpendingCharts transactions={transactions} />
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <Card className="bg-card lg:col-span-2">
+                <CardHeader>
+                    <CardTitle>Monthly Report</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <SpendingCharts transactions={transactions} />
+                </CardContent>
+            </Card>
+            <CategorySpending />
+        </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <BudgetsOverview />
             <Card className="bg-card">
               <CardHeader>
@@ -78,7 +81,7 @@ export function Dashboard() {
                     <CardTitle>Quick Access</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Link href="/expenses/new" className="block group">
                         <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
                         <CreditCard className="size-8 text-red-500 mb-2" />
@@ -110,7 +113,6 @@ export function Dashboard() {
                     </div>
                 </CardContent>
             </Card>
-            <CategorySpending />
         </div>
         
       </div>
