@@ -31,6 +31,24 @@ const DateSeparator = ({ date }: { date: number }) => (
     </div>
 );
 
+const ClientRelativeTime = ({ timestamp, className }: { timestamp: number; className: string }) => {
+    const [relativeTime, setRelativeTime] = useState('');
+
+    useEffect(() => {
+        // This will only run on the client, after hydration, avoiding the mismatch.
+        setRelativeTime(formatRelative(new Date(timestamp), new Date()));
+    }, [timestamp]);
+
+    // Return a non-relative format on the server and for the initial client render.
+    const initialTimeFormat = format(new Date(timestamp), 'p');
+
+    return (
+        <time dateTime={new Date(timestamp).toISOString()} className={className}>
+            {relativeTime || initialTimeFormat}
+        </time>
+    );
+};
+
 
 const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: () => void }) => {
     const { currentUser, conversations, sendMessage, members } = useAppContext();
@@ -106,7 +124,10 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
                                 )}
                                 <div className={cn("max-w-xs md:max-w-md p-3 rounded-2xl", isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none")}>
                                     <p className="text-sm">{msg.text}</p>
-                                    <p className={cn("text-xs mt-1 text-right", isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground/70")}>{formatRelative(new Date(msg.timestamp), new Date())}</p>
+                                    <ClientRelativeTime
+                                        timestamp={msg.timestamp}
+                                        className={cn("text-xs mt-1 text-right block", isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground/70")}
+                                    />
                                 </div>
                             </div>
                         );
@@ -205,7 +226,7 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
                                                     {conversation.unreadCount}
                                                 </Badge>
                                             ) : lastMessage.timestamp && (
-                                                <time className="text-xs text-muted-foreground shrink-0">{formatRelative(new Date(lastMessage.timestamp), new Date())}</time>
+                                                <ClientRelativeTime timestamp={lastMessage.timestamp} className="text-xs text-muted-foreground shrink-0" />
                                             )}
                                         </div>
                                         <p className="text-sm text-muted-foreground truncate">{lastMessage.text}</p>
