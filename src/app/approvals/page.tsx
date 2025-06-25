@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAppContext } from "@/context/app-provider";
 import { cn } from "@/lib/utils";
 import type { Approval } from "@/types";
-import { Check, Eye, Filter, ListFilter, MoreHorizontal, X } from "lucide-react";
+import { Check, Eye, Filter, ListFilter, MoreHorizontal, Plus, X } from "lucide-react";
 import { ApprovalRequestDialog } from "@/components/approval-request-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/currency";
@@ -64,6 +64,11 @@ export default function ApprovalsPage() {
             <header className="flex items-center justify-between p-4 sm:p-6">
                 <h1 className="text-3xl font-bold tracking-tight">Approvals</h1>
                 <div className="flex items-center gap-2">
+                    <Button asChild>
+                        <Link href="/approvals/new">
+                            <Plus className="mr-2 size-4" /> New Request
+                        </Link>
+                    </Button>
                     <Button variant="outline" size="icon">
                         <Filter className="size-4" />
                     </Button>
@@ -133,7 +138,7 @@ export default function ApprovalsPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2">
                                                     <button className="text-muted-foreground hover:text-foreground" onClick={() => handleViewClick(approval)}>
                                                         <Eye className="size-5" />
                                                     </button>
