@@ -205,10 +205,18 @@ export function Dashboard() {
                     </Link>
                 </Button>
             </CardHeader>
-            <CardContent className="p-0 flex-grow">
+            <CardContent className="p-0 flex-grow flex items-center justify-center">
                 <Calendar
                     month={calendarDate}
                     className="p-3 w-full"
+                     classNames={{
+                        row: "flex w-full mt-1",
+                        cell: "h-8 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-8 w-full p-0 font-normal aria-selected:opacity-100",
+                    }}
+                    components={{
+                      Caption: () => null,
+                    }}
                 />
             </CardContent>
         </Card>
