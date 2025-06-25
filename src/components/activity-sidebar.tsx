@@ -57,6 +57,39 @@ const ActivityStatus = ({ status }: { status: Trip['status']}) => {
     return <Badge variant="outline" className={cn('text-xs', getStatusClasses(status))}>{status}</Badge>;
 }
 
+const ActivityList = ({ items, type }: { items: (Transaction | Trip)[], type: 'expense' | 'income' | 'trip' }) => {
+    if (items.length === 0) {
+      const typeName = type === 'trip' ? 'trips' : `${type}s`;
+      return <p className="text-center text-sm text-muted-foreground py-10">No recent {typeName}.</p>;
+    }
+    return (
+      <div className="space-y-1 pr-4">
+        {items.map(item => {
+          if (type === 'expense' || type === 'income') {
+            const txn = item as Transaction;
+            return (
+              <ActivityItem key={txn.id}>
+                <ActivityIcon icon={type === 'income' ? ArrowUpRight : ArrowDownLeft} color={type === 'income' ? "bg-primary" : "bg-destructive"} />
+                <ActivityContent title={txn.description} description={txn.member} />
+                <ActivityAmount amount={txn.amount} currency={txn.currency} type={type} />
+              </ActivityItem>
+            )
+          }
+          if (type === 'trip') {
+            const trip = item as Trip;
+            return (
+              <ActivityItem key={trip.id}>
+                <ActivityIcon icon={Plane} color="bg-blue-500" />
+                <ActivityContent title={trip.location} description={trip.purpose} link={`/trips/${trip.id}`} />
+                <ActivityStatus status={trip.status} />
+              </ActivityItem>
+            )
+          }
+          return null;
+        })}
+      </div>
+    );
+  }
 
 export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolean }) {
     const { transactions, trips } = useAppContext();
@@ -91,44 +124,28 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent className={cn("flex flex-col", !showCalendar && "flex-grow")}>
-                    <Tabs defaultValue="expenses" className={cn("w-full", !showCalendar && "flex flex-col h-full")}>
-                        <TabsList className="grid w-full grid-cols-3">
+                <CardContent className={cn("flex flex-col p-4 pt-0", !showCalendar && "flex-grow min-h-0")}>
+                    <Tabs defaultValue="expenses" className={cn("w-full", !showCalendar && "flex flex-col flex-grow")}>
+                        <TabsList className="grid w-full grid-cols-3 shrink-0">
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <div className={cn("w-full", !showCalendar ? "relative flex-grow" : "h-72")}>
-                          <ScrollArea className={cn("w-full", !showCalendar ? "absolute h-full" : "")}>
-                              <TabsContent value="expenses" className="space-y-1">
-                                  {recentExpenses.length > 0 ? recentExpenses.map(txn => (
-                                      <ActivityItem key={txn.id}>
-                                          <ActivityIcon icon={ArrowDownLeft} color="bg-destructive" />
-                                          <ActivityContent title={txn.description} description={txn.member} />
-                                          <ActivityAmount amount={txn.amount} currency={txn.currency} type="expense" />
-                                      </ActivityItem>
-                                  )) : <p className="text-center text-sm text-muted-foreground py-10">No recent expenses.</p>}
-                              </TabsContent>
-                              <TabsContent value="income" className="space-y-1">
-                                   {recentIncome.length > 0 ? recentIncome.map(txn => (
-                                      <ActivityItem key={txn.id}>
-                                          <ActivityIcon icon={ArrowUpRight} color="bg-primary" />
-                                          <ActivityContent title={txn.description} description={txn.member} />
-                                          <ActivityAmount amount={txn.amount} currency={txn.currency} type="income" />
-                                      </ActivityItem>
-                                  )) : <p className="text-center text-sm text-muted-foreground py-10">No recent income.</p>}
-                              </TabsContent>
-                              <TabsContent value="trips" className="space-y-1">
-                                  {recentTrips.length > 0 ? recentTrips.map(trip => (
-                                      <ActivityItem key={trip.id}>
-                                          <ActivityIcon icon={Plane} color="bg-blue-500" />
-                                          <ActivityContent title={trip.location} description={trip.purpose} link={`/trips/${trip.id}`} />
-                                          <ActivityStatus status={trip.status} />
-                                      </ActivityItem>
-                                  )) : <p className="text-center text-sm text-muted-foreground py-10">No recent trips.</p>}
-                              </TabsContent>
+                        <TabsContent value="expenses" className="flex-grow mt-2">
+                          <ScrollArea className="h-full">
+                              <ActivityList items={recentExpenses} type="expense" />
                           </ScrollArea>
-                        </div>
+                        </TabsContent>
+                        <TabsContent value="income" className="flex-grow mt-2">
+                           <ScrollArea className="h-full">
+                              <ActivityList items={recentIncome} type="income" />
+                          </ScrollArea>
+                        </TabsContent>
+                        <TabsContent value="trips" className="flex-grow mt-2">
+                          <ScrollArea className="h-full">
+                              <ActivityList items={recentTrips} type="trip" />
+                          </ScrollArea>
+                        </TabsContent>
                     </Tabs>
                 </CardContent>
             </Card>
