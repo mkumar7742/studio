@@ -11,6 +11,7 @@ import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Trip } from '@/types';
 import { formatCurrency } from '@/lib/currency';
+import { ScrollArea } from './ui/scroll-area';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3 pr-4">
@@ -62,7 +63,7 @@ const ActivityList = ({ items, type }: { items: (Transaction | Trip)[], type: 'e
       return <p className="text-center text-sm text-muted-foreground py-10">No recent {typeName}.</p>;
     }
     return (
-      <div className="space-y-1">
+      <div className="space-y-1 pr-2">
         {items.map(item => {
           if (type === 'expense' || type === 'income') {
             const txn = item as Transaction;
@@ -130,14 +131,20 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2 overflow-y-auto">
-                            <ActivityList items={recentExpenses} type="expense" />
+                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0">
+                            <ScrollArea className="h-full">
+                                <ActivityList items={recentExpenses} type="expense" />
+                            </ScrollArea>
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2 overflow-y-auto">
-                            <ActivityList items={recentIncome} type="income" />
+                        <TabsContent value="income" className="flex-grow mt-2 min-h-0">
+                            <ScrollArea className="h-full">
+                                <ActivityList items={recentIncome} type="income" />
+                            </ScrollArea>
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 overflow-y-auto">
-                            <ActivityList items={recentTrips} type="trip" />
+                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0">
+                             <ScrollArea className="h-full">
+                                <ActivityList items={recentTrips} type="trip" />
+                            </ScrollArea>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
