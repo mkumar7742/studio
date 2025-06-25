@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
 import {
     accounts as initialAccounts,
@@ -102,22 +102,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     ]);
 
-    // For demonstration purposes, we assume the logged-in user is the first member.
-    // In a real app, this would come from an authentication provider.
     const currentUser = useMemo(() => members[0], [members]);
 
-    const getMemberRole = (member: MemberProfile): Role | undefined => {
+    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => {
         return roles.find(r => r.id === member.roleId);
-    };
+    }, [roles]);
 
-    const currentUserRole = useMemo(() => getMemberRole(currentUser), [currentUser, roles]);
+    const currentUserRole = useMemo(() => getMemberRole(currentUser), [currentUser, getMemberRole]);
     const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
     const isPrivilegedUser = useMemo(() => {
         const roleName = currentUserRole?.name;
         return roleName === 'Administrator' || roleName === 'Manager';
     }, [currentUserRole]);
 
-    // Filter data based on user role
     const transactions = useMemo(() => {
         if (isPrivilegedUser) return allTransactions;
         return allTransactions.filter(t => t.member === currentUser.name);
@@ -165,43 +162,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [transactions, trips, approvals, currentUserPermissions, subscriptions]);
 
 
-    const addTransaction = (values: FullTransaction) => {
+    const addTransaction = useCallback((values: FullTransaction) => {
         const newTransaction: Transaction = {
             id: `txn-${Date.now()}`,
             ...values,
-            accountId: accounts[0].id, // default to first account
+            accountId: accounts[0].id,
             team: 'Personal',
             receiptUrl: null,
         };
         setAllTransactions(prev => [newTransaction, ...prev]);
-    };
+    }, [accounts]);
 
-    const deleteTransactions = (transactionIds: string[]) => {
+    const deleteTransactions = useCallback((transactionIds: string[]) => {
         setAllTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
-    };
+    }, []);
 
-    const addBudget = (values: Omit<Budget, 'id' | 'status'>) => {
+    const addBudget = useCallback((values: Omit<Budget, 'id' | 'status'>) => {
         const newBudget: Budget = {
             id: `bud-${Date.now()}`,
             ...values,
             status: 'active',
         };
         setAllBudgets(prev => [...prev, newBudget]);
-    }
+    }, []);
 
-    const editBudget = (budgetId: string, values: Omit<Budget, 'id'>) => {
+    const editBudget = useCallback((budgetId: string, values: Omit<Budget, 'id'>) => {
         setAllBudgets(prev => prev.map(b => b.id === budgetId ? { id: budgetId, ...values } : b));
-    };
+    }, []);
 
-    const deleteBudget = (budgetId: string) => {
+    const deleteBudget = useCallback((budgetId: string) => {
         setAllBudgets(prev => prev.filter(b => b.id !== budgetId));
-    };
+    }, []);
 
-    const archiveBudget = (budgetId: string, status: 'active' | 'archived') => {
+    const archiveBudget = useCallback((budgetId: string, status: 'active' | 'archived') => {
         setAllBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, status } : b));
-    };
+    }, []);
 
-    const addCategory = (values: { name: string; color: string; icon: string }) => {
+    const addCategory = useCallback((values: { name: string; color: string; icon: string }) => {
         const newCategory: Category = {
             id: `cat-${Date.now()}`,
             name: values.name,
@@ -209,20 +206,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             icon: iconMap[values.icon] || Shapes,
         };
         setCategories(prev => [...prev, newCategory]);
-    };
+    }, []);
 
-    const editCategory = (categoryId: string, values: { name:string, color: string, icon: string }) => {
+    const editCategory = useCallback((categoryId: string, values: { name:string, color: string, icon: string }) => {
         setCategories(prev => prev.map(c => 
             c.id === categoryId 
             ? { ...c, name: values.name, color: values.color, icon: iconMap[values.icon] || Shapes } 
             : c));
-    }
+    }, []);
 
-    const deleteCategory = (categoryId: string) => {
+    const deleteCategory = useCallback((categoryId: string) => {
         setCategories(prev => prev.filter(c => c.id !== categoryId));
-    };
+    }, []);
 
-    const addMember = (values: { name: string; email: string; roleId: string; }) => {
+    const addMember = useCallback((values: { name: string; email: string; roleId: string; }) => {
         const newMember: MemberProfile = {
             id: `mem-${Date.now()}`,
             name: values.name,
@@ -232,34 +229,34 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             avatarHint: 'person portrait'
         };
         setMembers(prev => [...prev, newMember]);
-    };
+    }, []);
 
-    const editMember = (memberId: string, values: Partial<MemberProfile>) => {
+    const editMember = useCallback((memberId: string, values: Partial<MemberProfile>) => {
         setMembers(prev => prev.map(m => m.id === memberId ? { ...m, ...values } : m));
-    };
+    }, []);
     
-    const deleteMember = (memberId: string) => {
+    const deleteMember = useCallback((memberId: string) => {
         setMembers(prev => prev.filter(m => m.id !== memberId));
-    };
+    }, []);
 
-    const addRole = (values: { name: string; permissions: Permission[] }) => {
+    const addRole = useCallback((values: { name: string; permissions: Permission[] }) => {
         const newRole: Role = {
             id: `role-${Date.now()}`,
             name: values.name,
             permissions: values.permissions,
         };
         setRoles(prev => [...prev, newRole]);
-    };
+    }, []);
 
-    const editRole = (roleId: string, values: { name: string; permissions: Permission[] }) => {
+    const editRole = useCallback((roleId: string, values: { name: string; permissions: Permission[] }) => {
         setRoles(prev => prev.map(r => r.id === roleId ? { ...r, ...values } : r));
-    };
+    }, []);
 
-    const deleteRole = (roleId: string) => {
+    const deleteRole = useCallback((roleId: string) => {
         setRoles(prev => prev.filter(r => r.id !== roleId));
-    };
+    }, []);
 
-    const updateCurrentUser = (data: Partial<MemberProfile>) => {
+    const updateCurrentUser = useCallback((data: Partial<MemberProfile>) => {
         setMembers(prev => {
             const currentUserFromState = prev.find(m => m.id === currentUser.id);
             if (!currentUserFromState) return prev;
@@ -268,13 +265,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             
             return prev.map(m => m.id === currentUser.id ? updatedUser : m);
         });
-    };
+    }, [currentUser.id]);
 
-    const updateApprovalStatus = (approvalId: string, status: 'Approved' | 'Declined') => {
+    const updateApprovalStatus = useCallback((approvalId: string, status: 'Approved' | 'Declined') => {
         setApprovals(prev => prev.map(a => a.id === approvalId ? { ...a, status } : a));
-    };
+    }, []);
 
-    const addApproval = (values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
+    const addApproval = useCallback((values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
         const role = getMemberRole(currentUser);
         const newApproval: Approval = {
             id: `appr-${Date.now()}`,
@@ -288,9 +285,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         };
         setApprovals(prev => [newApproval, ...prev]);
-    };
+    }, [currentUser, getMemberRole]);
 
-    const addTrip = (tripData: Omit<Trip, 'id' | 'status' | 'report'>) => {
+    const addTrip = useCallback((tripData: Omit<Trip, 'id' | 'status' | 'report'>) => {
         const newTrip: Trip = {
             id: `trip-${Date.now()}`,
             ...tripData,
@@ -298,19 +295,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             report: `${format(parseISO(tripData.date), 'MMMM_yyyy')}`
         };
         setAllTrips(prev => [...prev, newTrip]);
-    };
+    }, []);
     
-    const deleteSubscription = (subscriptionId: string) => {
+    const deleteSubscription = useCallback((subscriptionId: string) => {
         setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
-    };
+    }, []);
 
-    const markConversationAsRead = (memberId: string) => {
+    const markConversationAsRead = useCallback((memberId: string) => {
         setConversations(prev => prev.map(c => 
             c.memberId === memberId ? { ...c, unreadCount: 0 } : c
         ));
-    };
+    }, []);
     
-    const sendMessage = (receiverId: string, text: string) => {
+    const sendMessage = useCallback((receiverId: string, text: string) => {
         const newMessage: ChatMessage = {
             id: `msg-${Date.now()}`,
             senderId: currentUser.id,
@@ -358,7 +355,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     : c
             ));
         }, 2500);
-    };
+    }, [currentUser.id, members]);
 
     const value = {
         transactions,
