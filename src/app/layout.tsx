@@ -9,7 +9,7 @@ import { AppProvider } from '@/context/app-provider';
 export const metadata: Metadata = {
   title: 'TrackWise',
   description: 'Smartly manage your income and expenses with AI-powered insights.',
-  manifest: '/manifest.ts'
+  manifest: '/manifest.json'
 };
 
 export const viewport: Viewport = {
