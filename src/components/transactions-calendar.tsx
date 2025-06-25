@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useMemo, createContext, useContext } from 'react';
+import { useState, useMemo, createContext, useContext, useEffect } from 'react';
 import { DayPicker, type DayProps } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
@@ -14,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { Separator } from './ui/separator';
 import { DayTransactionsDialog } from './day-transactions-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Skeleton } from './ui/skeleton';
 
 interface DayData {
   net: number;
@@ -30,6 +30,7 @@ const euroFormatter = new Intl.NumberFormat('de-DE', {
 const TransactionsCalendarContext = createContext<{
     transactionsByDay: Map<string, DayData>;
     handleDayClick: (date: Date, data: DayData | undefined) => void;
+    today: Date | null;
 } | null>(null);
 
 function useTransactionsCalendarContext() {
@@ -48,10 +49,11 @@ const CategoryIcon = ({ categoryName, className }: { categoryName: string, class
 };
 
 function CustomDay(props: DayProps) {
-    const { transactionsByDay, handleDayClick } = useTransactionsCalendarContext();
+    const { transactionsByDay, handleDayClick, today } = useTransactionsCalendarContext();
     const dayKey = format(props.date, 'yyyy-MM-dd');
     const dayData = transactionsByDay.get(dayKey);
     const hasTransactions = dayData && dayData.transactions.length > 0;
+    const isToday = today ? isSameDay(props.date, today) : false;
 
     if (props.displayMonth.getMonth() !== props.date.getMonth()) {
         return <div className="h-full w-full" />;
@@ -68,7 +70,7 @@ function CustomDay(props: DayProps) {
                             hasTransactions ? "cursor-pointer hover:bg-accent focus:bg-accent focus:outline-none" : "cursor-default"
                         )}
                     >
-                        <time dateTime={props.date.toISOString()} className={cn("ml-auto text-xs", isSameDay(props.date, new Date()) && "bg-primary text-primary-foreground rounded-full size-5 flex items-center justify-center")}>
+                        <time dateTime={props.date.toISOString()} className={cn("ml-auto text-xs", isToday && "bg-primary text-primary-foreground rounded-full size-5 flex items-center justify-center")}>
                             {format(props.date, 'd')}
                         </time>
                         {dayData && (
@@ -129,21 +131,45 @@ function CustomDay(props: DayProps) {
 
 export function TransactionsCalendar() {
     const { transactions } = useAppContext();
-    const [month, setMonth] = useState(startOfMonth(new Date()));
+    const [month, setMonth] = useState<Date>();
+    const [today, setToday] = useState<Date | null>(null);
     const [selectedDay, setSelectedDay] = useState<{ date: Date; data: DayData } | null>(null);
+    
+    useEffect(() => {
+        const now = new Date();
+        setMonth(startOfMonth(now));
+        setToday(now);
+    }, []);
 
-    const years = Array.from({ length: 21 }, (_, i) => getYear(new Date()) - 10 + i);
-    const months = Array.from({ length: 12 }, (_, i) => ({
+    const years = useMemo(() => {
+        const currentYear = getYear(new Date());
+        return Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+    }, []);
+
+    const months = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
         value: i,
         label: format(new Date(0, i), 'MMMM'),
-    }));
+    })), []);
 
     const handleMonthSelect = (monthIndex: string) => {
+        if (!month) return;
         setMonth(new Date(getYear(month), parseInt(monthIndex), 1));
     };
 
     const handleYearSelect = (year: string) => {
+        if (!month) return;
         setMonth(new Date(parseInt(year), getMonth(month), 1));
+    };
+
+    const handleQuickNav = (period: 'yesterday' | 'last-week' | 'today') => {
+        const now = new Date();
+        if (period === 'today') {
+            setMonth(startOfMonth(now));
+        } else if (period === 'yesterday') {
+            setMonth(startOfMonth(subDays(now, 1)));
+        } else if (period === 'last-week') {
+            setMonth(startOfMonth(subWeeks(now, 1)));
+        }
     };
 
 
@@ -179,14 +205,24 @@ export function TransactionsCalendar() {
         return map;
     }, [transactions]);
     
-    const contextValue = { transactionsByDay, handleDayClick };
+    const contextValue = { transactionsByDay, handleDayClick, today };
 
+    if (!month || !today) {
+        return (
+            <Card>
+                <CardContent className="p-3">
+                    <Skeleton className="h-[960px] w-full" />
+                </CardContent>
+            </Card>
+        );
+    }
+    
     return (
         <TransactionsCalendarContext.Provider value={contextValue}>
             <Card>
                 <header className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev, -1))}>
+                        <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev!, -1))}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <Select
@@ -211,24 +247,24 @@ export function TransactionsCalendar() {
                                 {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                         <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev, 1))}>
+                         <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev!, 1))}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => setMonth(startOfMonth(subWeeks(new Date(), 1)))}
+                            onClick={() => handleQuickNav('last-week')}
                         >
                             Last week
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => setMonth(startOfMonth(subDays(new Date(), 1)))}
+                            onClick={() => handleQuickNav('yesterday')}
                         >
                             Yesterday
                         </Button>
-                        <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>
+                        <Button variant="outline" onClick={() => handleQuickNav('today')}>
                             Today
                         </Button>
                     </div>
