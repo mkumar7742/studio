@@ -5,7 +5,7 @@ import { useState, useMemo, createContext, useContext } from 'react';
 import { DayPicker, type DayProps } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
-import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths, subDays, subWeeks } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -215,7 +215,23 @@ export function TransactionsCalendar() {
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
-                    <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>Today</Button>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setMonth(startOfMonth(subWeeks(new Date(), 1)))}
+                        >
+                            Last week
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setMonth(startOfMonth(subDays(new Date(), 1)))}
+                        >
+                            Yesterday
+                        </Button>
+                        <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>
+                            Today
+                        </Button>
+                    </div>
                 </header>
                 <CardContent className="p-0">
                     <DayPicker
