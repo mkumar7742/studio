@@ -124,19 +124,19 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent className={cn("flex flex-col p-4 pt-0", !showCalendar && "flex-grow min-h-0")}>
-                    <Tabs defaultValue="expenses" className={cn("w-full", !showCalendar && "flex flex-col flex-grow")}>
+                    <Tabs defaultValue="expenses" className={cn("w-full", !showCalendar && "flex flex-col flex-grow min-h-0")}>
                         <TabsList className="grid w-full grid-cols-3 shrink-0">
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                        <TabsContent value="expenses" className="flex-grow mt-2 overflow-y-auto">
                             <ActivityList items={recentExpenses} type="expense" />
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                        <TabsContent value="income" className="flex-grow mt-2 overflow-y-auto">
                             <ActivityList items={recentIncome} type="income" />
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                        <TabsContent value="trips" className="flex-grow mt-2 overflow-y-auto">
                             <ActivityList items={recentTrips} type="trip" />
                         </TabsContent>
                     </Tabs>
