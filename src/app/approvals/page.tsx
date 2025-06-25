@@ -14,6 +14,7 @@ import type { Approval } from "@/types";
 import { Check, Eye, Filter, ListFilter, MoreHorizontal, X } from "lucide-react";
 import { ApprovalRequestDialog } from "@/components/approval-request-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { formatCurrency } from "@/lib/currency";
 
 
 export default function ApprovalsPage() {
@@ -38,11 +39,6 @@ export default function ApprovalsPage() {
                 return 'bg-muted text-muted-foreground border-transparent';
         }
     };
-    
-    const euroFormatter = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-    });
 
     return (
         <div className="flex flex-col h-full">
@@ -111,7 +107,7 @@ export default function ApprovalsPage() {
                                                     {approval.category}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell>{euroFormatter.format(approval.amount)}</TableCell>
+                                            <TableCell>{formatCurrency(approval.amount, approval.currency)}</TableCell>
                                             <TableCell>{approval.frequency}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-4">

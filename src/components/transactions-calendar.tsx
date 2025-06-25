@@ -5,7 +5,7 @@ import { useState, useMemo, createContext, useContext, useEffect } from 'react';
 import { DayPicker, type DayProps, type DateRange } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
-import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths, subDays, isWithinInterval, startOfDay, subWeeks } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths, subDays, isWithinInterval, startOfDay } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { Separator } from './ui/separator';
 import { DayTransactionsDialog } from './day-transactions-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Skeleton } from './ui/skeleton';
+import { convertToEur, formatCurrency } from '@/lib/currency';
 
 interface DayData {
   net: number;
@@ -22,11 +23,6 @@ interface DayData {
   expense: number;
   transactions: Transaction[];
 }
-
-const euroFormatter = new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
-});
 
 const TransactionsCalendarContext = createContext<{
     transactionsByDay: Map<string, DayData>;
@@ -103,7 +99,7 @@ function CustomDay(props: DayProps) {
                                 <div className="text-xs font-bold w-full text-right" >
                                     {dayData.net !== 0 && (
                                         <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                            {dayData.net > 0 ? '+' : ''}{euroFormatter.format(dayData.net)}
+                                            {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'EUR')}
                                         </span>
                                     )}
                                 </div>
@@ -122,16 +118,16 @@ function CustomDay(props: DayProps) {
                                         <span className="truncate">{txn.description}</span>
                                     </div>
                                     <span className={cn("font-semibold", txn.type === 'income' ? "text-primary" : "text-destructive")}>
-                                        {txn.type === 'income' ? '+' : '-'}{euroFormatter.format(txn.amount)}
+                                        {txn.type === 'income' ? '+' : '-'}{formatCurrency(txn.amount, txn.currency)}
                                     </span>
                                 </div>
                             ))}
                         </div>
                         <Separator className="my-2 bg-border/50" />
                         <div className="flex justify-between font-bold text-xs">
-                            <span>Net</span>
+                            <span>Net (EUR)</span>
                             <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                {dayData.net > 0 ? '+' : ''}{euroFormatter.format(dayData.net)}
+                                {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'EUR')}
                             </span>
                         </div>
                     </TooltipContent>
@@ -212,13 +208,13 @@ export function TransactionsCalendar() {
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayData = map.get(dateKey) || { net: 0, income: 0, expense: 0, transactions: [] };
             
-            const amount = t.amount;
+            const amountInEur = convertToEur(t.amount, t.currency);
             if (t.type === 'income') {
-                dayData.income += amount;
-                dayData.net += amount;
+                dayData.income += amountInEur;
+                dayData.net += amountInEur;
             } else {
-                dayData.expense += amount;
-                dayData.net -= amount;
+                dayData.expense += amountInEur;
+                dayData.net -= amountInEur;
             }
             dayData.transactions.push(t);
             map.set(dateKey, dayData);
@@ -282,7 +278,7 @@ export function TransactionsCalendar() {
                             variant="outline"
                             onClick={() => handleQuickNav('last-week')}
                         >
-                            Last week
+                            Last 7 days
                         </Button>
                         <Button
                             variant="outline"

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { Transaction } from "@/types";
 import { format } from "date-fns";
 import Link from 'next/link';
+import { formatCurrency } from "@/lib/currency";
 
 interface DayData {
   net: number;
@@ -21,11 +22,6 @@ interface DayTransactionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const euroFormatter = new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
-});
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -49,7 +45,7 @@ export function DayTransactionsDialog({ day, open, onOpenChange }: DayTransactio
                 <DialogHeader>
                     <DialogTitle>Transactions for {format(day.date, 'PPP')}</DialogTitle>
                     <DialogDescription>
-                        A log of all income and expenses for this day.
+                        A log of all income and expenses for this day. Net total is in EUR.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto -mx-6 px-6">
@@ -89,7 +85,7 @@ export function DayTransactionsDialog({ day, open, onOpenChange }: DayTransactio
                                             txn.type === "income" ? "text-primary" : "text-destructive"
                                         )}
                                     >
-                                        {txn.type === "income" ? "+" : "-"}{euroFormatter.format(txn.amount)}
+                                        {txn.type === "income" ? "+" : "-"}{formatCurrency(txn.amount, txn.currency)}
                                     </TableCell>
                                 </TableRow>
                             );
@@ -109,7 +105,7 @@ export function DayTransactionsDialog({ day, open, onOpenChange }: DayTransactio
                      <span className={cn(
                         day.data.net >= 0 ? "text-primary" : "text-destructive"
                     )}>
-                        {day.data.net >= 0 ? '+' : ''}{euroFormatter.format(day.data.net)}
+                        {day.data.net >= 0 ? '+' : ''}{formatCurrency(day.data.net, 'EUR')}
                     </span>
                 </div>
             </DialogContent>

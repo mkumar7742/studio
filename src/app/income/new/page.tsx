@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 
 export default function NewIncomePage() {
     const { categories } = useAppContext();
@@ -63,14 +64,14 @@ export default function NewIncomePage() {
                             <div className="grid grid-cols-3 gap-4">
                                 <Input id="total" type="number" placeholder="0.00" className="col-span-2 bg-card border-border" />
                                 <div className="col-span-1">
-                                    <Select>
+                                    <Select defaultValue="EUR">
                                         <SelectTrigger className="bg-card border-border">
                                             <SelectValue placeholder="Currency" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="eur">EUR</SelectItem>
-                                            <SelectItem value="usd">USD</SelectItem>
-                                            <SelectItem value="gbp">GBP</SelectItem>
+                                            {SUPPORTED_CURRENCIES.map(c => (
+                                                <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>

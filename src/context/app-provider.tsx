@@ -91,6 +91,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             type: values.type,
             description: values.description,
             amount: values.amount,
+            currency: values.currency,
             category: values.category,
             accountId: values.accountId,
             date: format(values.date, "yyyy-MM-dd"),

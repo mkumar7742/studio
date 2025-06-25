@@ -10,6 +10,7 @@ import type { Transaction } from "@/types";
 import { format } from 'date-fns';
 import { Repeat } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatCurrency } from '@/lib/currency';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -89,7 +90,7 @@ export default function TransactionsPage() {
                                                 : "text-foreground"
                                             }`}
                                         >
-                                            {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                            {txn.type === "income" ? "+" : "-"}{formatCurrency(txn.amount, txn.currency)}
                                         </TableCell>
                                     </TableRow>
                                 );

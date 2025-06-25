@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Filter, MoreHorizontal, Plus, Plane, ListFilter, Eye } from 'lucide-react';
 import type { Trip } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { formatCurrency } from '@/lib/currency';
 
 export default function TripsPage() {
     const { trips } = useAppContext();
@@ -38,11 +39,6 @@ export default function TripsPage() {
 
     const allRowsSelected = trips.length > 0 && selectedRows.size === trips.length;
     const someRowsSelected = selectedRows.size > 0 && selectedRows.size < trips.length;
-
-    const euroFormatter = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-    });
 
     const getStatusClasses = (status: Trip['status']) => {
         switch (status) {
@@ -127,7 +123,7 @@ export default function TripsPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{trip.purpose}</TableCell>
-                                        <TableCell>{euroFormatter.format(trip.amount)}</TableCell>
+                                        <TableCell>{formatCurrency(trip.amount, trip.currency)}</TableCell>
                                         <TableCell>{trip.report.replace('_', ' ')}</TableCell>
                                         <TableCell>
                                             <Badge 

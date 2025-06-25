@@ -24,6 +24,7 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { format, getYear, getMonth, set } from 'date-fns';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { SUPPORTED_CURRENCIES, convertToEur, formatCurrency } from '@/lib/currency';
 
 const currentYear = getYear(new Date());
 
@@ -31,6 +32,7 @@ const budgetFormSchema = z.object({
   name: z.string().min(3, { message: "Budget name must be at least 3 characters." }),
   category: z.string({ required_error: "Please select a category." }),
   allocated: z.coerce.number().positive({ message: "Allocated amount must be positive." }),
+  currency: z.string({ required_error: "Please select a currency." }),
   scope: z.enum(['global', 'member'], { required_error: "Please select a scope." }),
   memberId: z.string().optional(),
   month: z.coerce.number().min(0).max(11),
@@ -68,6 +70,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
             name: budget?.name || "",
             category: budget?.category || "",
             allocated: budget?.allocated || 0,
+            currency: budget?.currency || "EUR",
             scope: budget?.scope || 'global',
             memberId: budget?.memberId || "",
             month: budget ? budget.month : getMonth(new Date()),
@@ -109,7 +112,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Month</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger></FormControl>
                                     <SelectContent>
                                         {monthOptions.map(option => (
@@ -204,17 +207,47 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="allocated"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Allocated Amount</FormLabel>
-                            <FormControl><Input type="number" placeholder="300.00" {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                        <FormField
+                            control={form.control}
+                            name="allocated"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Allocated Amount</FormLabel>
+                                    <FormControl><Input type="number" placeholder="300.00" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                     <div className="col-span-1">
+                        <FormField
+                            control={form.control}
+                            name="currency"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Currency</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a currency" />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                        {SUPPORTED_CURRENCIES.map((c) => (
+                                            <SelectItem key={c.code} value={c.code}>
+                                            {c.code}
+                                            </SelectItem>
+                                        ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
                 <Button type="submit" className='w-full'>{isEditing ? "Save Changes" : "Create Budget"}</Button>
             </form>
         </Form>
@@ -261,6 +294,10 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
     }, [members, budget]);
 
     const spent = useMemo(() => {
+        // For simplicity, we convert all transaction amounts to the budget's currency.
+        // In a real-world scenario, you might use historical exchange rates for the date of each transaction.
+        const budgetCurrency = budget.currency;
+
         let categoryTransactions = transactions.filter((t) => {
             const transactionDate = new Date(t.date);
             return (
@@ -275,11 +312,15 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
             categoryTransactions = categoryTransactions.filter(t => t.member === member.name);
         }
 
-        return categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
+        // Convert all amounts to EUR for a consistent sum
+        return categoryTransactions.reduce((sum, t) => sum + convertToEur(t.amount, t.currency), 0);
     }, [transactions, budget, member]);
+    
+    // Allocated amount is also converted to EUR for comparison
+    const allocatedInEur = useMemo(() => convertToEur(budget.allocated, budget.currency), [budget.allocated, budget.currency]);
 
-    const progress = Math.min((spent / budget.allocated) * 100, 100);
-    const remaining = budget.allocated - spent;
+    const progress = Math.min((spent / allocatedInEur) * 100, 100);
+    const remaining = allocatedInEur - spent;
     const Icon = categoryDetails?.icon;
 
     return (
@@ -327,13 +368,13 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
                     <CardDescription className="mb-2">Global budget for all members</CardDescription>
                 )}
                 <div className="mb-2 flex justify-between items-baseline">
-                    <span className="text-2xl font-bold">${spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-2xl font-bold">{formatCurrency(spent, 'EUR')}</span>
                     <span className="text-sm text-muted-foreground">
-                        of ${budget.allocated.toLocaleString()}
+                        of {formatCurrency(budget.allocated, budget.currency)}
                     </span>
                 </div>
                 <Progress value={progress} color={categoryDetails?.color} className="h-2 mb-2" />
-                <p className="text-xs text-muted-foreground">{remaining >= 0 ? `$${remaining.toLocaleString()} remaining` : `$${Math.abs(remaining).toLocaleString()} over budget`}</p>
+                <p className="text-xs text-muted-foreground">{remaining >= 0 ? `${formatCurrency(remaining, 'EUR')} remaining` : `${formatCurrency(Math.abs(remaining), 'EUR')} over budget`}</p>
             </CardContent>
         </Card>
     );

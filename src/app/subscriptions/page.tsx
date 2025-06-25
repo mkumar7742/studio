@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { formatCurrency } from "@/lib/currency";
 
 export default function SubscriptionsPage() {
     const { subscriptions } = useAppContext();
@@ -45,7 +46,7 @@ export default function SubscriptionsPage() {
                                     </CardHeader>
                                     <CardContent className="space-y-4 pt-4">
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-3xl font-bold">${sub.amount.toFixed(2)}</span>
+                                            <span className="text-3xl font-bold">{formatCurrency(sub.amount, sub.currency)}</span>
                                             <span className="text-sm text-muted-foreground">/ {sub.billingCycle === 'Monthly' ? 'month' : 'year'}</span>
                                         </div>
                                         <CardDescription>

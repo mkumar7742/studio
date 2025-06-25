@@ -171,9 +171,9 @@ export const members: MemberProfile[] = [
 ];
 
 export const accounts: Account[] = [
-  { id: 'acc1', name: 'Checking Account', balance: 4890.72, icon: Wallet },
-  { id: 'acc2', name: 'Savings Account', balance: 12540.15, icon: PiggyBank },
-  { id: 'acc3', name: 'Credit Card', balance: -784.21, icon: CreditCard },
+  { id: 'acc1', name: 'Checking Account', balance: 4890.72, currency: 'EUR', icon: Wallet },
+  { id: 'acc2', name: 'Savings Account', balance: 12540.15, currency: 'EUR', icon: PiggyBank },
+  { id: 'acc3', name: 'Credit Card', balance: -784.21, currency: 'EUR', icon: CreditCard },
 ];
 
 export const categories: Category[] = [
@@ -195,32 +195,32 @@ export const categories: Category[] = [
 ];
 
 export const transactions: Transaction[] = [
-  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 250.00, date: '2022-11-09', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, date: '2022-11-10', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, date: '2022-11-11', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, date: '2022-11-11', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
-  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
-  { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted' },
-  { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
+  { id: 'txn1', type: 'expense', category: 'Food', description: 'Food Catering', amount: 270.00, currency: 'USD', date: '2022-11-09', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Marketing', merchant: 'McFood', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn2', type: 'expense', category: 'Supplies', description: 'Office Supplies', amount: 150.00, currency: 'EUR', date: '2022-11-10', accountId: 'acc3', receiptUrl: null, member: 'John Doe', team: 'Operations', merchant: 'Officio', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn3', type: 'expense', category: 'Food', description: 'Business Lunch', amount: 75.50, currency: 'EUR', date: '2022-11-11', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Marketing', merchant: 'Restaurant', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn4', type: 'expense', category: 'Travel', description: 'Travel Expenses', amount: 450.25, currency: 'EUR', date: '2022-11-11', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Airlines', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn5', type: 'expense', category: 'Food', description: 'Client Dinner', amount: 120.00, currency: 'EUR', date: '2022-11-12', accountId: 'acc1', receiptUrl: null, member: 'John Doe', team: 'Marketing', merchant: 'Bistro', report: 'November_2022', status: 'Not Submitted' },
+  { id: 'txn6', type: 'expense', category: 'Accommodation', description: 'Accommodation', amount: 275.75, currency: 'EUR', date: '2022-11-16', accountId: 'acc1', receiptUrl: null, member: 'Jane Smith', team: 'Operations', merchant: 'Hotel ***', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, currency: 'EUR', date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
+  { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, currency: 'EUR', date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted' },
+  { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, currency: 'EUR', date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted', isRecurring: true, recurrenceFrequency: 'monthly' },
 ];
 
 export const subscriptions: Subscription[] = [
-  { id: 'sub1', name: 'Netflix', icon: Clapperboard, amount: 15.49, billingCycle: 'Monthly', nextPaymentDate: '2024-07-15', category: 'Entertainment' },
-  { id: 'sub2', name: 'Spotify Premium', icon: Music, amount: 10.99, billingCycle: 'Monthly', nextPaymentDate: '2024-07-22', category: 'Entertainment' },
-  { id: 'sub3', name: 'iCloud+', icon: Cloud, amount: 2.99, billingCycle: 'Monthly', nextPaymentDate: '2024-07-28', category: 'Utilities' },
-  { id: 'sub4', name: 'Adobe Creative Cloud', icon: Sparkles, amount: 599.88, billingCycle: 'Yearly', nextPaymentDate: '2025-01-10', category: 'Software' },
+  { id: 'sub1', name: 'Netflix', icon: Clapperboard, amount: 15.49, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-15', category: 'Entertainment' },
+  { id: 'sub2', name: 'Spotify Premium', icon: Music, amount: 10.99, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-22', category: 'Entertainment' },
+  { id: 'sub3', name: 'iCloud+', icon: Cloud, amount: 2.99, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-28', category: 'Utilities' },
+  { id: 'sub4', name: 'Adobe Creative Cloud', icon: Sparkles, amount: 599.88, currency: 'EUR', billingCycle: 'Yearly', nextPaymentDate: '2025-01-10', category: 'Software' },
 ];
 
 const currentMonth = getMonth(new Date());
 const currentYear = getYear(new Date());
 
 export const budgets: Budget[] = [
-    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, scope: 'member', memberId: 'mem3', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, scope: 'member', memberId: 'mem2', month: currentMonth, year: currentYear, status: 'archived' },
+    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, currency: 'EUR', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, currency: 'EUR', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, currency: 'EUR', scope: 'member', memberId: 'mem3', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, currency: 'EUR', scope: 'member', memberId: 'mem2', month: currentMonth, year: currentYear, status: 'archived' },
 ];
 
 export const pendingTasks: PendingTask[] = [
@@ -232,21 +232,21 @@ export const pendingTasks: PendingTask[] = [
 ];
 
 export const trips: Trip[] = [
-    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, report: 'November_2022', status: 'Approved' },
-    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, report: 'November_2022', status: 'Pending' },
-    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, report: 'November_2022', status: 'Approved' },
-    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, report: 'November_2022', status: 'Approved' },
-    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, report: 'November_2022', status: 'Not Approved' },
+    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
+    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending' },
+    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
+    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
+    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved' },
 ];
 
 export const approvals: Approval[] = [
-  { id: 'appr1', owner: { name: 'Samson Zap', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 780.00, frequency: 'Once', project: 'Client Design', description: "Travel to client's HQ for pitch presentation.", team: 'Websites', status: 'Pending' },
-  { id: 'appr2', owner: { name: 'Jessica Bowers', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 430.00, frequency: 'Once', project: 'Internal Workshop', description: 'Travel for company-wide design workshop.', team: 'Design', status: 'Pending' },
-  { id: 'appr3', owner: { name: 'John Wilson', title: 'Account Executive', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Food', amount: 95.50, frequency: 'Monthly', project: 'Client Lunch', description: 'Monthly recurring client lunch.', team: 'Sales', status: 'Pending' },
-  { id: 'appr4', owner: { name: 'Hannah Gomez', title: 'Product Manager', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 560.00, frequency: 'Monthly', project: 'User Research', description: 'Travel for on-site user research.', team: 'Product', status: 'Pending' },
-  { id: 'appr5', owner: { name: 'Laura Polis', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 120.00, frequency: 'Bi-Monthly', project: 'Design Tools', description: 'Subscription for new design software.', team: 'Design', status: 'Pending' },
-  { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, frequency: 'Bi-Monthly', project: 'Analytics Platform', description: 'Subscription for marketing analytics tool.', team: 'Marketing', status: 'Pending' },
-  { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, frequency: 'Monthly', project: 'Team Offsite', description: 'Monthly travel budget for team events.', team: 'Engineering', status: 'Pending' },
+  { id: 'appr1', owner: { name: 'Samson Zap', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 780.00, currency: 'EUR', frequency: 'Once', project: 'Client Design', description: "Travel to client's HQ for pitch presentation.", team: 'Websites', status: 'Pending' },
+  { id: 'appr2', owner: { name: 'Jessica Bowers', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 430.00, currency: 'EUR', frequency: 'Once', project: 'Internal Workshop', description: 'Travel for company-wide design workshop.', team: 'Design', status: 'Pending' },
+  { id: 'appr3', owner: { name: 'John Wilson', title: 'Account Executive', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Food', amount: 95.50, currency: 'EUR', frequency: 'Monthly', project: 'Client Lunch', description: 'Monthly recurring client lunch.', team: 'Sales', status: 'Pending' },
+  { id: 'appr4', owner: { name: 'Hannah Gomez', title: 'Product Manager', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Travel', amount: 560.00, currency: 'USD', frequency: 'Monthly', project: 'User Research', description: 'Travel for on-site user research.', team: 'Product', status: 'Pending' },
+  { id: 'appr5', owner: { name: 'Laura Polis', title: 'Designer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 120.00, currency: 'EUR', frequency: 'Bi-Monthly', project: 'Design Tools', description: 'Subscription for new design software.', team: 'Design', status: 'Pending' },
+  { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, currency: 'EUR', frequency: 'Bi-Monthly', project: 'Analytics Platform', description: 'Subscription for marketing analytics tool.', team: 'Marketing', status: 'Pending' },
+  { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, currency: 'EUR', frequency: 'Monthly', project: 'Team Offsite', description: 'Monthly travel budget for team events.', team: 'Engineering', status: 'Pending' },
 ];
 
 export const teamSpendingData = [

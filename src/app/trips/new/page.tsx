@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { X, PenSquare, Tag, BookText, Plane, CalendarDays, CircleDollarSign, BedDouble, PlaneTakeoff, PlaneLanding, CalendarPlus, CalendarMinus } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency";
 
 export default function NewTripPage() {
     return (
@@ -111,7 +113,21 @@ export default function NewTripPage() {
                             </div>
                             <span>Trip Budget*</span>
                         </Label>
-                        <Input id="budget-limit" type="number" className="bg-card border-border" />
+                         <div className="grid grid-cols-3 gap-4">
+                            <Input id="budget-limit" type="number" className="col-span-2 bg-card border-border" />
+                             <div className="col-span-1">
+                                <Select defaultValue="EUR">
+                                    <SelectTrigger className="bg-card border-border">
+                                        <SelectValue placeholder="Currency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {SUPPORTED_CURRENCIES.map(c => (
+                                            <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

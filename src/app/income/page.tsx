@@ -15,6 +15,7 @@ import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/currency';
 
 export default function IncomePage() {
     const { transactions: allTransactions, categories, members } = useAppContext();
@@ -47,11 +48,6 @@ export default function IncomePage() {
         return categories.find(c => c.name === categoryName);
     }
     
-    const euroFormatter = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-    });
-
     return (
         <div className="flex flex-col h-full">
             <header className="flex items-center justify-between p-4 sm:p-6">
@@ -151,7 +147,7 @@ export default function IncomePage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>{txn.merchant}</TableCell>
-                                            <TableCell className="text-primary">{euroFormatter.format(txn.amount)}</TableCell>
+                                            <TableCell className="text-primary">{formatCurrency(txn.amount, txn.currency)}</TableCell>
                                             <TableCell>
                                                 <Badge 
                                                     variant="outline"

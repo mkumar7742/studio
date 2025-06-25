@@ -7,6 +7,7 @@ export interface Transaction {
   category: string;
   description: string;
   amount: number;
+  currency: string;
   date: string; // yyyy-MM-dd
   accountId: string;
   receiptUrl: string | null;
@@ -23,6 +24,7 @@ export interface Account {
   id:string;
   name: string;
   balance: number;
+  currency: string;
   icon: LucideIcon;
 }
 
@@ -38,6 +40,7 @@ export interface Budget {
     name: string;
     category: string;
     allocated: number;
+    currency: string;
     scope: 'global' | 'member';
     memberId?: string;
     month: number; // 0-11
@@ -58,6 +61,7 @@ export interface Trip {
   location: string;
   purpose: string;
   amount: number;
+  currency: string;
   report: string;
   status: 'Approved' | 'Pending' | 'Not Approved';
 }
@@ -67,6 +71,7 @@ export interface Subscription {
   name: string;
   icon: LucideIcon;
   amount: number;
+  currency: string;
   billingCycle: 'Monthly' | 'Yearly';
   nextPaymentDate: string; // yyyy-MM-dd
   category: string;
@@ -131,6 +136,7 @@ export interface Approval {
   };
   category: 'Travel' | 'Food' | 'Software';
   amount: number;
+  currency: string;
   frequency: 'Once' | 'Monthly' | 'Bi-Monthly';
   project: string;
   description: string;

@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { cn } from "@/lib/utils";
 import { Plane, BedDouble, Car, MoreHorizontal, X, Check, ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/currency";
 
 const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType, title: string }) => (
     <div className="flex items-center gap-4 p-3 bg-muted rounded-lg">
@@ -30,13 +31,10 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
     const trip = {
         location: 'Brussels',
         date: '11/11/2022',
-        status: 'Pending'
+        status: 'Pending',
+        budget: 1500,
+        currency: 'EUR'
     };
-
-    const euroFormatter = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-    });
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -157,7 +155,7 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                                 <InfoRow label="Travel Policy:" value="Basic/Company" />
                                 <InfoRow label="Travel documents:" value="Provided" />
                                 <InfoRow label="Purpose:" value="Client Visit" />
-                                <InfoRow label="Trip Budget:" value={euroFormatter.format(1500)} />
+                                <InfoRow label="Trip Budget:" value={formatCurrency(trip.budget, trip.currency)} />
                             </CardContent>
                         </Card>
                     </div>

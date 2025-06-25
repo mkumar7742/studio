@@ -11,11 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Trip } from '@/types';
-
-const euroFormatter = new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
-});
+import { formatCurrency } from '@/lib/currency';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3">
@@ -40,12 +36,12 @@ const ActivityContent = ({ title, description, link }: { title: string, descript
     </div>
 );
 
-const ActivityAmount = ({ amount, type }: { amount: number, type: 'income' | 'expense' }) => (
+const ActivityAmount = ({ amount, currency, type }: { amount: number, currency: string, type: 'income' | 'expense' }) => (
      <div className={cn(
         "ml-auto text-sm font-bold",
         type === 'income' ? 'text-primary' : 'text-destructive'
     )}>
-        {type === 'income' ? '+' : '-'}{euroFormatter.format(amount)}
+        {type === 'income' ? '+' : '-'}{formatCurrency(amount, currency)}
     </div>
 );
 
@@ -108,7 +104,7 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                                     <ActivityItem key={txn.id}>
                                         <ActivityIcon icon={ArrowDownLeft} color="bg-destructive" />
                                         <ActivityContent title={txn.description} description={txn.member} />
-                                        <ActivityAmount amount={txn.amount} type="expense" />
+                                        <ActivityAmount amount={txn.amount} currency={txn.currency} type="expense" />
                                     </ActivityItem>
                                 )) : <p className="text-center text-sm text-muted-foreground py-10">No recent expenses.</p>}
                             </TabsContent>
@@ -117,7 +113,7 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                                     <ActivityItem key={txn.id}>
                                         <ActivityIcon icon={ArrowUpRight} color="bg-primary" />
                                         <ActivityContent title={txn.description} description={txn.member} />
-                                        <ActivityAmount amount={txn.amount} type="income" />
+                                        <ActivityAmount amount={txn.amount} currency={txn.currency} type="income" />
                                     </ActivityItem>
                                 )) : <p className="text-center text-sm text-muted-foreground py-10">No recent income.</p>}
                             </TabsContent>

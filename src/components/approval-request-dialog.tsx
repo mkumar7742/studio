@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Approval } from "@/types";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 interface ApprovalRequestDialogProps {
   approval: Approval | null;
@@ -41,11 +42,6 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
     if (!approval) {
         return null;
     }
-    
-    const euroFormatter = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-    });
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,7 +57,7 @@ export function ApprovalRequestDialog({ approval, open, onOpenChange }: Approval
 
                 <div className="space-y-4 my-6">
                     <DetailRow label="Amount">
-                        <span className="font-bold">{euroFormatter.format(approval.amount)}</span>
+                        <span className="font-bold">{formatCurrency(approval.amount, approval.currency)}</span>
                     </DetailRow>
                     <DetailRow label="Category">
                         <div className="flex items-center gap-2">

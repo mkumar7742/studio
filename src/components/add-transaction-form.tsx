@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ import { format } from "date-fns";
 import { useAppContext } from "@/context/app-provider";
 import Image from "next/image";
 import { Switch } from "./ui/switch";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency";
 
 const formSchema = z.object({
   type: z.enum(["income", "expense"], {
@@ -41,6 +43,7 @@ const formSchema = z.object({
   amount: z.coerce.number().positive({
       message: "Amount must be a positive number.",
   }),
+  currency: z.string({ required_error: "Please select a currency." }),
   date: z.date({
     required_error: "A date is required.",
   }),
@@ -83,6 +86,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
       date: new Date(),
       member: "",
       isRecurring: false,
+      currency: "EUR",
     },
   });
 
@@ -93,7 +97,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
     addTransaction({
         ...values,
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, currency: 'EUR', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -145,19 +149,49 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+                <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Amount</FormLabel>
+                            <FormControl>
+                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+            </div>
+            <div className="col-span-1">
+                <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Currency</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a currency" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {SUPPORTED_CURRENCIES.map((c) => (
+                                    <SelectItem key={c.code} value={c.code}>
+                                    {c.code}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+        </div>
         <FormField
           control={form.control}
           name="date"
