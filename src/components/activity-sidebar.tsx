@@ -12,7 +12,6 @@ import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Trip } from '@/types';
 import { formatCurrency } from '@/lib/currency';
-import { AIFinancialInsights } from './ai-financial-insights';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3">
@@ -78,7 +77,6 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
         
     return (
         <aside className="sticky top-6 flex flex-col gap-6">
-            <AIFinancialInsights />
             {showCalendar && (
                 <Card>
                     <CardContent className="p-0">
