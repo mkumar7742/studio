@@ -5,14 +5,14 @@ import { useState, useMemo, createContext, useContext } from 'react';
 import { DayPicker, type DayProps } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
-import { format, isSameDay, parseISO } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import type { LucideIcon } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { DayTransactionsDialog } from './day-transactions-dialog';
 
 interface DayData {
   net: number;
@@ -27,7 +27,8 @@ const euroFormatter = new Intl.NumberFormat('de-DE', {
 });
 
 const TransactionsCalendarContext = createContext<{
-    transactionsByDay: Map<string, DayData>
+    transactionsByDay: Map<string, DayData>;
+    handleDayClick: (date: Date, data: DayData | undefined) => void;
 } | null>(null);
 
 function useTransactionsCalendarContext() {
@@ -42,13 +43,14 @@ const CategoryIcon = ({ categoryName, className }: { categoryName: string, class
     const { categories } = useAppContext();
     const category = categories.find((c) => c.name === categoryName);
     const Icon = category?.icon;
-    return Icon ? <Icon className={cn("size-3", className)} /> : null;
+    return Icon ? <Icon className={cn("size-3 shrink-0", className)} /> : null;
 };
 
 function CustomDay(props: DayProps) {
-    const { transactionsByDay } = useTransactionsCalendarContext();
+    const { transactionsByDay, handleDayClick } = useTransactionsCalendarContext();
     const dayKey = format(props.date, 'yyyy-MM-dd');
     const dayData = transactionsByDay.get(dayKey);
+    const hasTransactions = dayData && dayData.transactions.length > 0;
 
     if (props.displayMonth.getMonth() !== props.date.getMonth()) {
         return <div className="h-full w-full" />;
@@ -58,10 +60,11 @@ function CustomDay(props: DayProps) {
         <TooltipProvider delayDuration={100}>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div
+                     <div
+                        onClick={() => handleDayClick(props.date, dayData)}
                         className={cn(
-                            "relative flex h-full w-full flex-col p-1.5 text-sm",
-                            "hover:bg-accent focus:bg-accent focus:outline-none"
+                            "relative flex h-full w-full flex-col p-1.5 text-sm focus:z-10",
+                            hasTransactions ? "cursor-pointer hover:bg-accent focus:bg-accent focus:outline-none" : "cursor-default"
                         )}
                     >
                         <time dateTime={props.date.toISOString()} className={cn("ml-auto text-xs", isSameDay(props.date, new Date()) && "bg-primary text-primary-foreground rounded-full size-5 flex items-center justify-center")}>
@@ -71,8 +74,10 @@ function CustomDay(props: DayProps) {
                             <div className="flex-grow flex flex-col justify-between items-start mt-1 overflow-hidden">
                                 <div className="space-y-1 w-full">
                                     {dayData.transactions.slice(0, 2).map(txn => (
-                                        <div key={txn.id} className={cn("flex items-center gap-1 text-xs font-medium w-full truncate p-0.5 rounded-sm", txn.type === 'income' ? 'text-primary' : 'text-destructive')}>
-                                            <CategoryIcon categoryName={txn.category} className={cn("shrink-0", txn.type === 'income' ? 'text-primary' : 'text-destructive')} />
+                                        <div key={txn.id} className={cn("flex items-center gap-1.5 text-xs font-medium w-full truncate p-1 rounded-sm", 
+                                            txn.type === 'income' ? 'bg-primary/20 text-primary' : 'bg-destructive/20 text-destructive'
+                                        )}>
+                                            <CategoryIcon categoryName={txn.category} />
                                             <span className="truncate flex-1">{txn.description}</span>
                                         </div>
                                     ))}
@@ -83,7 +88,7 @@ function CustomDay(props: DayProps) {
                                 <div className="text-xs font-bold w-full text-right" >
                                     {dayData.net !== 0 && (
                                         <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                            {euroFormatter.format(dayData.net)}
+                                            {dayData.net > 0 ? '+' : ''}{euroFormatter.format(dayData.net)}
                                         </span>
                                     )}
                                 </div>
@@ -91,7 +96,7 @@ function CustomDay(props: DayProps) {
                         )}
                     </div>
                 </TooltipTrigger>
-                {dayData && dayData.transactions.length > 0 && (
+                {hasTransactions && (
                      <TooltipContent className="w-64 p-2 bg-card border-border text-card-foreground">
                         <div className="font-bold mb-2 text-center">{format(props.date, 'PPP')}</div>
                         <div className="space-y-2">
@@ -111,7 +116,7 @@ function CustomDay(props: DayProps) {
                         <div className="flex justify-between font-bold text-xs">
                             <span>Net</span>
                             <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                {euroFormatter.format(dayData.net)}
+                                {dayData.net > 0 ? '+' : ''}{euroFormatter.format(dayData.net)}
                             </span>
                         </div>
                     </TooltipContent>
@@ -123,7 +128,14 @@ function CustomDay(props: DayProps) {
 
 export function TransactionsCalendar() {
     const { transactions } = useAppContext();
-    const [month, setMonth] = useState(new Date());
+    const [month, setMonth] = useState(startOfMonth(new Date()));
+    const [selectedDay, setSelectedDay] = useState<{ date: Date; data: DayData } | null>(null);
+
+    const handleDayClick = (date: Date, data: DayData | undefined) => {
+        if (data && data.transactions.length > 0) {
+            setSelectedDay({ date, data });
+        }
+    };
 
     const transactionsByDay = useMemo(() => {
         const map = new Map<string, DayData>();
@@ -144,7 +156,6 @@ export function TransactionsCalendar() {
             map.set(dateKey, dayData);
         });
 
-        // Sort transactions within each day to show largest amounts first
         map.forEach(dayData => {
             dayData.transactions.sort((a, b) => b.amount - a.amount);
         });
@@ -152,7 +163,7 @@ export function TransactionsCalendar() {
         return map;
     }, [transactions]);
     
-    const contextValue = { transactionsByDay };
+    const contextValue = { transactionsByDay, handleDayClick };
 
     return (
         <TransactionsCalendarContext.Provider value={contextValue}>
@@ -179,9 +190,12 @@ export function TransactionsCalendar() {
                             IconLeft: () => <ChevronLeft className="h-4 w-4" />,
                             IconRight: () => <ChevronRight className="h-4 w-4" />,
                         }}
+                        captionLayout="dropdown-buttons"
+                        fromYear={2020}
+                        toYear={2030}
                         classNames={{
                             root: 'p-3',
-                            caption: "flex justify-center items-center relative mb-4",
+                            caption: "flex justify-between items-center relative mb-4",
                             caption_label: "text-xl font-bold",
                             nav: "space-x-1",
                             nav_button: cn(
@@ -191,10 +205,28 @@ export function TransactionsCalendar() {
                             head: 'text-center text-sm text-muted-foreground font-normal',
                             head_cell: 'pb-2 font-semibold',
                             day: 'p-0',
+                            caption_end: 'flex items-center gap-2'
                         }}
+                        renderNav={(nav) => (
+                           <div className="flex items-center justify-between w-full">
+                                <div className='flex items-center gap-2'>
+                                    <h2 className="text-xl font-bold">{format(month, 'MMMM yyyy')}</h2>
+                                    <div className='flex items-center gap-1'>
+                                        {nav.previous}
+                                        {nav.next}
+                                    </div>
+                                </div>
+                                <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>Today</Button>
+                           </div>
+                        )}
                     />
                 </CardContent>
             </Card>
+            <DayTransactionsDialog
+                day={selectedDay}
+                open={!!selectedDay}
+                onOpenChange={(isOpen) => !isOpen && setSelectedDay(null)}
+            />
         </TransactionsCalendarContext.Provider>
     );
 }
