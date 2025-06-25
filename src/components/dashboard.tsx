@@ -50,13 +50,13 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <BudgetsOverview />
-            <Card className="bg-card">
+            <BudgetsOverview className="h-full" />
+            <Card className="bg-card flex flex-col h-full">
               <CardHeader>
                 <CardTitle>Pending Tasks</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CardContent className="flex-grow">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
                   {pendingTasks.map((task: PendingTask) => {
                     const link = taskLinks[task.label] || '#';
                     return (
@@ -76,35 +76,35 @@ export function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-card">
+            <Card className="bg-card flex flex-col h-full">
                 <CardHeader>
                     <CardTitle>Quick Access</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CardContent className="flex-grow">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
                     <Link href="/expenses/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
                         <CreditCard className="size-8 text-red-500 mb-2" />
                         <h3 className="font-semibold">New Expense</h3>
                         <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
                         </div>
                     </Link>
                     <Link href="/income/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
                         <TrendingUp className="size-8 text-green-500 mb-2" />
                         <h3 className="font-semibold">New Income</h3>
                         <p className="text-sm text-muted-foreground">Record a new source of income.</p>
                         </div>
                     </Link>
                     <Link href="/trips/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
                         <Plane className="size-8 text-blue-500 mb-2" />
                         <h3 className="font-semibold">New Trip</h3>
                         <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
                         </div>
                     </Link>
                     <Link href="/approvals/new" className="block group">
-                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
                         <ClipboardCheck className="size-8 text-pink-500 mb-2" />
                         <h3 className="font-semibold">New Approval</h3>
                         <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>

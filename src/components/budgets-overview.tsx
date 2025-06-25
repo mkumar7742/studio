@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -9,8 +10,9 @@ import { getMonth, getYear } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function BudgetsOverview() {
+export function BudgetsOverview({ className }: { className?: string }) {
     const { budgets, transactions, categories, members } = useAppContext();
 
     const currentMonthBudgets = useMemo(() => {
@@ -58,7 +60,7 @@ export function BudgetsOverview() {
 
 
     return (
-        <Card className="bg-card flex flex-col">
+        <Card className={cn("bg-card flex flex-col", className)}>
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
