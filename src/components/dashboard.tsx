@@ -24,6 +24,7 @@ import { useAppContext } from '@/context/app-provider';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
+import { DashboardSummary } from './dashboard-summary';
 
 const teamColors: { [key: string]: string } = {
   Marketing: "bg-fuchsia-600 text-white",
@@ -74,6 +75,7 @@ export function Dashboard() {
 
   return (
     <main className="flex-1 overflow-y-auto flex flex-col gap-6 p-4 md:p-6">
+      <DashboardSummary />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1 flex flex-col gap-6">
           <Card className="bg-card">
