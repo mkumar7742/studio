@@ -42,6 +42,7 @@ interface AppContextType {
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
     addTransaction: (values: FullTransaction) => void;
+    deleteTransactions: (transactionIds: string[]) => void;
     addBudget: (values: Omit<Budget, 'id' | 'status'>) => void;
     editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => void;
     deleteBudget: (budgetId: string) => void;
@@ -149,6 +150,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             receiptUrl: null,
         };
         setAllTransactions(prev => [newTransaction, ...prev]);
+    };
+
+    const deleteTransactions = (transactionIds: string[]) => {
+        setAllTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
     };
 
     const addBudget = (values: Omit<Budget, 'id' | 'status'>) => {
@@ -290,6 +295,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         currentUser,
         currentUserPermissions,
         addTransaction,
+        deleteTransactions,
         addBudget,
         editBudget,
         deleteBudget,

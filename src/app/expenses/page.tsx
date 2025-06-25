@@ -16,10 +16,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/currency';
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ExpensesPage() {
-    const { transactions: allTransactions, categories, members } = useAppContext();
+    const { transactions: allTransactions, categories, members, deleteTransactions } = useAppContext();
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+    const [rowsToDelete, setRowsToDelete] = useState<Set<string>>(new Set());
+    const { toast } = useToast();
 
     const transactions = allTransactions.filter(t => t.type === 'expense');
 
@@ -47,6 +51,16 @@ export default function ExpensesPage() {
     const getCategory = (categoryName: string): Category | undefined => {
         return categories.find(c => c.name === categoryName);
     }
+
+    const handleConfirmDelete = () => {
+        deleteTransactions(Array.from(rowsToDelete));
+        toast({
+            title: `${rowsToDelete.size} expense(s) deleted`,
+            description: "The selected expenses have been permanently removed.",
+        });
+        setRowsToDelete(new Set());
+        setSelectedRows(new Set());
+    };
 
     const handleExport = () => {
         const headers = ["Date", "Description", "Member", "Merchant", "Category", "Amount", "Currency", "Status", "Report"];
@@ -100,8 +114,13 @@ export default function ExpensesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onSelect={handleExport}>Export as CSV</DropdownMenuItem>
-                            <DropdownMenuItem>Archive Selected</DropdownMenuItem>
-                            <DropdownMenuItem>Delete Selected</DropdownMenuItem>
+                            <DropdownMenuItem
+                                onSelect={() => { if (selectedRows.size > 0) setRowsToDelete(selectedRows); }}
+                                disabled={selectedRows.size === 0}
+                                className="text-destructive focus:text-destructive"
+                            >
+                                Delete Selected
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -201,6 +220,13 @@ export default function ExpensesPage() {
                     </CardContent>
                 </Card>
             </main>
+             <DeleteConfirmationDialog
+                open={rowsToDelete.size > 0}
+                onOpenChange={(isOpen) => !isOpen && setRowsToDelete(new Set())}
+                onConfirm={handleConfirmDelete}
+                title={`Delete ${rowsToDelete.size} Expense(s)`}
+                description="Are you sure you want to delete the selected expenses? This action cannot be undone."
+            />
         </div>
     )
 }

@@ -10,16 +10,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
 import { cn } from '@/lib/utils';
-import { Filter, MoreHorizontal, Plus, Repeat, TrendingUp } from 'lucide-react';
+import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/currency';
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function IncomePage() {
-    const { transactions: allTransactions, categories, members } = useAppContext();
+    const { transactions: allTransactions, categories, members, deleteTransactions } = useAppContext();
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+    const [rowsToDelete, setRowsToDelete] = useState<Set<string>>(new Set());
+    const { toast } = useToast();
 
     const transactions = allTransactions.filter(t => t.type === 'income');
 
@@ -48,6 +52,16 @@ export default function IncomePage() {
         return categories.find(c => c.name === categoryName);
     }
     
+    const handleConfirmDelete = () => {
+        deleteTransactions(Array.from(rowsToDelete));
+        toast({
+            title: `${rowsToDelete.size} income record(s) deleted`,
+            description: "The selected income records have been permanently removed.",
+        });
+        setRowsToDelete(new Set());
+        setSelectedRows(new Set());
+    };
+
     const handleExport = () => {
         const headers = ["Date", "Description", "Member", "Source", "Category", "Amount", "Currency"];
         const csvRows = [
@@ -98,8 +112,13 @@ export default function IncomePage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onSelect={handleExport}>Export as CSV</DropdownMenuItem>
-                            <DropdownMenuItem>Archive Selected</DropdownMenuItem>
-                            <DropdownMenuItem>Delete Selected</DropdownMenuItem>
+                            <DropdownMenuItem
+                                onSelect={() => { if (selectedRows.size > 0) setRowsToDelete(selectedRows); }}
+                                disabled={selectedRows.size === 0}
+                                className="text-destructive focus:text-destructive"
+                            >
+                                Delete Selected
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -193,6 +212,13 @@ export default function IncomePage() {
                     </CardContent>
                 </Card>
             </main>
+            <DeleteConfirmationDialog
+                open={rowsToDelete.size > 0}
+                onOpenChange={(isOpen) => !isOpen && setRowsToDelete(new Set())}
+                onConfirm={handleConfirmDelete}
+                title={`Delete ${rowsToDelete.size} Income Record(s)`}
+                description="Are you sure you want to delete the selected income records? This action cannot be undone."
+            />
         </div>
     )
 }
