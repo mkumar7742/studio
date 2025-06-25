@@ -8,6 +8,9 @@ import type { Category } from '@/types';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
+import { Button } from './ui/button';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 const getCategoryDetails = (categories: Category[], categoryName: string) => {
     return categories.find(c => c.name === categoryName);
@@ -48,10 +51,16 @@ export function CategorySpending({ className }: { className?: string }) {
 
     return (
         <Card className={cn("bg-card flex flex-col", className)}>
-            <CardHeader>
-                <CardTitle>Spending by Category (USD)</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+                <CardTitle className="text-base font-semibold">Spending by Category</CardTitle>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/categories">
+                        View All
+                        <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                </Button>
             </CardHeader>
-            <CardContent className='flex-grow space-y-4'>
+            <CardContent className='flex-grow space-y-4 p-4'>
                 {spendingData.length > 0 ? (
                     spendingData.map((item) => {
                         const Icon = item.details?.icon;

@@ -61,20 +61,16 @@ export function BudgetsOverview({ className }: { className?: string }) {
 
     return (
         <Card className={cn("bg-card flex flex-col", className)}>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle>Budgets Overview</CardTitle>
-                        <CardDescription>Your spending vs. budgets for this month (in USD).</CardDescription>
-                    </div>
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/budgets">
-                            View All <ArrowRight className="mr-2 size-4" />
-                        </Link>
-                    </Button>
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+                <CardTitle className="text-base font-semibold">Budgets Overview</CardTitle>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/budgets">
+                        View All
+                        <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                </Button>
             </CardHeader>
-            <CardContent className='flex-grow space-y-4'>
+            <CardContent className='flex-grow space-y-4 p-4'>
                 {budgetProgress.length > 0 ? (
                     budgetProgress.slice(0, 4).map(budget => (
                         <div key={budget.id}>

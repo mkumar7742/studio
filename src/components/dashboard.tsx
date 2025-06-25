@@ -8,7 +8,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription
 } from "@/components/ui/card";
 import { SpendingCharts } from "@/components/spending-charts";
 import type { PendingTask, Transaction } from "@/types";
@@ -42,11 +41,16 @@ const SummaryCard = () => {
 
     return (
         <Card className="h-full flex flex-col">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                <CardDescription>Account balances overview (in USD)</CardDescription>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/accounts">
+                        View All
+                        <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                </Button>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-end space-y-3 text-sm">
+            <CardContent className="flex-grow flex flex-col justify-center p-4 space-y-3 text-sm">
                 <div>
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Balance:</span>
@@ -92,11 +96,16 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 
     return (
         <Card className="flex flex-col h-full">
-             <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">{title}</CardTitle>
-                <CardDescription>Income vs. Expenses (in USD)</CardDescription>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/transactions">
+                        View All
+                        <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                </Button>
             </CardHeader>
-            <CardContent className="flex-grow flex items-center gap-4">
+            <CardContent className="flex-grow flex items-center gap-4 p-4">
                  <div className="w-24 h-24">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -205,18 +214,19 @@ export function Dashboard() {
                     </Link>
                 </Button>
             </CardHeader>
-            <CardContent className="p-0 flex-grow">
+            <CardContent className="flex-grow p-0 flex items-center justify-center">
                 <Calendar
                     month={calendarDate}
-                    className="p-3 w-full"
+                    className="w-full"
                     classNames={{
-                        months: "flex flex-col sm:flex-row space-y-1",
+                        months: "flex flex-col sm:flex-row space-y-1 w-full",
                         month: "space-y-2 w-full",
-                        head_row: "flex",
+                        caption: "hidden",
+                        head_row: "flex w-full",
                         head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center",
                         row: "flex w-full mt-1",
-                        cell: "w-[14.28%] text-center text-sm p-0",
-                        day: "h-auto w-full p-1 font-normal aria-selected:opacity-100",
+                        cell: "w-[14.28%] text-center text-sm p-0 aspect-square",
+                        day: "h-full w-full p-1 font-normal aria-selected:opacity-100",
                         day_today: "bg-primary text-primary-foreground rounded-full",
                         day_outside: "text-muted-foreground opacity-50",
                         day_selected: "bg-accent text-accent-foreground rounded-md",
@@ -231,10 +241,16 @@ export function Dashboard() {
 
       <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
         <Card className="bg-card lg:col-span-2 h-full flex flex-col">
-          <CardHeader>
-            <CardTitle>Monthly Report</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-grow">
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+                <CardTitle className="text-base font-semibold">Monthly Report</CardTitle>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/transactions">
+                        View All
+                        <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                </Button>
+            </CardHeader>
+          <CardContent className="flex-grow p-4">
             <SpendingCharts transactions={expenseTransactions} />
           </CardContent>
         </Card>
@@ -249,10 +265,10 @@ export function Dashboard() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <BudgetsOverview className="h-full" />
           <Card className="bg-card flex flex-col h-full">
-            <CardHeader>
-              <CardTitle>Pending Tasks</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+              <CardTitle className="text-base font-semibold">Pending Tasks</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent className="flex-grow p-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 h-full">
                 {pendingTasks.map((task: PendingTask) => {
                   const link = taskLinks[task.label] || '#';
@@ -274,10 +290,10 @@ export function Dashboard() {
             </CardContent>
           </Card>
           <Card className="bg-card flex flex-col h-full">
-              <CardHeader>
-                  <CardTitle>Quick Access</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+                  <CardTitle className="text-base font-semibold">Quick Access</CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow">
+              <CardContent className="flex-grow p-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 h-full">
                   <Link href="/expenses/new" className="block group">
                       <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">

@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
+import { ArrowDownLeft, ArrowRight, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Transaction, Trip } from '@/types';
 import { formatCurrency } from '@/lib/currency';
+import { Button } from './ui/button';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3 pr-4">
@@ -120,10 +121,16 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                 </Card>
             )}
             <Card className={cn(!showCalendar && "h-full flex flex-col")}>
-                <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
+                    <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/transactions">
+                            View All
+                            <ArrowRight className="ml-2 size-4" />
+                        </Link>
+                    </Button>
                 </CardHeader>
-                <CardContent className={cn("p-4 pt-0 flex-grow min-h-0", !showCalendar && "flex flex-col")}>
+                <CardContent className={cn("p-4 flex-grow min-h-0", !showCalendar && "flex flex-col")}>
                     <Tabs defaultValue="expenses" className="w-full flex flex-col h-full">
                         <TabsList className="grid w-full grid-cols-3 shrink-0">
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
