@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, createContext, useContext, useEffect } from 'react';
@@ -142,9 +143,10 @@ export function TransactionsCalendar() {
     }, []);
 
     const years = useMemo(() => {
-        const currentYear = getYear(new Date());
+        if (!today) return [];
+        const currentYear = getYear(today);
         return Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
-    }, []);
+    }, [today]);
 
     const months = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
         value: i,
@@ -162,13 +164,14 @@ export function TransactionsCalendar() {
     };
 
     const handleQuickNav = (period: 'yesterday' | 'last-week' | 'today') => {
-        const now = new Date();
+        if (!today) return;
+        
         if (period === 'today') {
-            setMonth(startOfMonth(now));
+            setMonth(startOfMonth(today));
         } else if (period === 'yesterday') {
-            setMonth(startOfMonth(subDays(now, 1)));
+            setMonth(startOfMonth(subDays(today, 1)));
         } else if (period === 'last-week') {
-            setMonth(startOfMonth(subWeeks(now, 1)));
+            setMonth(startOfMonth(subWeeks(today, 1)));
         }
     };
 
