@@ -58,25 +58,6 @@ export function Dashboard() {
       {/* Main Content */}
       <div className="flex flex-col gap-6 lg:col-span-3">
         <DashboardSummary />
-        <div className="grid gap-6 md:grid-cols-2">
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle>Pending Tasks</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                {pendingTasks.map((task: PendingTask) => (
-                  <div key={task.label} className="flex items-center">
-                    <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label] || 'bg-gray-500')}>
-                        <task.icon className="size-4" />
-                    </div>
-                    <span className="flex-grow text-sm">{task.label}</span>
-                    <span className="text-sm font-semibold">{task.value}</span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-            <CategorySpending />
-        </div>
         
         <Card className="bg-card">
           <CardHeader>
@@ -84,6 +65,23 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <SpendingCharts transactions={transactions} />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle>Pending Tasks</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-4'>
+            {pendingTasks.map((task: PendingTask) => (
+              <div key={task.label} className="flex items-center">
+                <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md text-white", taskColorClasses[task.label] || 'bg-gray-500')}>
+                    <task.icon className="size-4" />
+                </div>
+                <span className="flex-grow text-sm">{task.label}</span>
+                <span className="text-sm font-semibold">{task.value}</span>
+              </div>
+            ))}
           </CardContent>
         </Card>
         
@@ -105,8 +103,9 @@ export function Dashboard() {
       </div>
 
       {/* Right Sidebar */}
-      <div className="lg:col-span-1">
+      <div className="lg:col-span-1 flex flex-col gap-6">
         <ActivitySidebar />
+        <CategorySpending />
       </div>
     </main>
   );
