@@ -186,13 +186,9 @@ export function Dashboard() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [highlightedRange, setHighlightedRange] = useState<DateRange | undefined>();
 
-  const handleQuickNav = (period: 'yesterday' | 'last-week' | 'today') => {
+  const handleQuickNav = (period: 'yesterday' | 'last-week') => {
     const today = new Date();
-    if (period === 'today') {
-      const range = { from: today, to: today };
-      setCalendarDate(startOfMonth(today));
-      setHighlightedRange(range);
-    } else if (period === 'yesterday') {
+    if (period === 'yesterday') {
       const yesterday = subDays(today, 1);
       const range = { from: yesterday, to: yesterday };
       setCalendarDate(startOfMonth(yesterday));
@@ -214,12 +210,11 @@ export function Dashboard() {
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         <Card className="h-full flex flex-col">
-            <CardHeader className='pb-2'>
+            <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
               <CardTitle className="text-base font-semibold">Calendar</CardTitle>
-              <div className="flex items-center gap-2 pt-2">
-                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('last-week')}>Last 7</Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('last-week')}>Last 7 days</Button>
                 <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('yesterday')}>Yesterday</Button>
-                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('today')}>Today</Button>
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-grow">
