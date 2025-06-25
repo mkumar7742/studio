@@ -23,21 +23,19 @@ const quickAccessItems = [
     label: "+ New expense",
     icon: CreditCard,
     color: "bg-pink-600 text-white",
+    href: "/expenses/new",
   },
   {
     label: "+ Add receipt",
     icon: Receipt,
     color: "bg-blue-600 text-white",
-  },
-  {
-    label: "+ Create report",
-    icon: FileText,
-    color: "bg-emerald-600 text-white",
+    href: "/expenses/new",
   },
   {
     label: "+ Create trip",
     icon: Plane,
     color: "bg-red-600 text-white",
+    href: "/trips/new",
   },
 ]
 
@@ -101,11 +99,13 @@ export function Dashboard() {
             </CardHeader>
             <CardContent className='flex-grow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
               {quickAccessItems.map(item => (
-                <Button key={item.label} variant="outline" className='h-16 justify-start p-4 bg-muted hover:bg-border/50'>
-                  <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md", item.color)}>
-                      <item.icon className="size-4" />
-                  </div>
-                  <span className='font-semibold'>{item.label}</span>
+                <Button key={item.label} asChild variant="outline" className='h-16 justify-start p-4 bg-muted hover:bg-border/50'>
+                  <Link href={item.href}>
+                    <div className={cn("mr-4 flex size-8 items-center justify-center rounded-md", item.color)}>
+                        <item.icon className="size-4" />
+                    </div>
+                    <span className='font-semibold'>{item.label}</span>
+                  </Link>
                 </Button>
               ))}
             </CardContent>
