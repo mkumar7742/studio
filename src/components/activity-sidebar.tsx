@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { ArrowDownLeft, ArrowUpRight, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,7 +13,7 @@ import type { Transaction, Trip } from '@/types';
 import { formatCurrency } from '@/lib/currency';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex items-center gap-4 py-3">
+    <div className="flex items-center gap-4 py-3 pr-4">
         {children}
     </div>
 );
@@ -131,20 +130,14 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0">
-                          <ScrollArea className="h-full pr-4">
-                              <ActivityList items={recentExpenses} type="expense" />
-                          </ScrollArea>
+                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                            <ActivityList items={recentExpenses} type="expense" />
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2 min-h-0">
-                           <ScrollArea className="h-full pr-4">
-                              <ActivityList items={recentIncome} type="income" />
-                          </ScrollArea>
+                        <TabsContent value="income" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                            <ActivityList items={recentIncome} type="income" />
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0">
-                          <ScrollArea className="h-full pr-4">
-                              <ActivityList items={recentTrips} type="trip" />
-                          </ScrollArea>
+                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0 overflow-y-auto">
+                            <ActivityList items={recentTrips} type="trip" />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
