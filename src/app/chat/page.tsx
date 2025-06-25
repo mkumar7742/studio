@@ -32,19 +32,18 @@ const DateSeparator = ({ date }: { date: number }) => (
 );
 
 const ClientRelativeTime = ({ timestamp, className }: { timestamp: number; className: string }) => {
-    const [relativeTime, setRelativeTime] = useState('');
+    const [relativeTime, setRelativeTime] = useState<string | null>(null);
 
     useEffect(() => {
         // This will only run on the client, after hydration, avoiding the mismatch.
         setRelativeTime(formatRelative(new Date(timestamp), new Date()));
     }, [timestamp]);
 
-    // Return a non-relative format on the server and for the initial client render.
-    const initialTimeFormat = format(new Date(timestamp), 'p');
-
+    // By rendering `null` on the server and during initial client render, we avoid the mismatch.
+    // The correct time will appear once the component mounts on the client.
     return (
         <time dateTime={new Date(timestamp).toISOString()} className={className}>
-            {relativeTime || initialTimeFormat}
+            {relativeTime}
         </time>
     );
 };
