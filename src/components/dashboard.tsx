@@ -214,12 +214,12 @@ export function Dashboard() {
                     className="w-full"
                     classNames={{
                         root: "p-3 w-full",
-                        month: "space-y-2 w-full",
+                        month: "space-y-1 w-full",
                         caption: "hidden",
                         head_row: "flex w-full",
                         head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center",
                         row: "flex w-full mt-1",
-                        cell: "w-[14.28%] text-center text-sm p-0 aspect-square",
+                        cell: "w-[14.28%] text-center text-sm p-0 h-10",
                         day: "h-full w-full p-1 font-normal aria-selected:opacity-100",
                         day_today: "bg-primary text-primary-foreground rounded-full",
                         day_outside: "text-muted-foreground opacity-50",
