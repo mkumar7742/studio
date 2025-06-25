@@ -86,7 +86,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
       date: new Date(),
       member: "",
       isRecurring: false,
-      currency: "EUR",
+      currency: "USD",
     },
   });
 
@@ -97,7 +97,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
     addTransaction({
         ...values,
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, currency: 'EUR', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, currency: 'USD', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
         onFinished();
     }

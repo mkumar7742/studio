@@ -64,7 +64,7 @@ export default function NewIncomePage() {
                             <div className="grid grid-cols-3 gap-4">
                                 <Input id="total" type="number" placeholder="0.00" className="col-span-2 bg-card border-border" />
                                 <div className="col-span-1">
-                                    <Select defaultValue="EUR">
+                                    <Select defaultValue="USD">
                                         <SelectTrigger className="bg-card border-border">
                                             <SelectValue placeholder="Currency" />
                                         </SelectTrigger>

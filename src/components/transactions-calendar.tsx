@@ -15,7 +15,7 @@ import { Separator } from './ui/separator';
 import { DayTransactionsDialog } from './day-transactions-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Skeleton } from './ui/skeleton';
-import { convertToEur, formatCurrency } from '@/lib/currency';
+import { convertToUsd, formatCurrency } from '@/lib/currency';
 
 interface DayData {
   net: number;
@@ -99,7 +99,7 @@ function CustomDay(props: DayProps) {
                                 <div className="text-xs font-bold w-full text-right" >
                                     {dayData.net !== 0 && (
                                         <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                            {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'EUR')}
+                                            {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'USD')}
                                         </span>
                                     )}
                                 </div>
@@ -125,9 +125,9 @@ function CustomDay(props: DayProps) {
                         </div>
                         <Separator className="my-2 bg-border/50" />
                         <div className="flex justify-between font-bold text-xs">
-                            <span>Net (EUR)</span>
+                            <span>Net (USD)</span>
                             <span className={cn(dayData.net > 0 ? "text-primary" : "text-destructive")}>
-                                {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'EUR')}
+                                {dayData.net > 0 ? '+' : ''}{formatCurrency(dayData.net, 'USD')}
                             </span>
                         </div>
                     </TooltipContent>
@@ -208,13 +208,13 @@ export function TransactionsCalendar() {
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayData = map.get(dateKey) || { net: 0, income: 0, expense: 0, transactions: [] };
             
-            const amountInEur = convertToEur(t.amount, t.currency);
+            const amountInUsd = convertToUsd(t.amount, t.currency);
             if (t.type === 'income') {
-                dayData.income += amountInEur;
-                dayData.net += amountInEur;
+                dayData.income += amountInUsd;
+                dayData.net += amountInUsd;
             } else {
-                dayData.expense += amountInEur;
-                dayData.net -= amountInEur;
+                dayData.expense += amountInUsd;
+                dayData.net -= amountInUsd;
             }
             dayData.transactions.push(t);
             map.set(dateKey, dayData);

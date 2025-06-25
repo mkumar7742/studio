@@ -7,7 +7,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useAppContext } from '@/context/app-provider';
 import { getMonth, getYear, subMonths } from 'date-fns';
-import { convertToEur, formatCurrency } from '@/lib/currency';
+import { convertToUsd, formatCurrency } from '@/lib/currency';
 
 // Summary card for total balance and credit
 const SummaryCard = () => {
@@ -15,11 +15,11 @@ const SummaryCard = () => {
     
     const balance = accounts
         .filter(acc => !acc.name.toLowerCase().includes('credit'))
-        .reduce((sum, acc) => sum + convertToEur(acc.balance, acc.currency), 0);
+        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
 
     const creditCards = accounts
         .filter(acc => acc.name.toLowerCase().includes('credit'))
-        .reduce((sum, acc) => sum + convertToEur(acc.balance, acc.currency), 0);
+        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
 
     const total = balance + creditCards;
 
@@ -27,21 +27,21 @@ const SummaryCard = () => {
         <Card>
             <CardHeader>
                 <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                <CardDescription>Account balances overview (in EUR)</CardDescription>
+                <CardDescription>Account balances overview (in USD)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Balance:</span>
-                    <span className="font-semibold text-primary">{formatCurrency(balance, 'EUR')}</span>
+                    <span className="font-semibold text-primary">{formatCurrency(balance, 'USD')}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Credit cards:</span>
-                    <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'EUR')}</span>
+                    <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'USD')}</span>
                 </div>
                 <Separator className="my-2 bg-border/50" />
                 <div className="flex justify-between items-center">
                     <span className="font-semibold text-muted-foreground">Total:</span>
-                    <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'EUR')}</span>
+                    <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'USD')}</span>
                 </div>
             </CardContent>
         </Card>
@@ -64,7 +64,7 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
             const data = payload[0].payload;
             return (
                 <div className="rounded-lg border bg-card p-2 shadow-sm text-card-foreground">
-                   <p className="text-sm font-bold">{`${data.name}: ${formatCurrency(data.fullValue, 'EUR')}`}</p>
+                   <p className="text-sm font-bold">{`${data.name}: ${formatCurrency(data.fullValue, 'USD')}`}</p>
                 </div>
             );
         }
@@ -75,7 +75,7 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
         <Card className="flex flex-col">
              <CardHeader>
                 <CardTitle className="text-base font-semibold">{title}</CardTitle>
-                <CardDescription>Income vs. Expenses (in EUR)</CardDescription>
+                <CardDescription>Income vs. Expenses (in USD)</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex items-center gap-4">
                  <div className="w-24 h-24">
@@ -104,18 +104,18 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
                             <ArrowUp className="size-4 mr-2 text-primary shrink-0" />
                             <span>Income</span>
                         </div>
-                        <span className="font-semibold text-primary">{formatCurrency(income, 'EUR')}</span>
+                        <span className="font-semibold text-primary">{formatCurrency(income, 'USD')}</span>
                     </div>
                     <div className="flex items-center justify-between">
                          <div className="flex items-center text-muted-foreground">
                             <ArrowDown className="size-4 mr-2 text-destructive shrink-0" />
                             <span>Expenses</span>
                          </div>
-                         <span className="font-semibold text-destructive">{formatCurrency(expenses, 'EUR')}</span>
+                         <span className="font-semibold text-destructive">{formatCurrency(expenses, 'USD')}</span>
                     </div>
                      <Separator className="my-2 bg-border/50" />
                     <div className="text-right">
-                        <span className="font-bold text-lg text-foreground">{formatCurrency(net, 'EUR')}</span>
+                        <span className="font-bold text-lg text-foreground">{formatCurrency(net, 'USD')}</span>
                     </div>
                 </div>
             </CardContent>
@@ -137,9 +137,9 @@ export function DashboardSummary() {
     const thisMonthStats = transactions.reduce((acc, t) => {
         const tDate = new Date(t.date);
         if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
-            const amountInEur = convertToEur(t.amount, t.currency);
-            if (t.type === 'income') acc.income += amountInEur;
-            else acc.expenses += amountInEur;
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'income') acc.income += amountInUsd;
+            else acc.expenses += amountInUsd;
         }
         return acc;
     }, { income: 0, expenses: 0 });
@@ -147,9 +147,9 @@ export function DashboardSummary() {
     const lastMonthStats = transactions.reduce((acc, t) => {
         const tDate = new Date(t.date);
         if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
-            const amountInEur = convertToEur(t.amount, t.currency);
-            if (t.type === 'income') acc.income += amountInEur;
-            else acc.expenses += amountInEur;
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'income') acc.income += amountInUsd;
+            else acc.expenses += amountInUsd;
         }
         return acc;
     }, { income: 0, expenses: 0 });

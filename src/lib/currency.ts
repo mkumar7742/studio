@@ -1,18 +1,21 @@
 
+
 export const SUPPORTED_CURRENCIES = [
-    { code: 'EUR', name: 'Euro' },
     { code: 'USD', name: 'US Dollar' },
+    { code: 'EUR', name: 'Euro' },
     { code: 'GBP', name: 'British Pound' },
+    { code: 'INR', name: 'Indian Rupee' },
 ];
 
-// Mock exchange rates relative to EUR
+// Mock exchange rates relative to USD
 const EXCHANGE_RATES: { [key: string]: number } = {
-    'EUR': 1,
-    'USD': 0.92, // 1 USD = 0.92 EUR
-    'GBP': 1.18, // 1 GBP = 1.18 EUR
+    'USD': 1,
+    'EUR': 1.09, // 1 EUR = 1.09 USD
+    'GBP': 1.29, // 1 GBP = 1.29 USD
+    'INR': 0.012, // 1 INR = 0.012 USD
 };
 
-export const formatCurrency = (amount: number, currencyCode: string = 'EUR') => {
+export const formatCurrency = (amount: number, currencyCode: string = 'USD') => {
     try {
         const formatter = new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -25,7 +28,7 @@ export const formatCurrency = (amount: number, currencyCode: string = 'EUR') => 
     }
 };
 
-export const convertToEur = (amount: number, currencyCode: string = 'EUR') => {
+export const convertToUsd = (amount: number, currencyCode: string = 'USD') => {
     const rate = EXCHANGE_RATES[currencyCode];
     if (rate === undefined) {
         // In a real app, you might want to fetch the rate or handle this as a more critical error.

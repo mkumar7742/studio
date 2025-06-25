@@ -24,7 +24,7 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { format, getYear, getMonth, set } from 'date-fns';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { SUPPORTED_CURRENCIES, convertToEur, formatCurrency } from '@/lib/currency';
+import { SUPPORTED_CURRENCIES, convertToUsd, formatCurrency } from '@/lib/currency';
 
 const currentYear = getYear(new Date());
 
@@ -70,7 +70,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
             name: budget?.name || "",
             category: budget?.category || "",
             allocated: budget?.allocated || 0,
-            currency: budget?.currency || "EUR",
+            currency: budget?.currency || "USD",
             scope: budget?.scope || 'global',
             memberId: budget?.memberId || "",
             month: budget ? budget.month : getMonth(new Date()),
@@ -294,10 +294,6 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
     }, [members, budget]);
 
     const spent = useMemo(() => {
-        // For simplicity, we convert all transaction amounts to the budget's currency.
-        // In a real-world scenario, you might use historical exchange rates for the date of each transaction.
-        const budgetCurrency = budget.currency;
-
         let categoryTransactions = transactions.filter((t) => {
             const transactionDate = new Date(t.date);
             return (
@@ -312,15 +308,15 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
             categoryTransactions = categoryTransactions.filter(t => t.member === member.name);
         }
 
-        // Convert all amounts to EUR for a consistent sum
-        return categoryTransactions.reduce((sum, t) => sum + convertToEur(t.amount, t.currency), 0);
+        // Convert all amounts to USD for a consistent sum
+        return categoryTransactions.reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
     }, [transactions, budget, member]);
     
-    // Allocated amount is also converted to EUR for comparison
-    const allocatedInEur = useMemo(() => convertToEur(budget.allocated, budget.currency), [budget.allocated, budget.currency]);
+    // Allocated amount is also converted to USD for comparison
+    const allocatedInUsd = useMemo(() => convertToUsd(budget.allocated, budget.currency), [budget.allocated, budget.currency]);
 
-    const progress = Math.min((spent / allocatedInEur) * 100, 100);
-    const remaining = allocatedInEur - spent;
+    const progress = Math.min((spent / allocatedInUsd) * 100, 100);
+    const remaining = allocatedInUsd - spent;
     const Icon = categoryDetails?.icon;
 
     return (
@@ -368,13 +364,13 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
                     <CardDescription className="mb-2">Global budget for all members</CardDescription>
                 )}
                 <div className="mb-2 flex justify-between items-baseline">
-                    <span className="text-2xl font-bold">{formatCurrency(spent, 'EUR')}</span>
+                    <span className="text-2xl font-bold">{formatCurrency(spent, 'USD')}</span>
                     <span className="text-sm text-muted-foreground">
                         of {formatCurrency(budget.allocated, budget.currency)}
                     </span>
                 </div>
                 <Progress value={progress} color={categoryDetails?.color} className="h-2 mb-2" />
-                <p className="text-xs text-muted-foreground">{remaining >= 0 ? `${formatCurrency(remaining, 'EUR')} remaining` : `${formatCurrency(Math.abs(remaining), 'EUR')} over budget`}</p>
+                <p className="text-xs text-muted-foreground">{remaining >= 0 ? `${formatCurrency(remaining, 'USD')} remaining` : `${formatCurrency(Math.abs(remaining), 'USD')} over budget`}</p>
             </CardContent>
         </Card>
     );

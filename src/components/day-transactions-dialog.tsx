@@ -45,7 +45,7 @@ export function DayTransactionsDialog({ day, open, onOpenChange }: DayTransactio
                 <DialogHeader>
                     <DialogTitle>Transactions for {format(day.date, 'PPP')}</DialogTitle>
                     <DialogDescription>
-                        A log of all income and expenses for this day. Net total is in EUR.
+                        A log of all income and expenses for this day. Net total is in USD.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto -mx-6 px-6">
@@ -105,7 +105,7 @@ export function DayTransactionsDialog({ day, open, onOpenChange }: DayTransactio
                      <span className={cn(
                         day.data.net >= 0 ? "text-primary" : "text-destructive"
                     )}>
-                        {day.data.net >= 0 ? '+' : ''}{formatCurrency(day.data.net, 'EUR')}
+                        {day.data.net >= 0 ? '+' : ''}{formatCurrency(day.data.net, 'USD')}
                     </span>
                 </div>
             </DialogContent>

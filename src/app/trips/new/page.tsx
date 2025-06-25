@@ -116,7 +116,7 @@ export default function NewTripPage() {
                          <div className="grid grid-cols-3 gap-4">
                             <Input id="budget-limit" type="number" className="col-span-2 bg-card border-border" />
                              <div className="col-span-1">
-                                <Select defaultValue="EUR">
+                                <Select defaultValue="USD">
                                     <SelectTrigger className="bg-card border-border">
                                         <SelectValue placeholder="Currency" />
                                     </SelectTrigger>
