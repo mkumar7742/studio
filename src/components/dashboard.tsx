@@ -17,15 +17,14 @@ import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, MoreHorizontal } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getMonth, getYear, subMonths, startOfMonth, subDays, addMonths, format } from 'date-fns';
+import { getMonth, getYear, subMonths, startOfMonth, subDays, format } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from './ui/calendar';
 import { Button } from './ui/button';
 import type { DateRange } from 'react-day-picker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 
@@ -194,28 +193,7 @@ export function Dashboard() {
     setCalendarDate(startOfMonth(now));
     setToday(now);
   }, []);
-
-  const years = useMemo(() => {
-    if (!today) return [];
-    const currentYear = getYear(today);
-    return Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
-  }, [today]);
-
-  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
-      value: i,
-      label: format(new Date(0, i), 'MMMM'),
-  })), []);
   
-  const handleMonthSelect = (monthIndex: string) => {
-    setHighlightedRange(undefined);
-    setCalendarDate(current => new Date(getYear(current!), parseInt(monthIndex), 1));
-  };
-
-  const handleYearSelect = (year: string) => {
-    setHighlightedRange(undefined);
-    setCalendarDate(current => new Date(parseInt(year), getMonth(current!), 1));
-  };
-
   const handleQuickNav = (period: 'yesterday' | 'last-week') => {
     if (!today) return;
     
@@ -243,45 +221,21 @@ export function Dashboard() {
         <Card className="h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => { setHighlightedRange(undefined); setCalendarDate(prev => addMonths(prev!, -1)); }}>
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Select value={String(getMonth(calendarDate))} onValueChange={handleMonthSelect}>
-                        <SelectTrigger className="w-[120px] h-8">
-                            <SelectValue placeholder="Select month" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {months.map(m => <SelectItem key={m.value} value={String(m.value)}>{m.label}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <Select value={String(getYear(calendarDate))} onValueChange={handleYearSelect}>
-                        <SelectTrigger className="w-[90px] h-8">
-                            <SelectValue placeholder="Select year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => { setHighlightedRange(undefined); setCalendarDate(prev => addMonths(prev!, 1)); }}>
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={() => handleQuickNav('last-week')}>
-                                Last 7 days
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => handleQuickNav('yesterday')}>
-                                Yesterday
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => handleQuickNav('last-week')}>
+                            Last 7 days
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleQuickNav('yesterday')}>
+                            Yesterday
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </CardHeader>
             <CardContent className="p-0 flex-grow">
                 <Calendar
@@ -290,9 +244,9 @@ export function Dashboard() {
                     month={calendarDate}
                     onMonthChange={setCalendarDate}
                     className="p-3 w-full"
-                    components={{
-                        Caption: () => null, // We are using a custom header
-                    }}
+                    captionLayout="dropdown-buttons"
+                    fromYear={today ? getYear(today) - 10 : 2014}
+                    toYear={today ? getYear(today) : 2024}
                 />
             </CardContent>
         </Card>
