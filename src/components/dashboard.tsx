@@ -198,90 +198,87 @@ export function Dashboard() {
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
-        {/* Main Content */}
-        <div className="flex flex-col gap-6 lg:col-span-3">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <Card className="bg-card lg:col-span-2">
-                  <CardHeader>
-                      <CardTitle>Monthly Report</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <SpendingCharts transactions={expenseTransactions} />
-                  </CardContent>
-              </Card>
-              <CategorySpending />
-          </div>
+        <Card className="bg-card lg:col-span-2 h-full flex flex-col">
+          <CardHeader>
+            <CardTitle>Monthly Report</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <SpendingCharts transactions={expenseTransactions} />
+          </CardContent>
+        </Card>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <BudgetsOverview className="h-full" />
-              <Card className="bg-card flex flex-col h-full">
-                <CardHeader>
-                  <CardTitle>Pending Tasks</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
-                    {pendingTasks.map((task: PendingTask) => {
-                      const link = taskLinks[task.label] || '#';
-                      return (
-                        <Link href={link} key={task.label} className="block group">
-                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
-                            <div className="flex items-start justify-between">
-                              <p className="font-semibold text-foreground/90">{task.label}</p>
-                              <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
-                                <task.icon className="size-4" />
-                              </div>
-                            </div>
-                            <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="bg-card flex flex-col h-full">
+        <CategorySpending className="lg:col-span-1 h-full" />
+        
+        <div className="lg:col-span-1 h-full">
+          <ActivitySidebar showCalendar={false} />
+        </div>
+        
+        <div className="lg:col-span-4 mt-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <BudgetsOverview className="h-full" />
+                <Card className="bg-card flex flex-col h-full">
                   <CardHeader>
-                      <CardTitle>Quick Access</CardTitle>
+                    <CardTitle>Pending Tasks</CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow">
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
-                      <Link href="/expenses/new" className="block group">
-                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                          <CreditCard className="size-8 text-red-500 mb-2" />
-                          <h3 className="font-semibold">New Expense</h3>
-                          <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
-                          </div>
-                      </Link>
-                      <Link href="/income/new" className="block group">
-                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                          <TrendingUp className="size-8 text-green-500 mb-2" />
-                          <h3 className="font-semibold">New Income</h3>
-                          <p className="text-sm text-muted-foreground">Record a new source of income.</p>
-                          </div>
-                      </Link>
-                      <Link href="/trips/new" className="block group">
-                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                          <Plane className="size-8 text-blue-500 mb-2" />
-                          <h3 className="font-semibold">New Trip</h3>
-                          <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
-                          </div>
-                      </Link>
-                      <Link href="/approvals/new" className="block group">
-                          <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                          <ClipboardCheck className="size-8 text-pink-500 mb-2" />
-                          <h3 className="font-semibold">New Approval</h3>
-                          <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
-                          </div>
-                      </Link>
-                      </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
+                      {pendingTasks.map((task: PendingTask) => {
+                        const link = taskLinks[task.label] || '#';
+                        return (
+                          <Link href={link} key={task.label} className="block group">
+                            <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
+                              <div className="flex items-start justify-between">
+                                <p className="font-semibold text-foreground/90">{task.label}</p>
+                                <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
+                                  <task.icon className="size-4" />
+                                </div>
+                              </div>
+                              <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </CardContent>
-              </Card>
-          </div>
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="lg:col-span-1">
-          <ActivitySidebar showCalendar={false} />
+                </Card>
+                <Card className="bg-card flex flex-col h-full">
+                    <CardHeader>
+                        <CardTitle>Quick Access</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
+                        <Link href="/expenses/new" className="block group">
+                            <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                            <CreditCard className="size-8 text-red-500 mb-2" />
+                            <h3 className="font-semibold">New Expense</h3>
+                            <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
+                            </div>
+                        </Link>
+                        <Link href="/income/new" className="block group">
+                            <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                            <TrendingUp className="size-8 text-green-500 mb-2" />
+                            <h3 className="font-semibold">New Income</h3>
+                            <p className="text-sm text-muted-foreground">Record a new source of income.</p>
+                            </div>
+                        </Link>
+                        <Link href="/trips/new" className="block group">
+                            <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                            <Plane className="size-8 text-blue-500 mb-2" />
+                            <h3 className="font-semibold">New Trip</h3>
+                            <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
+                            </div>
+                        </Link>
+                        <Link href="/approvals/new" className="block group">
+                            <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
+                            <ClipboardCheck className="size-8 text-pink-500 mb-2" />
+                            <h3 className="font-semibold">New Approval</h3>
+                            <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
+                            </div>
+                        </Link>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </div>
     </main>
