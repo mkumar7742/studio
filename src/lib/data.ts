@@ -66,6 +66,10 @@ export const allPermissions: { group: string; permissions: { id: Permission; lab
     group: 'Budgets',
     permissions: [{ id: 'budgets:manage', label: 'Manage Budgets' }],
   },
+  {
+    group: 'Calendar',
+    permissions: [{ id: 'calendar:view', label: 'View Calendar' }],
+  },
 ];
 
 
@@ -83,6 +87,7 @@ export const roles: Role[] = [
       'members:view', 'members:create', 'members:edit', 'members:delete',
       'roles:manage',
       'budgets:manage',
+      'calendar:view',
     ],
   },
   {
@@ -97,6 +102,7 @@ export const roles: Role[] = [
       'categories:view',
       'members:view',
       'budgets:manage',
+      'calendar:view',
     ],
   },
   {
@@ -107,6 +113,7 @@ export const roles: Role[] = [
       'expenses:view', 'expenses:create',
       'income:view', 'income:create',
       'trips:view', 'trips:create',
+      'calendar:view',
     ],
   },
 ];

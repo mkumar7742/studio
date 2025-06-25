@@ -84,7 +84,8 @@ export type Permission =
   | 'members:edit'
   | 'members:delete'
   | 'roles:manage'
-  | 'budgets:manage';
+  | 'budgets:manage'
+  | 'calendar:view';
 
 export interface Role {
   id: string;
