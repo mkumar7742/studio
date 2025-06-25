@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X, TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, FilePlus2 } from 'lucide-react';
+import { Plus, X, TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, FilePlus2, Repeat } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
+import { useState } from 'react';
+import { Switch } from '@/components/ui/switch';
 
 export default function NewIncomePage() {
     const { categories } = useAppContext();
+    const [isRecurring, setIsRecurring] = useState(false);
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -99,6 +102,28 @@ export default function NewIncomePage() {
                                 <span>Member*</span>
                             </Label>
                             <Input id="member" className="bg-card border-border" />
+
+                             <Label htmlFor="recurring" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-indigo-500 text-white">
+                                    <Repeat className="size-4" />
+                                </div>
+                                <span>Recurring</span>
+                            </Label>
+                            <div className="flex items-center gap-4">
+                                <Switch id="recurring" checked={isRecurring} onCheckedChange={setIsRecurring} />
+                                {isRecurring && (
+                                    <Select>
+                                        <SelectTrigger className="bg-card border-border w-[180px]">
+                                            <SelectValue placeholder="Frequency" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="weekly">Weekly</SelectItem>
+                                            <SelectItem value="monthly">Monthly</SelectItem>
+                                            <SelectItem value="yearly">Yearly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            </div>
                         </div>
 
                         <div className="lg:col-span-1">

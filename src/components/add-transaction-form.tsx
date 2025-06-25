@@ -29,6 +29,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppContext } from "@/context/app-provider";
 import Image from "next/image";
+import { Switch } from "./ui/switch";
 
 const formSchema = z.object({
   type: z.enum(["income", "expense"], {
@@ -53,6 +54,16 @@ const formSchema = z.object({
     message: "Member name must be at least 2 characters.",
   }),
   receipt: z.custom<File>().optional(),
+  isRecurring: z.boolean().default(false),
+  recurrenceFrequency: z.enum(["weekly", "monthly", "yearly"]).optional(),
+}).refine(data => {
+    if (data.isRecurring) {
+        return !!data.recurrenceFrequency;
+    }
+    return true;
+}, {
+    message: "Please select a frequency for recurring transactions.",
+    path: ["recurrenceFrequency"],
 });
 
 export type AddTransactionValues = z.infer<typeof formSchema>;
@@ -71,16 +82,18 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
       description: "",
       date: new Date(),
       member: "",
+      isRecurring: false,
     },
   });
 
   const receiptFile = form.watch('receipt');
+  const isRecurring = form.watch('isRecurring');
 
   function handleFormSubmit(values: AddTransactionValues) {
     addTransaction({
         ...values,
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, member: "", receipt: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -247,6 +260,50 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="isRecurring"
+          render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                      <FormLabel>Recurring Transaction</FormLabel>
+                      <FormDescription>
+                          Does this transaction repeat over time?
+                      </FormDescription>
+                  </div>
+                  <FormControl>
+                      <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                      />
+                  </FormControl>
+              </FormItem>
+          )}
+        />
+        {isRecurring && (
+            <FormField
+                control={form.control}
+                name="recurrenceFrequency"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Frequency</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a frequency" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        )}
         <FormField
           control={form.control}
           name="receipt"

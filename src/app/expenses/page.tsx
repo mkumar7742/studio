@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
 import { cn } from '@/lib/utils';
-import { Filter, MoreHorizontal, Plus } from 'lucide-react';
+import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 
 export default function ExpensesPage() {
@@ -123,7 +124,21 @@ export default function ExpensesPage() {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <div className="font-semibold">{txn.description}</div>
+                                                        <div className="font-semibold flex items-center gap-2">
+                                                            {txn.description}
+                                                            {txn.isRecurring && (
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger>
+                                                                            <Repeat className="size-4 text-muted-foreground" />
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Recurring {txn.recurrenceFrequency}</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                            )}
+                                                        </div>
                                                         <div className="text-sm text-muted-foreground">
                                                             {member ? (
                                                                 <Link href={`/members/${member.id}`} className="hover:underline">

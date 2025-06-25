@@ -99,7 +99,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             team: 'Personal',
             merchant: 'N/A',
             report: 'N/A',
-            status: 'Not Submitted'
+            status: 'Not Submitted',
+            isRecurring: values.isRecurring,
+            recurrenceFrequency: values.isRecurring ? values.recurrenceFrequency : undefined,
         };
         setTransactions(prev => [newTransaction, ...prev]);
     };

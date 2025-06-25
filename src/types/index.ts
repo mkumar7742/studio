@@ -15,6 +15,8 @@ export interface Transaction {
   merchant: string;
   report: string;
   status: 'Submitted' | 'Not Submitted';
+  isRecurring?: boolean;
+  recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
 }
 
 export interface Account {

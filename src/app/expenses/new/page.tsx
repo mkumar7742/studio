@@ -6,12 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, FilePlus2 } from 'lucide-react';
+import { Plus, X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, FilePlus2, Repeat } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
+import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
 
 export default function NewExpensePage() {
     const { categories } = useAppContext();
+    const [isRecurring, setIsRecurring] = useState(false);
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -130,6 +133,28 @@ export default function NewExpensePage() {
                                     <Checkbox id="report-no" />
                                     <Label htmlFor="report-no" className="font-normal">No</Label>
                                 </div>
+                            </div>
+
+                             <Label htmlFor="recurring" className="flex items-center gap-4">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-indigo-500 text-white">
+                                    <Repeat className="size-4" />
+                                </div>
+                                <span>Recurring</span>
+                            </Label>
+                            <div className="flex items-center gap-4">
+                                <Switch id="recurring" checked={isRecurring} onCheckedChange={setIsRecurring} />
+                                {isRecurring && (
+                                    <Select>
+                                        <SelectTrigger className="bg-card border-border w-[180px]">
+                                            <SelectValue placeholder="Frequency" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="weekly">Weekly</SelectItem>
+                                            <SelectItem value="monthly">Monthly</SelectItem>
+                                            <SelectItem value="yearly">Yearly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
                             </div>
                         </div>
 

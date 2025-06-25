@@ -8,6 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAppContext } from "@/context/app-provider";
 import type { Transaction } from "@/types";
 import { format } from 'date-fns';
+import { Repeat } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -51,7 +53,21 @@ export default function TransactionsPage() {
                                             <div className="flex items-center gap-3">
                                                 <CategoryIcon categoryName={txn.category} />
                                                 <div>
-                                                    <div className="font-medium">{txn.description}</div>
+                                                    <div className="font-medium flex items-center gap-2">
+                                                        {txn.description}
+                                                        {txn.isRecurring && (
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger>
+                                                                        <Repeat className="size-4 text-muted-foreground" />
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Recurring {txn.recurrenceFrequency}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        )}
+                                                    </div>
                                                     <div className="text-sm text-muted-foreground">
                                                         {txn.category} &middot;{' '}
                                                         {member ? (
