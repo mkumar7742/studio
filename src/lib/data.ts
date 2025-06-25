@@ -1,6 +1,6 @@
 
 import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles } from 'lucide-react';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, Wifi } from 'lucide-react';
 import { getYear, getMonth } from 'date-fns';
 
 export const allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[] = [
