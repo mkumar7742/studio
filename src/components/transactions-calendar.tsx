@@ -5,14 +5,15 @@ import { useState, useMemo, createContext, useContext } from 'react';
 import { DayPicker, type DayProps } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
-import { format, isSameDay, parseISO, startOfMonth } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button, buttonVariants } from './ui/button';
+import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { Separator } from './ui/separator';
 import { DayTransactionsDialog } from './day-transactions-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface DayData {
   net: number;
@@ -131,6 +132,21 @@ export function TransactionsCalendar() {
     const [month, setMonth] = useState(startOfMonth(new Date()));
     const [selectedDay, setSelectedDay] = useState<{ date: Date; data: DayData } | null>(null);
 
+    const years = Array.from({ length: 21 }, (_, i) => getYear(new Date()) - 10 + i);
+    const months = Array.from({ length: 12 }, (_, i) => ({
+        value: i,
+        label: format(new Date(0, i), 'MMMM'),
+    }));
+
+    const handleMonthSelect = (monthIndex: string) => {
+        setMonth(new Date(getYear(month), parseInt(monthIndex), 1));
+    };
+
+    const handleYearSelect = (year: string) => {
+        setMonth(new Date(parseInt(year), getMonth(month), 1));
+    };
+
+
     const handleDayClick = (date: Date, data: DayData | undefined) => {
         if (data && data.transactions.length > 0) {
             setSelectedDay({ date, data });
@@ -168,18 +184,40 @@ export function TransactionsCalendar() {
     return (
         <TransactionsCalendarContext.Provider value={contextValue}>
             <Card>
+                <header className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
+                     <div className="flex items-center gap-2">
+                        <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev, -1))}>
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Select
+                            value={String(getMonth(month))}
+                            onValueChange={handleMonthSelect}
+                        >
+                            <SelectTrigger className="w-[140px]">
+                                <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {months.map(m => <SelectItem key={m.value} value={String(m.value)}>{m.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={String(getYear(month))}
+                            onValueChange={handleYearSelect}
+                        >
+                            <SelectTrigger className="w-[100px]">
+                                <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                         <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev, 1))}>
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>Today</Button>
+                </header>
                 <CardContent className="p-0">
-                    <style>{`
-                    .rdp-table, .rdp-month { width: 100%; }
-                    .rdp-head_row, .rdp-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); width: 100%; }
-                    .rdp-cell { border-top: 1px solid hsl(var(--border)); padding: 0; }
-                    .rdp-row .rdp-cell { border-left: 1px solid hsl(var(--border));}
-                    .rdp-row .rdp-cell:first-child { border-left: 0; }
-                    .rdp-cell { height: 140px; }
-                    .rdp-day { width: 100%; height: 100%; padding: 0; border-radius: 0; }
-                    .rdp-day_outside .day-content { color: hsl(var(--muted-foreground)); opacity: 0.5; }
-                    .rdp-button:focus-visible:not([disabled]) { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; z-index: 10; }
-                    `}</style>
                     <DayPicker
                         showOutsideDays
                         fixedWeeks
@@ -187,38 +225,19 @@ export function TransactionsCalendar() {
                         onMonthChange={setMonth}
                         components={{
                             Day: CustomDay,
-                            IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-                            IconRight: () => <ChevronRight className="h-4 w-4" />,
+                            Caption: () => null, // We are using a custom header
                         }}
-                        captionLayout="dropdown-buttons"
-                        fromYear={2020}
-                        toYear={2030}
                         classNames={{
                             root: 'p-3',
-                            caption: "flex justify-between items-center relative mb-4",
-                            caption_label: "text-xl font-bold",
-                            nav: "space-x-1",
-                            nav_button: cn(
-                                buttonVariants({ variant: "outline" }),
-                                "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                            ),
-                            head: 'text-center text-sm text-muted-foreground font-normal',
-                            head_cell: 'pb-2 font-semibold',
-                            day: 'p-0',
-                            caption_end: 'flex items-center gap-2'
+                            table: 'w-full border-collapse',
+                            head_row: 'flex',
+                            head_cell: 'w-[14.28%] text-muted-foreground rounded-md font-normal text-[0.8rem] text-center pb-2',
+                            row: 'flex w-full',
+                            cell: 'h-[140px] w-[14.28%] text-sm p-0 relative border',
+                            day: 'h-full w-full p-0 focus:relative focus:z-20',
+                            day_today: 'bg-accent text-accent-foreground',
+                            day_outside: 'day-outside text-muted-foreground opacity-50',
                         }}
-                        renderNav={(nav) => (
-                           <div className="flex items-center justify-between w-full">
-                                <div className='flex items-center gap-2'>
-                                    <h2 className="text-xl font-bold">{format(month, 'MMMM yyyy')}</h2>
-                                    <div className='flex items-center gap-1'>
-                                        {nav.previous}
-                                        {nav.next}
-                                    </div>
-                                </div>
-                                <Button variant="outline" onClick={() => setMonth(startOfMonth(new Date()))}>Today</Button>
-                           </div>
-                        )}
                     />
                 </CardContent>
             </Card>
