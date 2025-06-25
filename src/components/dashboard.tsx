@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { getMonth, getYear, subMonths, startOfMonth, subDays, addMonths, format } from 'date-fns';
@@ -26,6 +26,7 @@ import { Calendar } from './ui/calendar';
 import { Button } from './ui/button';
 import type { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 
 // Summary card for total balance and credit
@@ -265,13 +266,21 @@ export function Dashboard() {
                     <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => { setHighlightedRange(undefined); setCalendarDate(prev => addMonths(prev!, 1)); }}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
-                    <Separator orientation="vertical" className="h-6 mx-1" />
-                    <Button variant="outline" size="sm" className="h-8" onClick={() => handleQuickNav('last-week')}>
-                        Last 7 days
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8" onClick={() => handleQuickNav('yesterday')}>
-                        Yesterday
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => handleQuickNav('last-week')}>
+                                Last 7 days
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => handleQuickNav('yesterday')}>
+                                Yesterday
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </CardHeader>
             <CardContent className="p-0 flex-grow">
