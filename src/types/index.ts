@@ -156,4 +156,5 @@ export interface ChatMessage {
 export interface Conversation {
   memberId: string; // The ID of the other member in the conversation
   messages: ChatMessage[];
+  unreadCount?: number;
 }

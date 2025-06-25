@@ -1,21 +1,36 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Send, ArrowLeft, MessageSquare, Smile } from 'lucide-react';
+import { Send, ArrowLeft, MessageSquare, Smile, Search } from 'lucide-react';
 import { useAppContext } from '@/context/app-provider';
-import type { MemberProfile } from '@/types';
+import type { MemberProfile, ChatMessage } from '@/types';
 import { cn } from '@/lib/utils';
-import { formatRelative } from 'date-fns';
+import { format, formatRelative, isSameDay } from 'date-fns';
 import { PageHeader } from '@/components/page-header';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Picker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
+import { Badge } from '@/components/ui/badge';
+
+const DateSeparator = ({ date }: { date: number }) => (
+    <div className="relative text-center my-4">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center">
+            <span className="bg-card px-2 text-xs text-muted-foreground">
+                {format(new Date(date), 'MMMM d, yyyy')}
+            </span>
+        </div>
+    </div>
+);
+
 
 const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: () => void }) => {
     const { currentUser, conversations, sendMessage, members } = useAppContext();
@@ -35,9 +50,25 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
         setMessage(currentMessage => currentMessage + emojiData.emoji);
     };
 
-    const allMessages = useMemo(() => {
-        return conversation?.messages.sort((a,b) => a.timestamp - b.timestamp) || [];
+    const messagesWithSeparators = useMemo(() => {
+        if (!conversation?.messages) return [];
+        const sortedMessages = [...conversation.messages].sort((a,b) => a.timestamp - b.timestamp);
+        
+        const result: (ChatMessage | { type: 'separator', date: number, id: string })[] = [];
+        let lastDate: Date | null = null;
+        
+        sortedMessages.forEach(msg => {
+            const msgDate = new Date(msg.timestamp);
+            if (!lastDate || !isSameDay(lastDate, msgDate)) {
+                result.push({ type: 'separator', date: msg.timestamp, id: `sep-${msg.timestamp}` });
+            }
+            result.push(msg);
+            lastDate = msgDate;
+        });
+
+        return result;
     }, [conversation]);
+
 
     const getSender = (senderId: string) => {
         return members.find(m => m.id === senderId);
@@ -57,7 +88,12 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
             </header>
             <ScrollArea className="flex-1">
                 <div className="p-4 space-y-4">
-                    {allMessages.map(msg => {
+                    {messagesWithSeparators.map(item => {
+                        if (item.type === 'separator') {
+                            return <DateSeparator key={item.id} date={item.date} />;
+                        }
+
+                        const msg = item as ChatMessage;
                         const isCurrentUser = msg.senderId === currentUser.id;
                         const sender = getSender(msg.senderId);
                         return (
@@ -108,7 +144,17 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
 
 const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberProfile) => void; }) => {
     const { members, currentUser, conversations } = useAppContext();
+    const [searchTerm, setSearchTerm] = useState('');
+
     const otherMembers = members.filter(m => m.id !== currentUser.id);
+
+    const filteredMembers = useMemo(() => {
+        if (!searchTerm) return otherMembers;
+        return otherMembers.filter(member => 
+            member.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm, otherMembers]);
+
 
     const getLastMessage = (memberId: string) => {
         const conversation = conversations.find(c => c.memberId === memberId);
@@ -122,12 +168,28 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
         };
     };
 
+    const getConversation = (memberId: string) => {
+        return conversations.find(c => c.memberId === memberId);
+    }
+
     return (
-        <Card className="h-full">
-            <ScrollArea className="h-full">
+        <Card className="h-full flex flex-col">
+            <div className="p-4 border-b">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search members..."
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
+            <ScrollArea className="flex-1">
                 <ul className="divide-y divide-border">
-                    {otherMembers.map(member => {
+                    {filteredMembers.map(member => {
                         const lastMessage = getLastMessage(member.id);
+                        const conversation = getConversation(member.id);
                         return (
                             <li key={member.id}>
                                 <button onClick={() => onSelectMember(member)} className="flex items-center gap-4 p-4 w-full text-left hover:bg-accent transition-colors">
@@ -136,9 +198,13 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
                                         <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 overflow-hidden">
-                                        <div className="flex justify-between items-baseline">
+                                        <div className="flex justify-between items-center">
                                             <h3 className="font-semibold truncate">{member.name}</h3>
-                                            {lastMessage.timestamp && (
+                                            {conversation?.unreadCount && conversation.unreadCount > 0 ? (
+                                                <Badge className="bg-primary text-primary-foreground rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                                                    {conversation.unreadCount}
+                                                </Badge>
+                                            ) : lastMessage.timestamp && (
                                                 <time className="text-xs text-muted-foreground shrink-0">{formatRelative(new Date(lastMessage.timestamp), new Date())}</time>
                                             )}
                                         </div>
@@ -148,6 +214,9 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
                             </li>
                         )
                     })}
+                     {filteredMembers.length === 0 && (
+                        <p className="text-center text-muted-foreground p-8">No members found.</p>
+                    )}
                 </ul>
             </ScrollArea>
         </Card>
@@ -164,6 +233,18 @@ const Placeholder = () => (
 
 export default function ChatPage() {
     const [selectedMember, setSelectedMember] = useState<MemberProfile | null>(null);
+    const { markConversationAsRead } = useAppContext();
+
+    const handleSelectMember = (member: MemberProfile) => {
+        setSelectedMember(member);
+        markConversationAsRead(member.id);
+    };
+
+    useEffect(() => {
+        if(selectedMember) {
+            markConversationAsRead(selectedMember.id);
+        }
+    }, [selectedMember, markConversationAsRead]);
 
     return (
         <div className="flex flex-col h-full">
@@ -171,7 +252,7 @@ export default function ChatPage() {
             <main className="flex-1 overflow-y-hidden p-4 sm:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 h-full">
                     <div className={cn("h-full", selectedMember ? "hidden md:block" : "block")}>
-                       <ConversationList onSelectMember={setSelectedMember} />
+                       <ConversationList onSelectMember={handleSelectMember} />
                     </div>
                     <div className="md:col-span-2 lg:col-span-3 h-full">
                         {selectedMember ? (

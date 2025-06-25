@@ -65,6 +65,7 @@ interface AppContextType {
     addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
     deleteSubscription: (subscriptionId: string) => void;
     sendMessage: (receiverId: string, text: string) => void;
+    markConversationAsRead: (memberId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -82,6 +83,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [conversations, setConversations] = useState<Conversation[]>([
       {
         memberId: 'mem2', // John Doe
+        unreadCount: 0,
         messages: [
           { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: Date.now() - 1000 * 60 * 5 },
           { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: Date.now() - 1000 * 60 * 4 },
@@ -90,6 +92,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       },
       {
         memberId: 'mem3', // Jane Smith
+        unreadCount: 1,
         messages: [
           { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: Date.now() - 1000 * 60 * 20 },
         ]
@@ -298,6 +301,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
     };
 
+    const markConversationAsRead = (memberId: string) => {
+        setConversations(prev => prev.map(c => 
+            c.memberId === memberId ? { ...c, unreadCount: 0 } : c
+        ));
+    };
+    
     const sendMessage = (receiverId: string, text: string) => {
         const newMessage: ChatMessage = {
             id: `msg-${Date.now()}`,
@@ -318,10 +327,34 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 const newConversation: Conversation = {
                     memberId: receiverId,
                     messages: [newMessage],
+                    unreadCount: 0,
                 };
                 return [...prev, newConversation];
             }
         });
+
+        // Simulate a reply after a short delay to demonstrate unread count
+        setTimeout(() => {
+            const receiver = members.find(m => m.id === receiverId);
+            const replyText = `This is an automated reply from ${receiver?.name || 'a member'}. Got your message!`;
+
+            const replyMessage: ChatMessage = {
+                id: `msg-${Date.now() + 1}`,
+                senderId: receiverId,
+                text: replyText,
+                timestamp: Date.now(),
+            };
+
+            setConversations(prev => prev.map(c => 
+                c.memberId === receiverId
+                    ? { 
+                        ...c, 
+                        messages: [...c.messages, replyMessage],
+                        unreadCount: (c.unreadCount || 0) + 1,
+                      }
+                    : c
+            ));
+        }, 2500);
     };
 
     const value = {
@@ -362,6 +395,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addTrip,
         deleteSubscription,
         sendMessage,
+        markConversationAsRead,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
