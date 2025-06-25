@@ -96,17 +96,14 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
 
     const recentExpenses = transactions
         .filter(t => t.type === 'expense')
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const recentIncome = transactions
         .filter(t => t.type === 'income')
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const recentTrips = trips
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 3);
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
     return (
         <aside className={cn("flex flex-col gap-6", showCalendar ? "sticky top-6" : "h-full")}>
@@ -131,17 +128,17 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                             <TabsTrigger value="income">Income</TabsTrigger>
                             <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expenses" className="flex-grow mt-2">
+                        <TabsContent value="expenses" className="flex-grow mt-2 min-h-0">
                           <ScrollArea className="h-full">
                               <ActivityList items={recentExpenses} type="expense" />
                           </ScrollArea>
                         </TabsContent>
-                        <TabsContent value="income" className="flex-grow mt-2">
+                        <TabsContent value="income" className="flex-grow mt-2 min-h-0">
                            <ScrollArea className="h-full">
                               <ActivityList items={recentIncome} type="income" />
                           </ScrollArea>
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2">
+                        <TabsContent value="trips" className="flex-grow mt-2 min-h-0">
                           <ScrollArea className="h-full">
                               <ActivityList items={recentTrips} type="trip" />
                           </ScrollArea>
