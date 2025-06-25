@@ -1,5 +1,5 @@
 
-"use client";
+'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
@@ -211,7 +211,7 @@ export function Dashboard() {
                     className="p-3 w-full"
                     classNames={{
                         months: "flex flex-col sm:flex-row space-y-1",
-                        month: "space-y-2",
+                        month: "space-y-2 w-full",
                         head_row: "flex",
                         head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center",
                         row: "flex w-full mt-1",
