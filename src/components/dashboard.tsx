@@ -40,7 +40,7 @@ const SummaryCard = () => {
 
     return (
         <Card className="h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Summary</CardTitle>
                 <Link href="/accounts" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View all <ArrowRight className="size-4" />
@@ -94,7 +94,7 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 
     return (
         <Card className="flex flex-col h-full">
-            <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">{title}</CardTitle>
                 <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View all <ArrowRight className="size-4" />
@@ -202,7 +202,7 @@ export function Dashboard() {
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         <Card className="h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
                 <Link href="/calendar" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View Full <ArrowRight className="size-4" />
@@ -235,7 +235,7 @@ export function Dashboard() {
 
       <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
         <Card className="bg-card lg:col-span-2 h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Monthly Report</CardTitle>
                 <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View all <ArrowRight className="size-4" />
@@ -256,7 +256,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <BudgetsOverview className="h-full" />
           <Card className="bg-card flex flex-col h-full">
-            <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
               <CardTitle className="text-base font-semibold">Pending Tasks</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow p-4">
@@ -281,7 +281,7 @@ export function Dashboard() {
             </CardContent>
           </Card>
           <Card className="bg-card flex flex-col h-full">
-              <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+              <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                   <CardTitle className="text-base font-semibold">Quick Access</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow p-4">
@@ -321,3 +321,5 @@ export function Dashboard() {
     </main>
   );
 }
+
+    

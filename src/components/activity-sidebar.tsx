@@ -121,7 +121,7 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                 </Card>
             )}
             <Card className={cn(!showCalendar && "h-full flex flex-col")}>
-                <CardHeader className="flex flex-row items-center justify-between p-3 space-y-0 border-b">
+                <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                     <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
                     <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                         View all <ArrowRight className="size-4" />
@@ -155,3 +155,5 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
         </aside>
     );
 }
+
+    
