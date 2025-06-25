@@ -201,7 +201,7 @@ export function Dashboard() {
         <SummaryCard />
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
-        <Card className="h-full flex flex-col">
+        <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
                 <Link href="/calendar" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
@@ -214,13 +214,13 @@ export function Dashboard() {
                     className="w-full"
                     classNames={{
                         root: "p-3 w-full",
-                        month: "space-y-1 w-full",
+                        month: "w-full",
                         caption: "hidden",
                         head_row: "flex w-full",
-                        head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center",
-                        row: "flex w-full mt-1",
-                        cell: "w-[14.28%] text-center text-sm p-0 h-10",
-                        day: "h-full w-full p-1 font-normal aria-selected:opacity-100",
+                        head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center pb-1",
+                        row: "flex w-full",
+                        cell: "w-[14.28%] text-center text-sm p-0 h-8",
+                        day: "h-full w-full p-0.5 font-normal aria-selected:opacity-100",
                         day_today: "bg-primary text-primary-foreground rounded-full",
                         day_outside: "text-muted-foreground opacity-50",
                         day_selected: "bg-accent text-accent-foreground rounded-md",
