@@ -17,15 +17,13 @@ import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, MoreHorizontal } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getMonth, getYear, subMonths, startOfMonth, subDays, format } from 'date-fns';
+import { getMonth, getYear, subMonths, startOfMonth, format } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from './ui/calendar';
 import { Button } from './ui/button';
-import type { DateRange } from 'react-day-picker';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 
 // Summary card for total balance and credit
@@ -184,33 +182,12 @@ export function Dashboard() {
     'Pending Reimbursements': '/expenses',
   };
   
-  const [calendarDate, setCalendarDate] = useState(new Date());
-  const [highlightedRange, setHighlightedRange] = useState<DateRange | undefined>();
-  const [today, setToday] = useState<Date | null>(null);
+  const [calendarDate, setCalendarDate] = useState<Date>();
 
   useEffect(() => {
-    const now = new Date();
-    setCalendarDate(startOfMonth(now));
-    setToday(now);
+    setCalendarDate(startOfMonth(new Date()));
   }, []);
   
-  const handleQuickNav = (period: 'yesterday' | 'last-week') => {
-    if (!today) return;
-    
-    if (period === 'yesterday') {
-        const yesterday = subDays(today, 1);
-        const range = { from: yesterday, to: yesterday };
-        setCalendarDate(startOfMonth(yesterday));
-        setHighlightedRange(range);
-    } else if (period === 'last-week') {
-        const to = today;
-        const from = subDays(to, 6);
-        const range = { from, to };
-        setCalendarDate(startOfMonth(from));
-        setHighlightedRange(range);
-    }
-  };
-
 
   return (
     <main className="flex flex-col flex-1 gap-6 p-4 md:p-6">
@@ -221,32 +198,17 @@ export function Dashboard() {
         <Card className="h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-4 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => handleQuickNav('last-week')}>
-                            Last 7 days
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleQuickNav('yesterday')}>
-                            Yesterday
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/calendar">
+                        View Full
+                        <ArrowRight className="ml-2" />
+                    </Link>
+                </Button>
             </CardHeader>
             <CardContent className="p-0 flex-grow">
                 <Calendar
-                    mode="range"
-                    selected={highlightedRange}
                     month={calendarDate}
-                    onMonthChange={setCalendarDate}
                     className="p-3 w-full"
-                    captionLayout="dropdown-buttons"
-                    fromYear={today ? getYear(today) - 10 : 2014}
-                    toYear={today ? getYear(today) : 2024}
                 />
             </CardContent>
         </Card>
