@@ -70,6 +70,9 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// A static date to use for initial chat data to prevent hydration errors.
+const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [allTransactions, setAllTransactions] = useState<Transaction[]>(initialTransactions);
     const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
@@ -85,16 +88,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         memberId: 'mem2', // John Doe
         unreadCount: 0,
         messages: [
-          { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: Date.now() - 1000 * 60 * 5 },
-          { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: Date.now() - 1000 * 60 * 4 },
-          { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: Date.now() - 1000 * 60 * 3 },
+          { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
+          { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
+          { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
         ]
       },
       {
         memberId: 'mem3', // Jane Smith
         unreadCount: 1,
         messages: [
-          { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: Date.now() - 1000 * 60 * 20 },
+          { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
         ]
       }
     ]);
