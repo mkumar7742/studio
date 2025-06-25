@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -15,7 +16,7 @@ import { CategorySpending } from "./category-spending";
 import { DashboardSummary } from './dashboard-summary';
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck } from 'lucide-react';
 
 export function Dashboard() {
   const { transactions: allTransactions, pendingTasks } = useAppContext();
@@ -77,7 +78,7 @@ export function Dashboard() {
                     <CardTitle>Quick Access</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Link href="/expenses/new" className="block group">
                         <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
                         <CreditCard className="size-8 text-red-500 mb-2" />
@@ -85,11 +86,25 @@ export function Dashboard() {
                         <p className="text-sm text-muted-foreground">Quickly add a new expense.</p>
                         </div>
                     </Link>
+                    <Link href="/income/new" className="block group">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <TrendingUp className="size-8 text-green-500 mb-2" />
+                        <h3 className="font-semibold">New Income</h3>
+                        <p className="text-sm text-muted-foreground">Record a new source of income.</p>
+                        </div>
+                    </Link>
                     <Link href="/trips/new" className="block group">
                         <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
                         <Plane className="size-8 text-blue-500 mb-2" />
                         <h3 className="font-semibold">New Trip</h3>
                         <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
+                        </div>
+                    </Link>
+                    <Link href="/approvals/new" className="block group">
+                        <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80">
+                        <ClipboardCheck className="size-8 text-pink-500 mb-2" />
+                        <h3 className="font-semibold">New Approval</h3>
+                        <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
                         </div>
                     </Link>
                     </div>

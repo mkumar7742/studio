@@ -59,6 +59,7 @@ interface AppContextType {
     deleteRole: (roleId: string) => void;
     updateCurrentUser: (data: Partial<MemberProfile>) => void;
     updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
+    addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
     addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
     deleteSubscription: (subscriptionId: string) => void;
 }
@@ -244,6 +245,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setApprovals(prev => prev.map(a => a.id === approvalId ? { ...a, status } : a));
     };
 
+    const addApproval = (values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
+        const role = getMemberRole(currentUser);
+        const newApproval: Approval = {
+            id: `appr-${Date.now()}`,
+            ...values,
+            status: 'Pending',
+            owner: {
+                name: currentUser.name,
+                title: role?.name || 'Member',
+                avatar: currentUser.avatar,
+                avatarHint: currentUser.avatarHint,
+            }
+        };
+        setApprovals(prev => [newApproval, ...prev]);
+    };
+
     const addTrip = (tripData: Omit<Trip, 'id' | 'status' | 'report'>) => {
         const newTrip: Trip = {
             id: `trip-${Date.now()}`,
@@ -290,6 +307,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deleteRole,
         updateCurrentUser,
         updateApprovalStatus,
+        addApproval,
         addTrip,
         deleteSubscription
     };
