@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAppContext } from '@/context/app-provider';
@@ -61,7 +62,7 @@ const ActivityStatus = ({ status }: { status: Trip['status']}) => {
 }
 
 
-export function ActivitySidebar() {
+export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolean }) {
     const { transactions, trips } = useAppContext();
 
     const recentExpenses = transactions
@@ -80,14 +81,16 @@ export function ActivitySidebar() {
         
     return (
         <aside className="sticky top-6 flex flex-col gap-6">
-            <Card>
-                <CardContent className="p-0">
-                    <Calendar
-                        mode="single"
-                        className="p-3"
-                    />
-                </CardContent>
-            </Card>
+            {showCalendar && (
+                <Card>
+                    <CardContent className="p-0">
+                        <Calendar
+                            mode="single"
+                            className="p-3"
+                        />
+                    </CardContent>
+                </Card>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
