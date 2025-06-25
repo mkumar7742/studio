@@ -2,10 +2,10 @@
 "use client";
 
 import { useState, useMemo, createContext, useContext, useEffect } from 'react';
-import { DayPicker, type DayProps } from 'react-day-picker';
+import { DayPicker, type DayProps, type DateRange } from 'react-day-picker';
 import { useAppContext } from '@/context/app-provider';
 import type { Transaction } from '@/types';
-import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths, subDays, subWeeks } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth, getYear, getMonth, addMonths, subDays, isWithinInterval, startOfDay, subWeeks } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,7 @@ const TransactionsCalendarContext = createContext<{
     transactionsByDay: Map<string, DayData>;
     handleDayClick: (date: Date, data: DayData | undefined) => void;
     today: Date | null;
+    highlightedRange: DateRange | undefined;
 } | null>(null);
 
 function useTransactionsCalendarContext() {
@@ -50,11 +51,20 @@ const CategoryIcon = ({ categoryName, className }: { categoryName: string, class
 };
 
 function CustomDay(props: DayProps) {
-    const { transactionsByDay, handleDayClick, today } = useTransactionsCalendarContext();
+    const { transactionsByDay, handleDayClick, today, highlightedRange } = useTransactionsCalendarContext();
     const dayKey = format(props.date, 'yyyy-MM-dd');
     const dayData = transactionsByDay.get(dayKey);
     const hasTransactions = dayData && dayData.transactions.length > 0;
     const isToday = today ? isSameDay(props.date, today) : false;
+
+    const isHighlighted = useMemo(() => {
+        if (!highlightedRange?.from) return false;
+        const date = startOfDay(props.date);
+        const from = startOfDay(highlightedRange.from);
+        const to = startOfDay(highlightedRange.to ?? highlightedRange.from);
+        return isWithinInterval(date, { start: from, end: to });
+    }, [highlightedRange, props.date]);
+
 
     if (props.displayMonth.getMonth() !== props.date.getMonth()) {
         return <div className="h-full w-full" />;
@@ -68,7 +78,8 @@ function CustomDay(props: DayProps) {
                         onClick={() => handleDayClick(props.date, dayData)}
                         className={cn(
                             "relative flex h-full w-full flex-col p-1.5 text-sm focus:z-10",
-                            hasTransactions ? "cursor-pointer hover:bg-accent focus:bg-accent focus:outline-none" : "cursor-default"
+                            hasTransactions ? "cursor-pointer hover:bg-accent focus:bg-accent" : "cursor-default",
+                            isHighlighted && "bg-muted rounded-sm"
                         )}
                     >
                         <time dateTime={props.date.toISOString()} className={cn("ml-auto text-xs", isToday && "bg-primary text-primary-foreground rounded-full size-5 flex items-center justify-center")}>
@@ -135,6 +146,7 @@ export function TransactionsCalendar() {
     const [month, setMonth] = useState<Date>();
     const [today, setToday] = useState<Date | null>(null);
     const [selectedDay, setSelectedDay] = useState<{ date: Date; data: DayData } | null>(null);
+    const [highlightedRange, setHighlightedRange] = useState<DateRange | undefined>();
     
     useEffect(() => {
         const now = new Date();
@@ -155,11 +167,13 @@ export function TransactionsCalendar() {
 
     const handleMonthSelect = (monthIndex: string) => {
         if (!month) return;
+        setHighlightedRange(undefined);
         setMonth(new Date(getYear(month), parseInt(monthIndex), 1));
     };
 
     const handleYearSelect = (year: string) => {
         if (!month) return;
+        setHighlightedRange(undefined);
         setMonth(new Date(parseInt(year), getMonth(month), 1));
     };
 
@@ -167,11 +181,20 @@ export function TransactionsCalendar() {
         if (!today) return;
         
         if (period === 'today') {
+            const range = { from: today, to: today };
             setMonth(startOfMonth(today));
+            setHighlightedRange(range);
         } else if (period === 'yesterday') {
-            setMonth(startOfMonth(subDays(today, 1)));
+            const yesterday = subDays(today, 1);
+            const range = { from: yesterday, to: yesterday };
+            setMonth(startOfMonth(yesterday));
+            setHighlightedRange(range);
         } else if (period === 'last-week') {
-            setMonth(startOfMonth(subWeeks(today, 1)));
+            const to = today;
+            const from = subDays(to, 6);
+            const range = { from, to };
+            setMonth(startOfMonth(from));
+            setHighlightedRange(range);
         }
     };
 
@@ -208,7 +231,7 @@ export function TransactionsCalendar() {
         return map;
     }, [transactions]);
     
-    const contextValue = { transactionsByDay, handleDayClick, today };
+    const contextValue = { transactionsByDay, handleDayClick, today, highlightedRange };
 
     if (!month || !today) {
         return (
@@ -225,7 +248,7 @@ export function TransactionsCalendar() {
             <Card>
                 <header className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev!, -1))}>
+                        <Button variant="outline" size="icon" onClick={() => { setHighlightedRange(undefined); setMonth(prev => addMonths(prev!, -1)); }}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <Select
@@ -250,7 +273,7 @@ export function TransactionsCalendar() {
                                 {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                         <Button variant="outline" size="icon" onClick={() => setMonth(prev => addMonths(prev!, 1))}>
+                         <Button variant="outline" size="icon" onClick={() => { setHighlightedRange(undefined); setMonth(prev => addMonths(prev!, 1)); }}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -277,7 +300,7 @@ export function TransactionsCalendar() {
                         showOutsideDays
                         fixedWeeks
                         month={month}
-                        onMonthChange={setMonth}
+                        onMonthChange={(newMonth) => { setHighlightedRange(undefined); setMonth(newMonth); }}
                         components={{
                             Day: CustomDay,
                             Caption: () => null, // We are using a custom header
