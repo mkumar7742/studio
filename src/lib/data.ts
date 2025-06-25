@@ -248,21 +248,3 @@ export const approvals: Approval[] = [
   { id: 'appr6', owner: { name: 'Barbara Jones', title: 'Strategist', avatar: 'https://placehold.co/40x40.png', avatarHint: 'woman portrait' }, category: 'Software', amount: 275.75, currency: 'EUR', frequency: 'Bi-Monthly', project: 'Analytics Platform', description: 'Subscription for marketing analytics tool.', team: 'Marketing', status: 'Pending' },
   { id: 'appr7', owner: { name: 'Zach Moss', title: 'Engineer', avatar: 'https://placehold.co/40x40.png', avatarHint: 'man portrait' }, category: 'Travel', amount: 30.00, currency: 'EUR', frequency: 'Monthly', project: 'Team Offsite', description: 'Monthly travel budget for team events.', team: 'Engineering', status: 'Pending' },
 ];
-
-export const teamSpendingData = [
-    { name: 'PJ', total: 80000 },
-    { name: 'SJ', total: 35000 },
-    { name: 'MB', total: 72000 },
-    { name: 'IS', total: 65000 },
-    { name: 'DW', total: 28000 },
-    { name: 'ND', total: 55000 },
-    { name: 'BS', total: 95000 },
-];
-
-export const dayToDayExpensesData = [
-  { name: 'Accommodation', value: 45 },
-  { name: 'Comms', value: 15 },
-  { name: 'Services', value: 80 },
-  { name: 'Food', value: 65 },
-  { name: 'Fuel', value: 20 },
-];
