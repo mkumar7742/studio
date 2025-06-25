@@ -146,7 +146,7 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
     const { members, currentUser, conversations } = useAppContext();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const otherMembers = members.filter(m => m.id !== currentUser.id);
+    const otherMembers = useMemo(() => members.filter(m => m.id !== currentUser.id), [members, currentUser.id]);
 
     const filteredMembers = useMemo(() => {
         if (!searchTerm) return otherMembers;
