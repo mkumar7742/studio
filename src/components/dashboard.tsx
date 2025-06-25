@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -17,14 +17,15 @@ import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
 import { ActivitySidebar } from './activity-sidebar';
 import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp } from 'lucide-react';
+import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getMonth, getYear, subMonths, startOfMonth, subDays } from 'date-fns';
+import { getMonth, getYear, subMonths, startOfMonth, subDays, addMonths, format } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from './ui/calendar';
 import { Button } from './ui/button';
 import type { DateRange } from 'react-day-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 
 // Summary card for total balance and credit
@@ -185,20 +186,53 @@ export function Dashboard() {
   
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [highlightedRange, setHighlightedRange] = useState<DateRange | undefined>();
+  const [today, setToday] = useState<Date | null>(null);
 
-  const handleQuickNav = (period: 'yesterday' | 'last-week') => {
-    const today = new Date();
-    if (period === 'yesterday') {
-      const yesterday = subDays(today, 1);
-      const range = { from: yesterday, to: yesterday };
-      setCalendarDate(startOfMonth(yesterday));
-      setHighlightedRange(range);
+  useEffect(() => {
+    const now = new Date();
+    setCalendarDate(startOfMonth(now));
+    setToday(now);
+  }, []);
+
+  const years = useMemo(() => {
+    if (!today) return [];
+    const currentYear = getYear(today);
+    return Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+  }, [today]);
+
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
+      value: i,
+      label: format(new Date(0, i), 'MMMM'),
+  })), []);
+  
+  const handleMonthSelect = (monthIndex: string) => {
+    setHighlightedRange(undefined);
+    setCalendarDate(current => new Date(getYear(current!), parseInt(monthIndex), 1));
+  };
+
+  const handleYearSelect = (year: string) => {
+    setHighlightedRange(undefined);
+    setCalendarDate(current => new Date(parseInt(year), getMonth(current!), 1));
+  };
+
+  const handleQuickNav = (period: 'yesterday' | 'last-week' | 'today') => {
+    if (!today) return;
+    
+    if (period === 'today') {
+        const range = { from: today, to: today };
+        setCalendarDate(startOfMonth(today));
+        setHighlightedRange(range);
+    } else if (period === 'yesterday') {
+        const yesterday = subDays(today, 1);
+        const range = { from: yesterday, to: yesterday };
+        setCalendarDate(startOfMonth(yesterday));
+        setHighlightedRange(range);
     } else if (period === 'last-week') {
-      const to = today;
-      const from = subDays(to, 6);
-      const range = { from, to };
-      setCalendarDate(startOfMonth(from));
-      setHighlightedRange(range);
+        const to = today;
+        const from = subDays(to, 6);
+        const range = { from, to };
+        setCalendarDate(startOfMonth(from));
+        setHighlightedRange(range);
     }
   };
 
@@ -210,13 +244,55 @@ export function Dashboard() {
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         <Card className="h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
-              <CardTitle className="text-base font-semibold">Calendar</CardTitle>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('last-week')}>Last 7 days</Button>
-                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('yesterday')}>Yesterday</Button>
-              </div>
-            </CardHeader>
+            <header className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
+                 <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => { setHighlightedRange(undefined); setCalendarDate(prev => addMonths(prev!, -1)); }}>
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Select
+                        value={String(getMonth(calendarDate))}
+                        onValueChange={handleMonthSelect}
+                    >
+                        <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="Select month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {months.map(m => <SelectItem key={m.value} value={String(m.value)}>{m.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        value={String(getYear(calendarDate))}
+                        onValueChange={handleYearSelect}
+                    >
+                        <SelectTrigger className="w-[90px]">
+                            <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                     <Button variant="outline" size="icon" onClick={() => { setHighlightedRange(undefined); setCalendarDate(prev => addMonths(prev!, 1)); }}>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => handleQuickNav('last-week')}
+                    >
+                        Last 7 days
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => handleQuickNav('yesterday')}
+                    >
+                        Yesterday
+                    </Button>
+                    <Button variant="outline" onClick={() => handleQuickNav('today')}>
+                        Today
+                    </Button>
+                </div>
+            </header>
             <CardContent className="p-0 flex-grow">
                 <Calendar
                     mode="range"
@@ -224,6 +300,9 @@ export function Dashboard() {
                     month={calendarDate}
                     onMonthChange={setCalendarDate}
                     className="p-3 w-full"
+                    components={{
+                        Caption: () => null, // We are using a custom header
+                    }}
                 />
             </CardContent>
         </Card>
