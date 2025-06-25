@@ -209,10 +209,17 @@ export function Dashboard() {
                 <Calendar
                     month={calendarDate}
                     className="p-3 w-full"
-                     classNames={{
+                    classNames={{
+                        months: "flex flex-col sm:flex-row space-y-1",
+                        month: "space-y-2",
+                        head_row: "flex",
+                        head_cell: "w-[14.28%] text-muted-foreground rounded-md text-xs font-normal text-center",
                         row: "flex w-full mt-1",
-                        cell: "h-8 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                        day: "h-8 w-full p-0 font-normal aria-selected:opacity-100",
+                        cell: "w-[14.28%] text-center text-sm p-0",
+                        day: "h-auto w-full p-1 font-normal aria-selected:opacity-100",
+                        day_today: "bg-primary text-primary-foreground rounded-full",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_selected: "bg-accent text-accent-foreground rounded-md",
                     }}
                     components={{
                       Caption: () => null,
