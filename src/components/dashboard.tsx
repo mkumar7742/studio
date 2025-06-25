@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardDescription
 } from "@/components/ui/card";
 import { SpendingCharts } from "@/components/spending-charts";
-import type { PendingTask } from "@/types";
+import type { PendingTask, Transaction } from "@/types";
 import { useAppContext } from '@/context/app-provider';
 import { cn } from '@/lib/utils';
 import { CategorySpending } from "./category-spending";
@@ -19,9 +20,11 @@ import { BudgetsOverview } from './budgets-overview';
 import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getMonth, getYear, subMonths } from 'date-fns';
+import { getMonth, getYear, subMonths, startOfMonth, subDays } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from './ui/calendar';
+import { Button } from './ui/button';
+import type { DateRange } from 'react-day-picker';
 
 
 // Summary card for total balance and credit
@@ -179,6 +182,29 @@ export function Dashboard() {
     'Upcoming Bills & Subscriptions': '/subscriptions',
     'Pending Reimbursements': '/expenses',
   };
+  
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [highlightedRange, setHighlightedRange] = useState<DateRange | undefined>();
+
+  const handleQuickNav = (period: 'yesterday' | 'last-week' | 'today') => {
+    const today = new Date();
+    if (period === 'today') {
+      const range = { from: today, to: today };
+      setCalendarDate(startOfMonth(today));
+      setHighlightedRange(range);
+    } else if (period === 'yesterday') {
+      const yesterday = subDays(today, 1);
+      const range = { from: yesterday, to: yesterday };
+      setCalendarDate(startOfMonth(yesterday));
+      setHighlightedRange(range);
+    } else if (period === 'last-week') {
+      const to = today;
+      const from = subDays(to, 6);
+      const range = { from, to };
+      setCalendarDate(startOfMonth(from));
+      setHighlightedRange(range);
+    }
+  };
 
 
   return (
@@ -188,9 +214,20 @@ export function Dashboard() {
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         <Card className="h-full flex flex-col">
+            <CardHeader className='pb-2'>
+              <CardTitle className="text-base font-semibold">Calendar</CardTitle>
+              <div className="flex items-center gap-2 pt-2">
+                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('last-week')}>Last 7</Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('yesterday')}>Yesterday</Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleQuickNav('today')}>Today</Button>
+              </div>
+            </CardHeader>
             <CardContent className="p-0 flex-grow">
                 <Calendar
-                    mode="single"
+                    mode="range"
+                    selected={highlightedRange}
+                    month={calendarDate}
+                    onMonthChange={setCalendarDate}
                     className="p-3 w-full"
                 />
             </CardContent>
