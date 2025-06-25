@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription } from '@/types';
 import {
     accounts as initialAccounts,
     categories as initialCategories,
@@ -13,7 +13,8 @@ import {
     approvals as initialApprovals,
     members as initialMembers,
     roles as initialRoles,
-    allPermissions
+    allPermissions,
+    subscriptions as initialSubscriptions,
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
 import { format, getMonth, getYear } from 'date-fns';
@@ -35,6 +36,7 @@ interface AppContextType {
     approvals: Approval[];
     members: MemberProfile[];
     roles: Role[];
+    subscriptions: Subscription[];
     allPermissions: typeof allPermissions;
     currentUser: MemberProfile;
     currentUserPermissions: Permission[];
@@ -69,6 +71,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
     const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
     const [roles, setRoles] = useState<Role[]>(initialRoles);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>(initialSubscriptions);
 
     // For demonstration purposes, we assume the logged-in user is the first member.
     // In a real app, this would come from an authentication provider.
@@ -201,6 +204,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         approvals,
         members,
         roles,
+        subscriptions,
         allPermissions,
         currentUser,
         currentUserPermissions,

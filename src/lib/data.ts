@@ -1,6 +1,6 @@
 
-import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission } from '@/types';
-import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2 } from 'lucide-react';
+import type { Account, Transaction, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription } from '@/types';
+import { Wallet, CreditCard, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, PiggyBank, Briefcase, Shapes, Plane, Receipt, Home, PenSquare, ClipboardCheck, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles } from 'lucide-react';
 import { getYear, getMonth } from 'date-fns';
 
 export const allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[] = [
@@ -70,6 +70,10 @@ export const allPermissions: { group: string; permissions: { id: Permission; lab
     group: 'Calendar',
     permissions: [{ id: 'calendar:view', label: 'View Calendar' }],
   },
+  {
+    group: 'Subscriptions',
+    permissions: [{ id: 'subscriptions:view', label: 'View Subscriptions' }],
+  },
 ];
 
 
@@ -88,6 +92,7 @@ export const roles: Role[] = [
       'roles:manage',
       'budgets:manage',
       'calendar:view',
+      'subscriptions:view',
     ],
   },
   {
@@ -103,6 +108,7 @@ export const roles: Role[] = [
       'members:view',
       'budgets:manage',
       'calendar:view',
+      'subscriptions:view',
     ],
   },
   {
@@ -114,6 +120,7 @@ export const roles: Role[] = [
       'income:view', 'income:create',
       'trips:view', 'trips:create',
       'calendar:view',
+      'subscriptions:view',
     ],
   },
 ];
@@ -183,6 +190,8 @@ export const categories: Category[] = [
   { id: 'cat-11', name: 'Accommodation', icon: Home, color: 'hsl(130, 71%, 48%)' },
   { id: 'cat-12', name: 'News Subscription', icon: Receipt, color: 'hsl(26, 88%, 58%)' },
   { id: 'cat-13', name: 'Software', icon: Shapes, color: 'hsl(250, 88%, 58%)' },
+  { id: 'cat-14', name: 'Utilities', icon: Wifi, color: 'hsl(180, 88%, 58%)' },
+  { id: 'cat-15', name: 'Subscriptions', icon: Repeat, color: 'hsl(300, 76%, 60%)' }
 ];
 
 export const transactions: Transaction[] = [
@@ -195,6 +204,13 @@ export const transactions: Transaction[] = [
   { id: 'txn7', type: 'expense', category: 'News Subscription', description: 'News Subscription', amount: 30.00, date: '2022-11-20', accountId: 'acc3', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'NewsTimes', report: 'November_2022', status: 'Not Submitted' },
   { id: 'txn8', type: 'income', category: 'Income', description: 'Client Project Payment', amount: 3500.00, date: '2022-11-01', accountId: 'acc1', receiptUrl: null, member: 'Janice Chandler', team: 'Finance', merchant: 'Client Inc.', report: 'November_2022', status: 'Submitted' },
   { id: 'txn9', type: 'income', category: 'Income', description: 'Monthly Salary', amount: 5000.00, date: '2022-11-25', accountId: 'acc2', receiptUrl: null, member: 'John Doe', team: 'Personal', merchant: 'Employer Corp.', report: 'November_2022', status: 'Submitted' },
+];
+
+export const subscriptions: Subscription[] = [
+  { id: 'sub1', name: 'Netflix', icon: Clapperboard, amount: 15.49, billingCycle: 'Monthly', nextPaymentDate: '2024-07-15', category: 'Entertainment' },
+  { id: 'sub2', name: 'Spotify Premium', icon: Music, amount: 10.99, billingCycle: 'Monthly', nextPaymentDate: '2024-07-22', category: 'Entertainment' },
+  { id: 'sub3', name: 'iCloud+', icon: Cloud, amount: 2.99, billingCycle: 'Monthly', nextPaymentDate: '2024-07-28', category: 'Utilities' },
+  { id: 'sub4', name: 'Adobe Creative Cloud', icon: Sparkles, amount: 599.88, billingCycle: 'Yearly', nextPaymentDate: '2025-01-10', category: 'Software' },
 ];
 
 const currentMonth = getMonth(new Date());

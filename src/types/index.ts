@@ -60,6 +60,16 @@ export interface Trip {
   status: 'Approved' | 'Pending' | 'Not Approved';
 }
 
+export interface Subscription {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  amount: number;
+  billingCycle: 'Monthly' | 'Yearly';
+  nextPaymentDate: string; // yyyy-MM-dd
+  category: string;
+}
+
 // A list of all possible permissions in the app
 export type Permission =
   | 'dashboard:view'
@@ -85,7 +95,8 @@ export type Permission =
   | 'members:delete'
   | 'roles:manage'
   | 'budgets:manage'
-  | 'calendar:view';
+  | 'calendar:view'
+  | 'subscriptions:view';
 
 export interface Role {
   id: string;
