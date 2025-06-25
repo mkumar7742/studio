@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from 'lucide-react';
 
 export interface Transaction {
@@ -64,6 +63,7 @@ export interface Trip {
   currency: string;
   report: string;
   status: 'Approved' | 'Pending' | 'Not Approved';
+  memberId: string;
 }
 
 export interface Subscription {

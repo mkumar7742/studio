@@ -171,9 +171,9 @@ export const members: MemberProfile[] = [
 ];
 
 export const accounts: Account[] = [
-  { id: 'acc1', name: 'Checking Account', balance: 4890.72, currency: 'EUR', icon: Wallet },
-  { id: 'acc2', name: 'Savings Account', balance: 12540.15, currency: 'EUR', icon: PiggyBank },
-  { id: 'acc3', name: 'Credit Card', balance: -784.21, currency: 'EUR', icon: CreditCard },
+  { id: 'acc1', name: 'Checking Account', balance: 4890.72, currency: 'USD', icon: Wallet },
+  { id: 'acc2', name: 'Savings Account', balance: 12540.15, currency: 'USD', icon: PiggyBank },
+  { id: 'acc3', name: 'Credit Card', balance: -784.21, currency: 'USD', icon: CreditCard },
 ];
 
 export const categories: Category[] = [
@@ -207,20 +207,20 @@ export const transactions: Transaction[] = [
 ];
 
 export const subscriptions: Subscription[] = [
-  { id: 'sub1', name: 'Netflix', icon: Clapperboard, amount: 15.49, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-15', category: 'Entertainment' },
-  { id: 'sub2', name: 'Spotify Premium', icon: Music, amount: 10.99, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-22', category: 'Entertainment' },
-  { id: 'sub3', name: 'iCloud+', icon: Cloud, amount: 2.99, currency: 'EUR', billingCycle: 'Monthly', nextPaymentDate: '2024-07-28', category: 'Utilities' },
-  { id: 'sub4', name: 'Adobe Creative Cloud', icon: Sparkles, amount: 599.88, currency: 'EUR', billingCycle: 'Yearly', nextPaymentDate: '2025-01-10', category: 'Software' },
+  { id: 'sub1', name: 'Netflix', icon: Clapperboard, amount: 15.49, currency: 'USD', billingCycle: 'Monthly', nextPaymentDate: '2024-07-15', category: 'Entertainment' },
+  { id: 'sub2', name: 'Spotify Premium', icon: Music, amount: 10.99, currency: 'USD', billingCycle: 'Monthly', nextPaymentDate: '2024-07-22', category: 'Entertainment' },
+  { id: 'sub3', name: 'iCloud+', icon: Cloud, amount: 2.99, currency: 'USD', billingCycle: 'Monthly', nextPaymentDate: '2024-07-28', category: 'Utilities' },
+  { id: 'sub4', name: 'Adobe Creative Cloud', icon: Sparkles, amount: 599.88, currency: 'USD', billingCycle: 'Yearly', nextPaymentDate: '2025-01-10', category: 'Software' },
 ];
 
 const currentMonth = getMonth(new Date());
 const currentYear = getYear(new Date());
 
 export const budgets: Budget[] = [
-    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, currency: 'EUR', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, currency: 'EUR', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, currency: 'EUR', scope: 'member', memberId: 'mem3', month: currentMonth, year: currentYear, status: 'active' },
-    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, currency: 'EUR', scope: 'member', memberId: 'mem2', month: currentMonth, year: currentYear, status: 'archived' },
+    { id: 'bud1', name: 'Global Food Budget', category: 'Food', allocated: 500, currency: 'USD', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud2', name: 'Global Shopping', category: 'Shopping', allocated: 300, currency: 'USD', scope: 'global', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud3', name: 'Jane\'s Travel Budget', category: 'Travel', allocated: 800, currency: 'USD', scope: 'member', memberId: 'mem3', month: currentMonth, year: currentYear, status: 'active' },
+    { id: 'bud4', name: 'John\'s Supplies Budget', category: 'Supplies', allocated: 200, currency: 'USD', scope: 'member', memberId: 'mem2', month: currentMonth, year: currentYear, status: 'archived' },
 ];
 
 export const pendingTasks: PendingTask[] = [
@@ -228,15 +228,15 @@ export const pendingTasks: PendingTask[] = [
   { icon: Plane, label: 'New Trips Registered', value: 1, color: 'bg-blue-600' },
   { icon: Receipt, label: 'Unsubmitted Expenses', value: 4, color: 'bg-emerald-600' },
   { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: 0, color: 'bg-orange-500' },
-  { icon: Undo2, label: 'Pending Reimbursements', value: '€0.00', color: 'bg-purple-500' }
+  { icon: Undo2, label: 'Pending Reimbursements', value: '$0.00', color: 'bg-purple-500' }
 ];
 
 export const trips: Trip[] = [
-    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
-    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending' },
-    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
-    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved' },
-    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved' },
+    { id: 'trip1', date: '08/11/2022', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip2', date: '10/11/2022', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending', memberId: 'mem2' },
+    { id: 'trip3', date: '11/11/2022', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem3' },
+    { id: 'trip4', date: '11/11/2022', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip5', date: '12/11/2022', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved', memberId: 'mem3' },
 ];
 
 export const approvals: Approval[] = [

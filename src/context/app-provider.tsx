@@ -8,7 +8,6 @@ import {
     categories as initialCategories,
     transactions as initialTransactions,
     budgets as initialBudgets,
-    pendingTasks as initialPendingTasks,
     trips as initialTrips,
     approvals as initialApprovals,
     members as initialMembers,
@@ -17,7 +16,7 @@ import {
     subscriptions as initialSubscriptions,
 } from '@/lib/data';
 import type { AddTransactionValues } from '@/components/add-transaction-form';
-import { format, getMonth, getYear } from 'date-fns';
+import { format } from 'date-fns';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2 } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 
@@ -62,12 +61,11 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-    const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+    const [allTransactions, setAllTransactions] = useState<Transaction[]>(initialTransactions);
     const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
     const [categories, setCategories] = useState<Category[]>(initialCategories);
-    const [budgets, setBudgets] = useState<Budget[]>(initialBudgets);
-    const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks);
-    const [trips, setTrips] = useState<Trip[]>(initialTrips);
+    const [allBudgets, setAllBudgets] = useState<Budget[]>(initialBudgets);
+    const [allTrips, setAllTrips] = useState<Trip[]>(initialTrips);
     const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
     const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
     const [roles, setRoles] = useState<Role[]>(initialRoles);
@@ -83,6 +81,45 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const currentUserRole = useMemo(() => getMemberRole(currentUser), [currentUser, roles]);
     const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
+    const isPrivilegedUser = useMemo(() => {
+        const roleName = currentUserRole?.name;
+        return roleName === 'Administrator' || roleName === 'Manager';
+    }, [currentUserRole]);
+
+    // Filter data based on user role
+    const transactions = useMemo(() => {
+        if (isPrivilegedUser) return allTransactions;
+        return allTransactions.filter(t => t.member === currentUser.name);
+    }, [allTransactions, currentUser.name, isPrivilegedUser]);
+
+    const budgets = useMemo(() => {
+        if (isPrivilegedUser) return allBudgets;
+        return allBudgets.filter(b => b.scope === 'global' || b.memberId === currentUser.id);
+    }, [allBudgets, currentUser.id, isPrivilegedUser]);
+
+    const trips = useMemo(() => {
+        if (isPrivilegedUser) return allTrips;
+        return allTrips.filter(t => t.memberId === currentUser.id);
+    }, [allTrips, currentUser.id, isPrivilegedUser]);
+    
+    const pendingTasks = useMemo(() => {
+        const unsubmittedCount = transactions.filter(t => t.status === 'Not Submitted').length;
+        const pendingApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
+        
+        let visibleApprovals = 0;
+        if(currentUserPermissions.includes('approvals:action')) {
+            visibleApprovals = pendingApprovalsCount;
+        }
+
+        return [
+            { icon: ClipboardCheck, label: 'Pending Approvals', value: visibleApprovals, color: 'bg-pink-600' },
+            { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending').length, color: 'bg-blue-600' },
+            { icon: Receipt, label: 'My Unsubmitted Expenses', value: unsubmittedCount, color: 'bg-emerald-600' },
+            { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: 0, color: 'bg-orange-500' },
+            { icon: Undo2, label: 'Pending Reimbursements', value: '$0.00', color: 'bg-purple-500' }
+        ].filter(task => task.value > 0 || task.label === 'Pending Reimbursements' || task.label === 'Upcoming Bills & Subscriptions' );
+
+    }, [transactions, trips, approvals, currentUserPermissions]);
 
 
     const addTransaction = (values: AddTransactionValues) => {
@@ -104,7 +141,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             isRecurring: values.isRecurring,
             recurrenceFrequency: values.isRecurring ? values.recurrenceFrequency : undefined,
         };
-        setTransactions(prev => [newTransaction, ...prev]);
+        setAllTransactions(prev => [newTransaction, ...prev]);
     };
 
     const addBudget = (values: Omit<Budget, 'id' | 'status'>) => {
@@ -113,19 +150,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             ...values,
             status: 'active',
         };
-        setBudgets(prev => [...prev, newBudget]);
+        setAllBudgets(prev => [...prev, newBudget]);
     }
 
     const editBudget = (budgetId: string, values: Omit<Budget, 'id'>) => {
-        setBudgets(prev => prev.map(b => b.id === budgetId ? { id: budgetId, ...values } : b));
+        setAllBudgets(prev => prev.map(b => b.id === budgetId ? { id: budgetId, ...values } : b));
     };
 
     const deleteBudget = (budgetId: string) => {
-        setBudgets(prev => prev.filter(b => b.id !== budgetId));
+        setAllBudgets(prev => prev.filter(b => b.id !== budgetId));
     };
 
     const archiveBudget = (budgetId: string, status: 'active' | 'archived') => {
-        setBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, status } : b));
+        setAllBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, status } : b));
     };
 
     const addCategory = (values: { name: string; color: string; icon: string }) => {
