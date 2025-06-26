@@ -14,6 +14,7 @@ import { Filter, MoreHorizontal, Plus, Plane, ListFilter, Eye } from 'lucide-rea
 import type { Trip } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatCurrency } from '@/lib/currency';
+import { format, parseISO } from 'date-fns';
 
 export default function TripsPage() {
     const { trips } = useAppContext();
@@ -54,12 +55,13 @@ export default function TripsPage() {
     }
 
     const handleExport = () => {
-        const headers = ["Date", "Location", "Purpose", "Amount", "Currency", "Status", "Report"];
+        const headers = ["Departure Date", "Return Date", "Location", "Purpose", "Amount", "Currency", "Status", "Report"];
         const csvRows = [
             headers.join(','),
             ...trips.map(trip => {
                 const row = [
-                    `"${trip.date}"`,
+                    `"${trip.departDate}"`,
+                    `"${trip.returnDate}"`,
                     `"${trip.location.replace(/"/g, '""')}"`,
                     `"${trip.purpose.replace(/"/g, '""')}"`,
                     trip.amount,
@@ -146,7 +148,7 @@ export default function TripsPage() {
                                                     <Plane className="size-4" />
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs text-muted-foreground">{trip.date}</div>
+                                                    <div className="text-xs text-muted-foreground">{format(parseISO(trip.departDate), 'MMM d, yyyy')}</div>
                                                     <div className="font-semibold">{trip.location}</div>
                                                 </div>
                                             </div>

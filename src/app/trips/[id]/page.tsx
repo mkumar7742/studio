@@ -7,46 +7,46 @@ import Link from "next/link";
 import { useAppContext } from '@/context/app-provider';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Plane, BedDouble, Car, MoreHorizontal, X, Check, ArrowRight, Plus, Pencil, Trash2 } from "lucide-react";
+import { Plane, MoreHorizontal, X, Pencil, Trash2, Calendar, User, Wallet, Info } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { TripDialog } from '@/components/trip-dialog';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Trip } from '@/types';
+import { format as formatDate, parseISO } from 'date-fns';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
-const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType, title: string }) => (
-    <div className="flex items-center gap-4 p-3 bg-muted rounded-lg">
-        <Icon className="size-5 text-muted-foreground" />
-        <h2 className="font-semibold text-lg text-foreground">{title}</h2>
-    </div>
-);
-
-const InfoRow = ({ label, value, valueClassName }: { label: string, value: string, valueClassName?: string }) => (
-    <div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className={cn("font-bold text-base text-foreground", valueClassName)}>{value}</p>
+const InfoRow = ({ icon: Icon, label, value, valueClassName }: { icon: React.ElementType, label: string, value: string, valueClassName?: string }) => (
+    <div className="flex items-start gap-4">
+        <Icon className="size-4 text-muted-foreground mt-1" />
+        <div>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className={cn("font-semibold text-foreground", valueClassName)}>{value}</p>
+        </div>
     </div>
 );
 
 export default function TripDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { trips, deleteTrip } = useAppContext();
+    const { trips, deleteTrip, members } = useAppContext();
     const { toast } = useToast();
     
     const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);
     const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
 
     const trip = trips.find(t => t.id === params.id);
+    const member = trip ? members.find(m => m.id === trip.memberId) : null;
     
-    if (!trip) {
+    if (!trip || !member) {
         return (
              <div className="flex flex-col h-full items-center justify-center bg-background text-foreground p-4 text-center">
                 <h1 className="text-2xl font-bold">Trip not found</h1>
-                <p className="text-muted-foreground mt-2">The requested trip could not be found.</p>
+                <p className="text-muted-foreground mt-2">The requested trip could not be found or is invalid.</p>
                 <Button asChild variant="outline" className="mt-4"><Link href="/trips">Back to Trips</Link></Button>
             </div>
         );
@@ -73,12 +73,15 @@ export default function TripDetailPage() {
         }
     }
 
+    const formattedDepartDate = formatDate(parseISO(trip.departDate), 'PPP');
+    const formattedReturnDate = formatDate(parseISO(trip.returnDate), 'PPP');
+
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
             <header className="flex items-center justify-between p-6 border-b border-border">
                 <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-bold tracking-tight">
-                        Trips - {trip.location} {trip.date}
+                        Trip to {trip.location}
                     </h1>
                     <Badge className={cn("border-none", getStatusBadgeClass(trip.status))}>{trip.status}</Badge>
                 </div>
@@ -109,98 +112,42 @@ export default function TripDetailPage() {
                 </div>
             </header>
             <main className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <p className="text-sm text-muted-foreground">Duration: November 11 - November 20</p>
-                        
-                        <div className="space-y-3">
-                            <SectionHeader icon={Plane} title="Flight" />
-                            <Card className="bg-card">
-                                <CardContent className="p-4 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto] items-center gap-4 text-sm">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">11 Nov</p>
-                                        <p className="font-bold">Stockholm</p>
-                                        <p className="text-muted-foreground">Arlanda Airport (ARN)</p>
-                                    </div>
-                                    <ArrowRight className="size-4 text-muted-foreground hidden md:block" />
-                                    <div>
-                                        <p className="font-bold">Brussels</p>
-                                        <p className="text-muted-foreground">Brussels Airport (BRU)</p>
-                                    </div>
-                                    <div className="border-t md:border-t-0 md:border-l border-border/50 pt-4 md:pt-0 md:pl-4 mt-4 md:mt-0 space-y-1">
-                                        <div className="flex items-center justify-between"><span>Economy Class</span> <Check className="size-4 text-green-500" /></div>
-                                        <div className="flex items-center justify-between text-muted-foreground"><span>Early check-in</span> <X className="size-4 text-red-500" /></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-card">
-                                <CardContent className="p-4 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto] items-center gap-4 text-sm">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">20 Nov</p>
-                                        <p className="font-bold">Brussels</p>
-                                        <p className="text-muted-foreground">Brussels Airport (BRU)</p>
-                                    </div>
-                                    <ArrowRight className="size-4 text-muted-foreground hidden md:block" />
-                                    <div>
-                                        <p className="font-bold">Stockholm</p>
-                                        <p className="text-muted-foreground">Arlanda Airport (ARN)</p>
-                                    </div>
-                                    <div className="border-t md:border-t-0 md:border-l border-border/50 pt-4 md:pt-0 md:pl-4 mt-4 md:mt-0 space-y-1">
-                                        <div className="flex items-center justify-between"><span>Economy Class</span> <Check className="size-4 text-green-500" /></div>
-                                        <div className="flex items-center justify-between text-muted-foreground"><span>Early check-in</span> <X className="size-4 text-red-500" /></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <CardTitle className="text-2xl">Trip Summary</CardTitle>
+                                <CardDescription>Key details for the trip to {trip.location}.</CardDescription>
+                            </div>
+                            <div className="flex size-12 items-center justify-center rounded-lg bg-blue-500 text-white">
+                                <Plane className="size-6" />
+                            </div>
                         </div>
-
-                        <div className="space-y-3">
-                            <SectionHeader icon={BedDouble} title="Hotel" />
-                             <Card className="bg-card">
-                                <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 items-center gap-4 text-sm">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">11 Nov - 20 Nov</p>
-                                        <p className="font-bold">Superior Hotel *****</p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <InfoRow icon={Calendar} label="Departure Date" value={formattedDepartDate} />
+                            <InfoRow icon={Calendar} label="Return Date" value={formattedReturnDate} />
+                             <InfoRow icon={Wallet} label="Trip Budget" value={formatCurrency(trip.amount, trip.currency)} />
+                            <div className="flex items-start gap-4">
+                                <User className="size-4 text-muted-foreground mt-1" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Traveller</p>
+                                    <div className="flex items-center gap-2 font-semibold text-foreground">
+                                        <Avatar className="size-6">
+                                            <AvatarImage src={member.avatar} data-ai-hint={member.avatarHint} />
+                                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <Link href={`/members/${member.id}`} className="hover:underline">{member.name}</Link>
                                     </div>
-                                    <div className="border-t md:border-t-0 md:border-l border-border/50 pt-4 md:pt-0 md:pl-4 mt-4 md:mt-0 space-y-1">
-                                        <div className="flex items-center justify-between"><span>Queen Suite</span> <Check className="size-4 text-green-500" /></div>
-                                        <div className="flex items-center justify-between"><span>Early check-in</span> <Check className="size-4 text-green-500" /></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div className="space-y-3">
-                             <SectionHeader icon={Car} title="Transfer" />
-                             <Card className="bg-card h-14 flex items-center justify-center">
-                                <p className="text-muted-foreground">-</p>
-                            </Card>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Button variant="outline" className="w-full justify-start p-3 bg-muted rounded-lg border-none hover:bg-muted/80 text-foreground h-auto">
-                                <Plus className="mr-4 size-5 text-muted-foreground" />
-                                <span className="font-semibold text-lg">Add section</span>
-                            </Button>
-                            <Card className="bg-card border-dashed">
-                                <CardContent className="p-4 flex justify-between text-muted-foreground">
-                                    <span>-</span>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-
-                    <div className="lg:col-span-1">
-                        <Card className="bg-card sticky top-6">
-                            <CardContent className="p-6 space-y-6">
-                                <InfoRow label="Approved by:" value="Clara from Ops Team" />
-                                <InfoRow label="Travel Policy:" value="Basic/Company" />
-                                <InfoRow label="Travel documents:" value="Provided" />
-                                <InfoRow label="Purpose:" value={trip.purpose} />
-                                <InfoRow label="Trip Budget:" value={formatCurrency(trip.amount, trip.currency)} />
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                        <Separator />
+                        <InfoRow icon={Info} label="Purpose" value={trip.purpose} />
+                        {trip.hotel && <InfoRow icon={Plane} label="Hotel" value={trip.hotel} />}
+                    </CardContent>
+                </Card>
             </main>
             <TripDialog 
                 trip={tripToEdit}

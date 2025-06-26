@@ -232,11 +232,11 @@ export const pendingTasks: PendingTask[] = [
 ];
 
 export const trips: Trip[] = [
-    { id: 'trip1', date: '2022-11-08', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
-    { id: 'trip2', date: '2022-11-10', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending', memberId: 'mem2' },
-    { id: 'trip3', date: '2022-11-11', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem3' },
-    { id: 'trip4', date: '2022-11-11', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
-    { id: 'trip5', date: '2022-11-12', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved', memberId: 'mem3' },
+    { id: 'trip1', departDate: '2022-11-08', returnDate: '2022-11-15', location: 'Copenhagen', purpose: 'Business Trip', amount: 1000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip2', departDate: '2022-11-10', returnDate: '2022-11-18', location: 'London', purpose: 'Client Pitch', amount: 850.00, currency: 'GBP', report: 'November_2022', status: 'Pending', memberId: 'mem2' },
+    { id: 'trip3', departDate: '2022-11-11', returnDate: '2022-11-20', location: 'Brussels', purpose: 'Client Pitch', amount: 1500.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem3' },
+    { id: 'trip4', departDate: '2022-11-11', returnDate: '2022-11-14', location: 'Barcelona', purpose: 'Conference', amount: 2000.00, currency: 'EUR', report: 'November_2022', status: 'Approved', memberId: 'mem1' },
+    { id: 'trip5', departDate: '2022-11-12', returnDate: '2022-11-19', location: 'Hamburg', purpose: 'Business Trip', amount: 980.00, currency: 'EUR', report: 'November_2022', status: 'Not Approved', memberId: 'mem3' },
 ];
 
 export const approvals: Approval[] = [

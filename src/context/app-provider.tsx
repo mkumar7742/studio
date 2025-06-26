@@ -27,6 +27,7 @@ const iconMap: { [key: string]: LucideIcon } = {
 
 export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
 export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon'> & { icon: string };
+export type TripFormData = Omit<Trip, 'id' | 'status' | 'report'>;
 
 interface AppContextType {
     transactions: Transaction[];
@@ -63,8 +64,8 @@ interface AppContextType {
     updateCurrentUser: (data: Partial<MemberProfile>) => void;
     updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
     addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
-    addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
-    editTrip: (tripId: string, values: Partial<Trip>) => void;
+    addTrip: (trip: TripFormData) => void;
+    editTrip: (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => void;
     deleteTrip: (tripId: string) => void;
     addSubscription: (values: SubscriptionFormData) => void;
     editSubscription: (subscriptionId: string, values: SubscriptionFormData) => void;
@@ -292,17 +293,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setApprovals(prev => [newApproval, ...prev]);
     }, [currentUser, getMemberRole]);
 
-    const addTrip = useCallback((tripData: Omit<Trip, 'id' | 'status' | 'report'>) => {
+    const addTrip = useCallback((tripData: TripFormData) => {
         const newTrip: Trip = {
             id: `trip-${Date.now()}`,
             ...tripData,
             status: 'Pending',
-            report: `${format(parseISO(tripData.date), 'MMMM_yyyy')}`
+            report: `${format(parseISO(tripData.departDate), 'MMMM_yyyy')}`
         };
         setAllTrips(prev => [...prev, newTrip]);
     }, []);
 
-    const editTrip = useCallback((tripId: string, values: Partial<Trip>) => {
+    const editTrip = useCallback((tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
         setAllTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
     }, []);
 

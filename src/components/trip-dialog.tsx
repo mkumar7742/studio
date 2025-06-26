@@ -15,6 +15,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from './ui/textarea';
+import { format, parseISO } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
+import { Calendar } from './ui/calendar';
 
 const tripFormSchema = z.object({
   location: z.string().min(2, { message: "Location is required." }),
@@ -22,7 +27,14 @@ const tripFormSchema = z.object({
   amount: z.coerce.number().positive(),
   currency: z.string(),
   status: z.enum(['Approved', 'Pending', 'Not Approved']),
+  departDate: z.date({ required_error: "Departure date is required." }),
+  returnDate: z.date({ required_error: "Return date is required." }),
+  hotel: z.string().optional(),
+}).refine(data => data.returnDate >= data.departDate, {
+    message: "Return date cannot be before departure date.",
+    path: ["returnDate"],
 });
+
 
 type TripFormValues = z.infer<typeof tripFormSchema>;
 
@@ -48,14 +60,23 @@ export function TripDialog({ trip, open, onOpenChange }: TripDialogProps) {
                 amount: trip.amount,
                 currency: trip.currency,
                 status: trip.status,
+                departDate: parseISO(trip.departDate),
+                returnDate: parseISO(trip.returnDate),
+                hotel: trip.hotel,
             });
         }
-    }, [trip, form]);
+    }, [trip, form, open]);
     
     if (!trip) return null;
 
     function onSubmit(values: TripFormValues) {
-        editTrip(trip!.id, values);
+        const updatedTripData = {
+            ...values,
+            departDate: format(values.departDate, 'yyyy-MM-dd'),
+            returnDate: format(values.returnDate, 'yyyy-MM-dd'),
+        };
+
+        editTrip(trip!.id, updatedTripData);
         toast({
             title: "Trip Updated",
             description: `The trip to ${values.location} has been updated.`,
@@ -65,7 +86,7 @@ export function TripDialog({ trip, open, onOpenChange }: TripDialogProps) {
     
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Edit Trip</DialogTitle>
                     <DialogDescription>Update the details for your trip to {trip.location}.</DialogDescription>
@@ -79,6 +100,50 @@ export function TripDialog({ trip, open, onOpenChange }: TripDialogProps) {
                             <FormItem><FormLabel>Purpose</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="departDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                    <FormLabel>Departure Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="returnDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                    <FormLabel>Return Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
                             <FormField control={form.control} name="amount" render={({ field }) => (
                                 <FormItem><FormLabel>Budget</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
@@ -89,6 +154,9 @@ export function TripDialog({ trip, open, onOpenChange }: TripDialogProps) {
                                 </Select><FormMessage /></FormItem>
                             )} />
                         </div>
+                        <FormField control={form.control} name="hotel" render={({ field }) => (
+                            <FormItem><FormLabel>Hotel</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
                         <FormField control={form.control} name="status" render={({ field }) => (
                             <FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger></FormControl>

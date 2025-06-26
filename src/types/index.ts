@@ -58,7 +58,8 @@ export interface PendingTask {
 
 export interface Trip {
   id: string;
-  date: string;
+  departDate: string; // yyyy-MM-dd
+  returnDate: string; // yyyy-MM-dd
   location: string;
   purpose: string;
   amount: number;
@@ -66,6 +67,7 @@ export interface Trip {
   report: string;
   status: 'Approved' | 'Pending' | 'Not Approved';
   memberId: string;
+  hotel?: string;
 }
 
 export interface Subscription {

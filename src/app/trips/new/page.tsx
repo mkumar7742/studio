@@ -28,7 +28,11 @@ const tripFormSchema = z.object({
   amount: z.coerce.number().positive({ message: "Budget must be a positive number." }),
   currency: z.string({ required_error: "Please select a currency." }),
   hotel: z.string().optional(),
+}).refine(data => data.returnDate >= data.departDate, {
+    message: "Return date cannot be before departure date.",
+    path: ["returnDate"],
 });
+
 
 type TripFormValues = z.infer<typeof tripFormSchema>;
 
@@ -47,7 +51,8 @@ export default function NewTripPage() {
     function onSubmit(values: TripFormValues) {
         addTrip({
             ...values,
-            date: format(values.departDate, 'yyyy-MM-dd'),
+            departDate: format(values.departDate, 'yyyy-MM-dd'),
+            returnDate: format(values.returnDate, 'yyyy-MM-dd'),
             memberId: currentUser.id,
         });
         toast({
@@ -150,12 +155,6 @@ export default function NewTripPage() {
                     <div className="space-y-6">
                         <h2 className="text-base font-semibold uppercase tracking-wider text-muted-foreground">ACCOMMODATION</h2>
                         <div className="space-y-6 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
-                            <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-teal-500 text-white"><CalendarPlus className="size-4" /></div><span>Check-in*</span></Label>
-                            <Input type="date" className="bg-card border-border" />
-
-                            <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-pink-500 text-white"><CalendarMinus className="size-4" /></div><span>Check-out*</span></Label>
-                            <Input type="date" className="bg-card border-border" />
-                            
                             <FormField
                                 control={form.control}
                                 name="hotel"
