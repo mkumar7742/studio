@@ -64,6 +64,8 @@ interface AppContextType {
     updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
     addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
     addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
+    editTrip: (tripId: string, values: Partial<Trip>) => void;
+    deleteTrip: (tripId: string) => void;
     addSubscription: (values: SubscriptionFormData) => void;
     editSubscription: (subscriptionId: string, values: SubscriptionFormData) => void;
     deleteSubscription: (subscriptionId: string) => void;
@@ -299,6 +301,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         };
         setAllTrips(prev => [...prev, newTrip]);
     }, []);
+
+    const editTrip = useCallback((tripId: string, values: Partial<Trip>) => {
+        setAllTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
+    }, []);
+
+    const deleteTrip = useCallback((tripId: string) => {
+        setAllTrips(prev => prev.filter(t => t.id !== tripId));
+    }, []);
     
     const addSubscription = useCallback((values: SubscriptionFormData) => {
         const newSubscription: Subscription = {
@@ -413,6 +423,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         updateApprovalStatus,
         addApproval,
         addTrip,
+        editTrip,
+        deleteTrip,
         addSubscription,
         editSubscription,
         deleteSubscription,

@@ -1,14 +1,21 @@
 
 'use client';
 
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useAppContext } from '@/context/app-provider';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Plane, BedDouble, Car, MoreHorizontal, X, Check, ArrowRight, Plus } from "lucide-react";
-import Link from "next/link";
+import { Plane, BedDouble, Car, MoreHorizontal, X, Check, ArrowRight, Plus, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { TripDialog } from '@/components/trip-dialog';
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
+import type { Trip } from '@/types';
 
 const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType, title: string }) => (
     <div className="flex items-center gap-4 p-3 bg-muted rounded-lg">
@@ -17,24 +24,54 @@ const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType, title: 
     </div>
 );
 
-
 const InfoRow = ({ label, value, valueClassName }: { label: string, value: string, valueClassName?: string }) => (
     <div>
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className={cn("font-bold text-base text-foreground", valueClassName)}>{value}</p>
     </div>
-)
+);
 
-export default function TripDetailPage({ params }: { params: { id: string } }) {
-    // In a real app, you would fetch trip data based on params.id
-    // For this example, we'll use static data that matches the design.
-    const trip = {
-        location: 'Brussels',
-        date: '11/11/2022',
-        status: 'Pending',
-        budget: 1500,
-        currency: 'EUR'
+export default function TripDetailPage() {
+    const params = useParams();
+    const router = useRouter();
+    const { trips, deleteTrip } = useAppContext();
+    const { toast } = useToast();
+    
+    const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);
+    const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
+
+    const trip = trips.find(t => t.id === params.id);
+    
+    if (!trip) {
+        return (
+             <div className="flex flex-col h-full items-center justify-center bg-background text-foreground p-4 text-center">
+                <h1 className="text-2xl font-bold">Trip not found</h1>
+                <p className="text-muted-foreground mt-2">The requested trip could not be found.</p>
+                <Button asChild variant="outline" className="mt-4"><Link href="/trips">Back to Trips</Link></Button>
+            </div>
+        );
+    }
+
+    const handleConfirmDelete = () => {
+        if (tripToDelete) {
+            deleteTrip(tripToDelete.id);
+            toast({
+                title: "Trip Deleted",
+                description: `The trip to ${tripToDelete.location} has been deleted.`,
+            });
+            router.push('/trips');
+            setTripToDelete(null);
+        }
     };
+    
+    const getStatusBadgeClass = (status: Trip['status']) => {
+        switch(status) {
+            case 'Approved': return 'bg-violet-600 hover:bg-violet-600/90 text-white';
+            case 'Pending': return 'bg-pink-600 hover:bg-pink-600/90 text-white';
+            case 'Not Approved': return 'bg-red-600 hover:bg-red-600/90 text-white';
+            default: return '';
+        }
+    }
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -43,10 +80,12 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                     <h1 className="text-2xl font-bold tracking-tight">
                         Trips - {trip.location} {trip.date}
                     </h1>
-                    <Badge className="bg-pink-600 hover:bg-pink-600/90 text-white border-none">{trip.status}</Badge>
+                    <Badge className={cn("border-none", getStatusBadgeClass(trip.status))}>{trip.status}</Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold">Edit</Button>
+                    <Button onClick={() => setTripToEdit(trip)} className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold">
+                        <Pencil className="mr-2" /> Edit
+                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -57,7 +96,9 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                             <DropdownMenuItem>Share</DropdownMenuItem>
                             <DropdownMenuItem>Duplicate</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive focus:bg-destructive/80 focus:text-destructive-foreground">Delete Trip</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTripToDelete(trip)} className="text-destructive focus:bg-destructive/80 focus:text-destructive-foreground">
+                                <Trash2 className="mr-2" /> Delete Trip
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Link href="/trips">
@@ -154,13 +195,25 @@ export default function TripDetailPage({ params }: { params: { id: string } }) {
                                 <InfoRow label="Approved by:" value="Clara from Ops Team" />
                                 <InfoRow label="Travel Policy:" value="Basic/Company" />
                                 <InfoRow label="Travel documents:" value="Provided" />
-                                <InfoRow label="Purpose:" value="Client Visit" />
-                                <InfoRow label="Trip Budget:" value={formatCurrency(trip.budget, trip.currency)} />
+                                <InfoRow label="Purpose:" value={trip.purpose} />
+                                <InfoRow label="Trip Budget:" value={formatCurrency(trip.amount, trip.currency)} />
                             </CardContent>
                         </Card>
                     </div>
                 </div>
             </main>
+            <TripDialog 
+                trip={tripToEdit}
+                open={!!tripToEdit}
+                onOpenChange={(isOpen) => !isOpen && setTripToEdit(null)}
+            />
+             <DeleteConfirmationDialog
+                open={!!tripToDelete}
+                onOpenChange={(isOpen) => !isOpen && setTripToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Trip"
+                description={`Are you sure you want to delete the trip to ${tripToDelete?.location}? This action cannot be undone.`}
+            />
         </div>
     );
 }
