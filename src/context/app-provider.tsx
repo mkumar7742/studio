@@ -26,6 +26,7 @@ const iconMap: { [key: string]: LucideIcon } = {
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
+export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon'> & { icon: string };
 
 interface AppContextType {
     transactions: Transaction[];
@@ -63,6 +64,8 @@ interface AppContextType {
     updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
     addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
     addTrip: (trip: Omit<Trip, 'id' | 'status' | 'report'>) => void;
+    addSubscription: (values: SubscriptionFormData) => void;
+    editSubscription: (subscriptionId: string, values: SubscriptionFormData) => void;
     deleteSubscription: (subscriptionId: string) => void;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
@@ -297,6 +300,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setAllTrips(prev => [...prev, newTrip]);
     }, []);
     
+    const addSubscription = useCallback((values: SubscriptionFormData) => {
+        const newSubscription: Subscription = {
+            id: `sub-${Date.now()}`,
+            ...values,
+            icon: iconMap[values.icon] || Repeat,
+        };
+        setSubscriptions(prev => [...prev, newSubscription]);
+    }, []);
+
+    const editSubscription = useCallback((subscriptionId: string, values: SubscriptionFormData) => {
+        setSubscriptions(prev => prev.map(s => 
+            s.id === subscriptionId 
+            ? { id: subscriptionId, ...values, icon: iconMap[values.icon] || Repeat } 
+            : s
+        ));
+    }, []);
+
     const deleteSubscription = useCallback((subscriptionId: string) => {
         setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
     }, []);
@@ -393,6 +413,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         updateApprovalStatus,
         addApproval,
         addTrip,
+        addSubscription,
+        editSubscription,
         deleteSubscription,
         sendMessage,
         markConversationAsRead,
