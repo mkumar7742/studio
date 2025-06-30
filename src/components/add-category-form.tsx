@@ -74,8 +74,8 @@ export function AddCategoryForm({ onFinished }: AddCategoryFormProps) {
     defaultValues: { name: "", color: categoryColors[0], icon: availableIcons[0].name },
   });
 
-  function onSubmit(values: AddCategoryValues) {
-    addCategory(values);
+  async function onSubmit(values: AddCategoryValues) {
+    await addCategory(values);
     form.reset({ name: "", color: categoryColors[0], icon: availableIcons[0].name });
     if (onFinished) {
       onFinished();

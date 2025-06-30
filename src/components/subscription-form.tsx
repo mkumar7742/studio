@@ -35,16 +35,6 @@ export const availableSubscriptionIcons: { name: string; icon: LucideIcon }[] = 
     { name: "ShoppingCart", icon: ShoppingCart },
 ];
 
-const getIconName = (IconComponent: LucideIcon | undefined) => {
-    if (!IconComponent) return "Repeat";
-    for (const { name, icon } of availableSubscriptionIcons) {
-        if (icon === IconComponent) {
-            return name;
-        }
-    }
-    return 'Repeat'; // fallback
-};
-
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
@@ -52,7 +42,7 @@ const formSchema = z.object({
   billingCycle: z.enum(["Monthly", "Yearly"], { required_error: "Please select a billing cycle." }),
   nextPaymentDate: z.date({ required_error: "A date is required." }),
   category: z.string({ required_error: "Please select a category." }),
-  icon: z.string({ required_error: "Please select an icon." }),
+  iconName: z.string({ required_error: "Please select an icon." }),
 });
 
 type SubscriptionFormValues = z.infer<typeof formSchema>;
@@ -75,19 +65,15 @@ export function SubscriptionForm({ subscription, onFinished }: SubscriptionFormP
         billingCycle: subscription?.billingCycle || "Monthly",
         nextPaymentDate: subscription ? parseISO(subscription.nextPaymentDate) : new Date(),
         category: subscription?.category || "",
-        icon: getIconName(subscription?.icon),
+        iconName: subscription?.iconName || "Repeat",
     },
   });
 
-  function onSubmit(values: SubscriptionFormValues) {
-    const dataToSave = {
-        ...values,
-        nextPaymentDate: format(values.nextPaymentDate, "yyyy-MM-dd"),
-    }
+  async function onSubmit(values: SubscriptionFormValues) {
     if (isEditing && subscription) {
-      editSubscription(subscription.id, dataToSave);
+      await editSubscription(subscription.id, values);
     } else {
-      addSubscription(dataToSave);
+      await addSubscription(values);
     }
     if (onFinished) {
       onFinished();
@@ -211,7 +197,7 @@ export function SubscriptionForm({ subscription, onFinished }: SubscriptionFormP
         />
         <FormField
           control={form.control}
-          name="icon"
+          name="iconName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Icon</FormLabel>

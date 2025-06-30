@@ -6,6 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableCategoryItem } from './sortable-category-item';
 import type { Category } from '@/types';
+import { useAppContext } from '@/context/app-provider';
 
 interface SortableCategoryListProps {
   items: Category[];
@@ -16,6 +17,7 @@ interface SortableCategoryListProps {
 }
 
 export function SortableCategoryList({ items, setItems, categoryCounts, onEdit, onDelete }: SortableCategoryListProps) {
+  const { reorderCategories } = useAppContext();
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -27,11 +29,13 @@ export function SortableCategoryList({ items, setItems, categoryCounts, onEdit, 
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setItems((currentItems) => {
-        const oldIndex = currentItems.findIndex((item) => item.id === active.id);
-        const newIndex = currentItems.findIndex((item) => item.id === over.id);
-        return arrayMove(currentItems, oldIndex, newIndex);
-      });
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      const newOrder = arrayMove(items, oldIndex, newIndex);
+      setItems(newOrder); // Optimistic update
+      
+      const orderedIds = newOrder.map(item => item.id);
+      reorderCategories(orderedIds);
     }
   }
 

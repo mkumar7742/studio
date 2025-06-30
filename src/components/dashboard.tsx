@@ -149,8 +149,8 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 }
 
 export function Dashboard() {
-  const { transactions: allTransactions, pendingTasks, transactions } = useAppContext();
-  const expenseTransactions = allTransactions.filter(t => t.type === 'expense');
+  const { transactions, pendingTasks } = useAppContext();
+  const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
   const now = new Date();
   const thisMonth = getMonth(now);

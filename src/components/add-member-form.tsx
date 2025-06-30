@@ -30,12 +30,12 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
     defaultValues: {
       name: "",
       email: "",
-      roleId: "role-member",
+      roleId: roles.find(r => r.name === 'Member')?.id,
     },
   });
 
-  function onSubmit(values: AddMemberValues) {
-    addMember(values);
+  async function onSubmit(values: AddMemberValues) {
+    await addMember(values);
     form.reset();
     if (onFinished) {
       onFinished();

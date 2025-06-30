@@ -1,0 +1,60 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
+
+const seedDatabase = require('./seed');
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// MongoDB Connection
+const dbURI = process.env.MONGODB_URI;
+
+if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv://'))) {
+    console.error('---');
+    console.error('FATAL ERROR: Invalid or missing MongoDB connection string.');
+    console.error('The MONGODB_URI environment variable is not set correctly.');
+    console.error('Please add it to your .env file.');
+    console.error('Example (Local): MONGODB_URI="mongodb://127.0.0.1:27017/trackwise"');
+    console.error('Example (Atlas): MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/dbname"');
+    console.error('---');
+    // We don't exit the process to allow nodemon to restart on .env file changes
+} else {
+    mongoose.connect(dbURI)
+        .then(async () => {
+            console.log('MongoDB connected successfully');
+            console.log('---');
+            console.log('NOTE: If this is the first run against an empty database,');
+            console.log('it will be automatically seeded with initial data.');
+            console.log('---');
+            await seedDatabase();
+        })
+        .catch(err => {
+            console.error('MongoDB connection error:', err);
+        });
+}
+
+// API Routes
+app.use('/api/transactions', require('./api/transactions'));
+app.use('/api/accounts', require('./api/accounts'));
+app.use('/api/categories', require('./api/categories'));
+app.use('/api/budgets', require('./api/budgets'));
+app.use('/api/trips', require('./api/trips'));
+app.use('/api/approvals', require('./api/approvals'));
+app.use('/api/members', require('./api/members'));
+app.use('/api/roles', require('./api/roles'));
+app.use('/api/subscriptions', require('./api/subscriptions'));
+app.use('/api/permissions', require('./api/permissions'));
+
+app.get('/', (req, res) => {
+    res.send('TrackWise API Server is running.');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

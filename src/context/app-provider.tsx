@@ -1,32 +1,23 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
-import {
-    accounts as initialAccounts,
-    categories as initialCategories,
-    transactions as initialTransactions,
-    budgets as initialBudgets,
-    trips as initialTrips,
-    approvals as initialApprovals,
-    members as initialMembers,
-    roles as initialRoles,
-    allPermissions,
-    subscriptions as initialSubscriptions,
-} from '@/lib/data';
+import { allPermissions as initialAllPermissions } from '@/lib/data';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
+import { useToast } from '@/hooks/use-toast';
 
-// Create a map of icon names to Lucide components
+const API_BASE_URL = 'http://localhost:5001/api';
+
 const iconMap: { [key: string]: LucideIcon } = {
-    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
-export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon'> & { icon: string };
+export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon' | 'iconName'> & { iconName: string };
 export type TripFormData = Omit<Trip, 'id' | 'status' | 'report'>;
 
 interface AppContextType {
@@ -40,103 +31,125 @@ interface AppContextType {
     members: MemberProfile[];
     roles: Role[];
     subscriptions: Subscription[];
-    allPermissions: typeof allPermissions;
-    currentUser: MemberProfile;
+    allPermissions: typeof initialAllPermissions;
+    currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
     conversations: Conversation[];
-    addTransaction: (values: FullTransaction) => void;
-    deleteTransactions: (transactionIds: string[]) => void;
-    addBudget: (values: Omit<Budget, 'id' | 'status'>) => void;
-    editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => void;
-    deleteBudget: (budgetId: string) => void;
-    archiveBudget: (budgetId: string, status: 'active' | 'archived') => void;
-    addCategory: (values: { name: string; color: string; icon: string }) => void;
-    editCategory: (categoryId: string, values: { name: string; color: string; icon: string }) => void;
-    deleteCategory: (categoryId: string) => void;
+    addTransaction: (values: Omit<Transaction, 'id'>) => Promise<void>;
+    deleteTransactions: (transactionIds: string[]) => Promise<void>;
+    addBudget: (values: Omit<Budget, 'id' | 'status'>) => Promise<void>;
+    editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => Promise<void>;
+    deleteBudget: (budgetId: string) => Promise<void>;
+    archiveBudget: (budgetId: string, status: 'active' | 'archived') => Promise<void>;
+    addCategory: (values: { name: string; color: string; icon: string }) => Promise<void>;
+    editCategory: (categoryId: string, values: { name: string; color: string; icon: string }) => Promise<void>;
+    deleteCategory: (categoryId: string) => Promise<void>;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
-    addMember: (values: { name: string; email: string; roleId: string; }) => void;
-    editMember: (memberId: string, values: Partial<MemberProfile>) => void;
-    deleteMember: (memberId: string) => void;
+    reorderCategories: (orderedIds: string[]) => Promise<void>;
+    addMember: (values: { name: string; email: string; roleId: string; }) => Promise<void>;
+    editMember: (memberId: string, values: Partial<MemberProfile>) => Promise<void>;
+    deleteMember: (memberId: string) => Promise<void>;
     getMemberRole: (member: MemberProfile) => Role | undefined;
-    addRole: (values: { name: string; permissions: Permission[] }) => void;
-    editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => void;
-    deleteRole: (roleId: string) => void;
-    updateCurrentUser: (data: Partial<MemberProfile>) => void;
-    updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => void;
-    addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => void;
-    addTrip: (trip: TripFormData) => void;
-    editTrip: (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => void;
-    deleteTrip: (tripId: string) => void;
-    addSubscription: (values: SubscriptionFormData) => void;
-    editSubscription: (subscriptionId: string, values: SubscriptionFormData) => void;
-    deleteSubscription: (subscriptionId: string) => void;
+    addRole: (values: { name: string; permissions: Permission[] }) => Promise<void>;
+    editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => Promise<void>;
+    deleteRole: (roleId: string) => Promise<void>;
+    updateCurrentUser: (data: Partial<MemberProfile>) => Promise<void>;
+    updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => Promise<void>;
+    addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => Promise<void>;
+    addTrip: (trip: TripFormData) => Promise<void>;
+    editTrip: (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => Promise<void>;
+    deleteTrip: (tripId: string) => Promise<void>;
+    addSubscription: (values: SubscriptionFormData) => Promise<void>;
+    editSubscription: (subscriptionId: string, values: SubscriptionFormData) => Promise<void>;
+    deleteSubscription: (subscriptionId: string) => Promise<void>;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// A static date to use for initial chat data to prevent hydration errors.
 const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
 
+const mapAccountData = (account: any): Account => ({
+    ...account,
+    icon: iconMap[account.icon] || Wallet,
+});
+
+const mapCategoryData = (category: any): Category => ({
+    ...category,
+    icon: iconMap[category.icon] || Shapes,
+    iconName: category.icon,
+});
+
+const mapSubscriptionData = (subscription: any): Subscription => ({
+    ...subscription,
+    icon: iconMap[subscription.icon] || Repeat,
+    iconName: subscription.icon,
+});
+
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-    const [allTransactions, setAllTransactions] = useState<Transaction[]>(initialTransactions);
-    const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
-    const [categories, setCategories] = useState<Category[]>(initialCategories);
-    const [allBudgets, setAllBudgets] = useState<Budget[]>(initialBudgets);
-    const [allTrips, setAllTrips] = useState<Trip[]>(initialTrips);
-    const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
-    const [members, setMembers] = useState<MemberProfile[]>(initialMembers);
-    const [roles, setRoles] = useState<Role[]>(initialRoles);
-    const [subscriptions, setSubscriptions] = useState<Subscription[]>(initialSubscriptions);
+    const { toast } = useToast();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [trips, setTrips] = useState<Trip[]>([]);
+    const [approvals, setApprovals] = useState<Approval[]>([]);
+    const [members, setMembers] = useState<MemberProfile[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+    const [allPermissions, setAllPermissions] = useState(initialAllPermissions);
+    const [currentUser, setCurrentUser] = useState<MemberProfile | null>(null);
+
     const [conversations, setConversations] = useState<Conversation[]>([
-      {
-        memberId: 'mem2', // John Doe
-        unreadCount: 0,
-        messages: [
-          { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
-          { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
-          { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
-        ]
-      },
-      {
-        memberId: 'mem3', // Jane Smith
-        unreadCount: 1,
-        messages: [
-          { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
-        ]
-      }
+      { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
+      { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
     ]);
 
-    const currentUser = useMemo(() => members[0], [members]);
+    const fetchData = useCallback(async () => {
+        try {
+            const [
+                transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes
+            ] = await Promise.all([
+                fetch(`${API_BASE_URL}/transactions`), fetch(`${API_BASE_URL}/accounts`), fetch(`${API_BASE_URL}/categories`),
+                fetch(`${API_BASE_URL}/budgets`), fetch(`${API_BASE_URL}/trips`), fetch(`${API_BASE_URL}/approvals`),
+                fetch(`${API_BASE_URL}/members`), fetch(`${API_BASE_URL}/roles`), fetch(`${API_BASE_URL}/subscriptions`),
+                fetch(`${API_BASE_URL}/permissions`)
+            ]);
+            
+            setTransactions(await transactionsRes.json());
+            setAccounts((await accountsRes.json()).map(mapAccountData));
+            setCategories((await categoriesRes.json()).map(mapCategoryData));
+            setBudgets(await budgetsRes.json());
+            setTrips(await tripsRes.json());
+            setApprovals(await approvalsRes.json());
+            const memberData = await membersRes.json();
+            setMembers(memberData);
+            setCurrentUser(memberData[0]); // Set first member as current user
+            setRoles(await rolesRes.json());
+            setSubscriptions((await subscriptionsRes.json()).map(mapSubscriptionData));
+            setAllPermissions(await permissionsRes.json());
+
+        } catch (error) {
+            console.error("Failed to fetch initial data", error);
+            toast({ title: "Error", description: "Could not connect to the server.", variant: "destructive" });
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => {
         return roles.find(r => r.id === member.roleId);
     }, [roles]);
 
-    const currentUserRole = useMemo(() => getMemberRole(currentUser), [currentUser, getMemberRole]);
+    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
     const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
-    const isPrivilegedUser = useMemo(() => {
-        const roleName = currentUserRole?.name;
-        return roleName === 'Administrator' || roleName === 'Manager';
-    }, [currentUserRole]);
-
-    const transactions = useMemo(() => {
-        if (isPrivilegedUser) return allTransactions;
-        return allTransactions.filter(t => t.member === currentUser.name);
-    }, [allTransactions, currentUser.name, isPrivilegedUser]);
-
-    const budgets = useMemo(() => {
-        if (isPrivilegedUser) return allBudgets;
-        return allBudgets.filter(b => b.scope === 'global' || b.memberId === currentUser.id);
-    }, [allBudgets, currentUser.id, isPrivilegedUser]);
-
-    const trips = useMemo(() => {
-        if (isPrivilegedUser) return allTrips;
-        return allTrips.filter(t => t.memberId === currentUser.id);
-    }, [allTrips, currentUser.id, isPrivilegedUser]);
     
     const pendingTasks = useMemo(() => {
+        if (!currentUser) return [];
         const unsubmittedCount = transactions.filter(t => t.status === 'Not Submitted').length;
         const pendingApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
         
@@ -156,281 +169,219 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             .filter(t => t.reimbursable && t.status === 'Submitted')
             .reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
 
-
         return [
             { icon: ClipboardCheck, label: 'Pending Approvals', value: visibleApprovals, color: 'bg-pink-600' },
-            { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending').length, color: 'bg-blue-600' },
+            { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending' && t.memberId === currentUser.id).length, color: 'bg-blue-600' },
             { icon: Receipt, label: 'My Unsubmitted Expenses', value: unsubmittedCount, color: 'bg-emerald-600' },
             { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: upcomingSubscriptionsCount, color: 'bg-orange-500' },
             { icon: Undo2, label: 'Pending Reimbursements', value: formatCurrency(pendingReimbursementsAmount, 'USD'), color: 'bg-purple-500' }
         ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
 
-    }, [transactions, trips, approvals, currentUserPermissions, subscriptions]);
+    }, [transactions, trips, approvals, currentUserPermissions, subscriptions, currentUser]);
 
+    const makeApiRequest = async (url: string, options: RequestInit = {}) => {
+        try {
+            const response = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options,
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'An API error occurred');
+            }
+            return response.json();
+        } catch (error) {
+            console.error('API Request Failed:', error);
+            toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
+            throw error;
+        }
+    };
 
-    const addTransaction = useCallback((values: FullTransaction) => {
-        const newTransaction: Transaction = {
-            id: `txn-${Date.now()}`,
-            ...values,
-            accountId: accounts[0].id,
-            team: 'Personal',
-            receiptUrl: null,
-        };
-        setAllTransactions(prev => [newTransaction, ...prev]);
-    }, [accounts]);
+    const addTransaction = async (values: Omit<Transaction, 'id'>) => {
+        const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify({ ...values, id: `txn-${Date.now()}` }) });
+        setTransactions(prev => [newTransaction, ...prev]);
+    };
 
-    const deleteTransactions = useCallback((transactionIds: string[]) => {
-        setAllTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
-    }, []);
+    const deleteTransactions = async (transactionIds: string[]) => {
+        await makeApiRequest(`${API_BASE_URL}/transactions/bulk-delete`, { method: 'POST', body: JSON.stringify({ ids: transactionIds }) });
+        setTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
+    };
 
-    const addBudget = useCallback((values: Omit<Budget, 'id' | 'status'>) => {
-        const newBudget: Budget = {
-            id: `bud-${Date.now()}`,
-            ...values,
-            status: 'active',
-        };
-        setAllBudgets(prev => [...prev, newBudget]);
-    }, []);
+    const addBudget = async (values: Omit<Budget, 'id' | 'status'>) => {
+        const newBudget = await makeApiRequest(`${API_BASE_URL}/budgets`, { method: 'POST', body: JSON.stringify({ ...values, id: `bud-${Date.now()}`, status: 'active' }) });
+        setBudgets(prev => [...prev, newBudget]);
+    };
 
-    const editBudget = useCallback((budgetId: string, values: Omit<Budget, 'id'>) => {
-        setAllBudgets(prev => prev.map(b => b.id === budgetId ? { id: budgetId, ...values } : b));
-    }, []);
+    const editBudget = async (budgetId: string, values: Omit<Budget, 'id'>) => {
+        const updatedBudget = await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'PUT', body: JSON.stringify(values) });
+        setBudgets(prev => prev.map(b => b.id === budgetId ? updatedBudget : b));
+    };
 
-    const deleteBudget = useCallback((budgetId: string) => {
-        setAllBudgets(prev => prev.filter(b => b.id !== budgetId));
-    }, []);
+    const deleteBudget = async (budgetId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'DELETE' });
+        setBudgets(prev => prev.filter(b => b.id !== budgetId));
+    };
 
-    const archiveBudget = useCallback((budgetId: string, status: 'active' | 'archived') => {
-        setAllBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, status } : b));
-    }, []);
+    const archiveBudget = async (budgetId: string, status: 'active' | 'archived') => {
+        const budget = budgets.find(b => b.id === budgetId);
+        if(budget) {
+            const updatedBudget = await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'PUT', body: JSON.stringify({ ...budget, status }) });
+            setBudgets(prev => prev.map(b => b.id === budgetId ? updatedBudget : b));
+        }
+    };
 
-    const addCategory = useCallback((values: { name: string; color: string; icon: string }) => {
-        const newCategory: Category = {
+    const addCategory = async (values: { name: string; color: string; icon: string }) => {
+        const newCategoryData = {
             id: `cat-${Date.now()}`,
             name: values.name,
             color: values.color,
-            icon: iconMap[values.icon] || Shapes,
+            icon: values.icon,
+            order: categories.length
         };
-        setCategories(prev => [...prev, newCategory]);
-    }, []);
+        const newCategory = await makeApiRequest(`${API_BASE_URL}/categories`, { method: 'POST', body: JSON.stringify(newCategoryData) });
+        setCategories(prev => [...prev, mapCategoryData(newCategory)]);
+    };
 
-    const editCategory = useCallback((categoryId: string, values: { name:string, color: string, icon: string }) => {
-        setCategories(prev => prev.map(c => 
-            c.id === categoryId 
-            ? { ...c, name: values.name, color: values.color, icon: iconMap[values.icon] || Shapes } 
-            : c));
-    }, []);
+    const editCategory = async (categoryId: string, values: { name: string; color: string; icon: string }) => {
+        const updatedCategory = await makeApiRequest(`${API_BASE_URL}/categories/${categoryId}`, { method: 'PUT', body: JSON.stringify({ name: values.name, color: values.color, icon: values.icon }) });
+        setCategories(prev => prev.map(c => (c.id === categoryId ? mapCategoryData(updatedCategory) : c)));
+    };
+    
+    const reorderCategories = async (orderedIds: string[]) => {
+        await makeApiRequest(`${API_BASE_URL}/categories/reorder`, { method: 'POST', body: JSON.stringify({ orderedIds }) });
+        // The local state update is handled optimistically by the component
+    };
 
-    const deleteCategory = useCallback((categoryId: string) => {
+    const deleteCategory = async (categoryId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/categories/${categoryId}`, { method: 'DELETE' });
         setCategories(prev => prev.filter(c => c.id !== categoryId));
-    }, []);
+    };
 
-    const addMember = useCallback((values: { name: string; email: string; roleId: string; }) => {
-        const newMember: MemberProfile = {
+    const addMember = async (values: { name: string; email: string; roleId: string; }) => {
+        const newMemberData = {
             id: `mem-${Date.now()}`,
-            name: values.name,
-            email: values.email,
-            roleId: values.roleId,
+            ...values,
             avatar: 'https://placehold.co/100x100.png',
             avatarHint: 'person portrait'
         };
+        const newMember = await makeApiRequest(`${API_BASE_URL}/members`, { method: 'POST', body: JSON.stringify(newMemberData) });
         setMembers(prev => [...prev, newMember]);
-    }, []);
+    };
 
-    const editMember = useCallback((memberId: string, values: Partial<MemberProfile>) => {
-        setMembers(prev => prev.map(m => m.id === memberId ? { ...m, ...values } : m));
-    }, []);
-    
-    const deleteMember = useCallback((memberId: string) => {
+    const editMember = async (memberId: string, values: Partial<MemberProfile>) => {
+        const updatedMember = await makeApiRequest(`${API_BASE_URL}/members/${memberId}`, { method: 'PUT', body: JSON.stringify(values) });
+        setMembers(prev => prev.map(m => (m.id === memberId ? updatedMember : m)));
+        if(currentUser && currentUser.id === memberId) {
+            setCurrentUser(updatedMember);
+        }
+    };
+
+    const deleteMember = async (memberId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/members/${memberId}`, { method: 'DELETE' });
         setMembers(prev => prev.filter(m => m.id !== memberId));
-    }, []);
-
-    const addRole = useCallback((values: { name: string; permissions: Permission[] }) => {
-        const newRole: Role = {
-            id: `role-${Date.now()}`,
-            name: values.name,
-            permissions: values.permissions,
-        };
+    };
+    
+    const addRole = async (values: { name: string; permissions: Permission[] }) => {
+        const newRole = await makeApiRequest(`${API_BASE_URL}/roles`, { method: 'POST', body: JSON.stringify(values) });
         setRoles(prev => [...prev, newRole]);
-    }, []);
+    };
 
-    const editRole = useCallback((roleId: string, values: { name: string; permissions: Permission[] }) => {
-        setRoles(prev => prev.map(r => r.id === roleId ? { ...r, ...values } : r));
-    }, []);
+    const editRole = async (roleId: string, values: { name: string; permissions: Permission[] }) => {
+        const updatedRole = await makeApiRequest(`${API_BASE_URL}/roles/${roleId}`, { method: 'PUT', body: JSON.stringify(values) });
+        setRoles(prev => prev.map(r => (r.id === roleId ? updatedRole : r)));
+    };
 
-    const deleteRole = useCallback((roleId: string) => {
+    const deleteRole = async (roleId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/roles/${roleId}`, { method: 'DELETE' });
         setRoles(prev => prev.filter(r => r.id !== roleId));
-    }, []);
+    };
 
-    const updateCurrentUser = useCallback((data: Partial<MemberProfile>) => {
-        setMembers(prev => {
-            const currentUserFromState = prev.find(m => m.id === currentUser.id);
-            if (!currentUserFromState) return prev;
-
-            const updatedUser = { ...currentUserFromState, ...data };
-            
-            return prev.map(m => m.id === currentUser.id ? updatedUser : m);
-        });
-    }, [currentUser.id]);
-
-    const updateApprovalStatus = useCallback((approvalId: string, status: 'Approved' | 'Declined') => {
-        setApprovals(prev => prev.map(a => a.id === approvalId ? { ...a, status } : a));
-    }, []);
-
-    const addApproval = useCallback((values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
-        const role = getMemberRole(currentUser);
-        const newApproval: Approval = {
+    const updateCurrentUser = async (data: Partial<MemberProfile>) => {
+        if(currentUser) {
+            await editMember(currentUser.id, data);
+        }
+    };
+    
+    const addApproval = async (values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
+        if(!currentUser) return;
+        const newApprovalData = {
             id: `appr-${Date.now()}`,
             ...values,
             status: 'Pending',
             owner: {
                 name: currentUser.name,
-                title: role?.name || 'Member',
+                title: getMemberRole(currentUser)?.name || 'Member',
                 avatar: currentUser.avatar,
                 avatarHint: currentUser.avatarHint,
             }
         };
+        const newApproval = await makeApiRequest(`${API_BASE_URL}/approvals`, { method: 'POST', body: JSON.stringify(newApprovalData) });
         setApprovals(prev => [newApproval, ...prev]);
-    }, [currentUser, getMemberRole]);
-
-    const addTrip = useCallback((tripData: TripFormData) => {
-        const newTrip: Trip = {
+    };
+    
+    const updateApprovalStatus = async (approvalId: string, status: 'Approved' | 'Declined') => {
+        const updatedApproval = await makeApiRequest(`${API_BASE_URL}/approvals/${approvalId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+        setApprovals(prev => prev.map(a => a.id === approvalId ? updatedApproval : a));
+    };
+    
+    const addTrip = async (tripData: TripFormData) => {
+        const newTripData = {
             id: `trip-${Date.now()}`,
             ...tripData,
             status: 'Pending',
             report: `${format(parseISO(tripData.departDate), 'MMMM_yyyy')}`
         };
-        setAllTrips(prev => [...prev, newTrip]);
-    }, []);
-
-    const editTrip = useCallback((tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
-        setAllTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
-    }, []);
-
-    const deleteTrip = useCallback((tripId: string) => {
-        setAllTrips(prev => prev.filter(t => t.id !== tripId));
-    }, []);
+        const newTrip = await makeApiRequest(`${API_BASE_URL}/trips`, { method: 'POST', body: JSON.stringify(newTripData) });
+        setTrips(prev => [...prev, newTrip]);
+    };
     
-    const addSubscription = useCallback((values: SubscriptionFormData) => {
-        const newSubscription: Subscription = {
+    const editTrip = async (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
+        const updatedTrip = await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
+        setTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
+    };
+
+    const deleteTrip = async (tripId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'DELETE' });
+        setTrips(prev => prev.filter(t => t.id !== tripId));
+    };
+
+    const addSubscription = async (values: SubscriptionFormData) => {
+        const newSubscriptionData = {
             id: `sub-${Date.now()}`,
             ...values,
-            icon: iconMap[values.icon] || Repeat,
+            icon: values.iconName
         };
-        setSubscriptions(prev => [...prev, newSubscription]);
-    }, []);
+        const newSubscription = await makeApiRequest(`${API_BASE_URL}/subscriptions`, { method: 'POST', body: JSON.stringify(newSubscriptionData) });
+        setSubscriptions(prev => [...prev, mapSubscriptionData(newSubscription)]);
+    };
 
-    const editSubscription = useCallback((subscriptionId: string, values: SubscriptionFormData) => {
-        setSubscriptions(prev => prev.map(s => 
-            s.id === subscriptionId 
-            ? { id: subscriptionId, ...values, icon: iconMap[values.icon] || Repeat } 
-            : s
-        ));
-    }, []);
+    const editSubscription = async (subscriptionId: string, values: SubscriptionFormData) => {
+        const updatedSubscription = await makeApiRequest(`${API_BASE_URL}/subscriptions/${subscriptionId}`, { method: 'PUT', body: JSON.stringify({ ...values, icon: values.iconName }) });
+        setSubscriptions(prev => prev.map(s => s.id === subscriptionId ? mapSubscriptionData(updatedSubscription) : s));
+    };
 
-    const deleteSubscription = useCallback((subscriptionId: string) => {
+    const deleteSubscription = async (subscriptionId: string) => {
+        await makeApiRequest(`${API_BASE_URL}/subscriptions/${subscriptionId}`, { method: 'DELETE' });
         setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
-    }, []);
+    };
 
-    const markConversationAsRead = useCallback((memberId: string) => {
-        setConversations(prev => prev.map(c => 
-            c.memberId === memberId ? { ...c, unreadCount: 0 } : c
-        ));
-    }, []);
-    
-    const sendMessage = useCallback((receiverId: string, text: string) => {
-        const newMessage: ChatMessage = {
-            id: `msg-${Date.now()}`,
-            senderId: currentUser.id,
-            text,
-            timestamp: Date.now(),
-        };
-
+    const markConversationAsRead = (memberId: string) => { setConversations(prev => prev.map(c => c.memberId === memberId ? { ...c, unreadCount: 0 } : c)); };
+    const sendMessage = (receiverId: string, text: string) => {
+        if(!currentUser) return;
+        const newMessage: ChatMessage = { id: `msg-${Date.now()}`, senderId: currentUser.id, text, timestamp: Date.now() };
         setConversations(prev => {
             const conversationExists = prev.some(c => c.memberId === receiverId);
-            if (conversationExists) {
-                return prev.map(c => 
-                    c.memberId === receiverId
-                        ? { ...c, messages: [...c.messages, newMessage] }
-                        : c
-                );
-            } else {
-                const newConversation: Conversation = {
-                    memberId: receiverId,
-                    messages: [newMessage],
-                    unreadCount: 0,
-                };
-                return [...prev, newConversation];
-            }
+            if (conversationExists) { return prev.map(c => c.memberId === receiverId ? { ...c, messages: [...c.messages, newMessage] } : c); }
+            else { return [...prev, { memberId: receiverId, messages: [newMessage], unreadCount: 0, }]; }
         });
-
-        // Simulate a reply after a short delay to demonstrate unread count
-        setTimeout(() => {
-            const receiver = members.find(m => m.id === receiverId);
-            const replyText = `This is an automated reply from ${receiver?.name || 'a member'}. Got your message!`;
-
-            const replyMessage: ChatMessage = {
-                id: `msg-${Date.now() + 1}`,
-                senderId: receiverId,
-                text: replyText,
-                timestamp: Date.now(),
-            };
-
-            setConversations(prev => prev.map(c => 
-                c.memberId === receiverId
-                    ? { 
-                        ...c, 
-                        messages: [...c.messages, replyMessage],
-                        unreadCount: (c.unreadCount || 0) + 1,
-                      }
-                    : c
-            ));
-        }, 2500);
-    }, [currentUser.id, members]);
+    };
 
     const value = {
-        transactions,
-        accounts,
-        categories,
-        budgets,
-        pendingTasks,
-        trips,
-        approvals,
-        members,
-        roles,
-        subscriptions,
-        allPermissions,
-        currentUser,
-        currentUserPermissions,
-        conversations,
-        addTransaction,
-        deleteTransactions,
-        addBudget,
-        editBudget,
-        deleteBudget,
-        archiveBudget,
-        addCategory,
-        editCategory,
-        deleteCategory,
-        setCategories,
-        addMember,
-        editMember,
-        deleteMember,
-        getMemberRole,
-        addRole,
-        editRole,
-        deleteRole,
-        updateCurrentUser,
-        updateApprovalStatus,
-        addApproval,
-        addTrip,
-        editTrip,
-        deleteTrip,
-        addSubscription,
-        editSubscription,
-        deleteSubscription,
-        sendMessage,
-        markConversationAsRead,
+        transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions,
+        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addBudget, editBudget, deleteBudget,
+        archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
+        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
+        deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -33,7 +33,9 @@ export interface Category {
   id: string;
   name: string;
   icon: LucideIcon;
+  iconName: string;
   color: string;
+  order: number;
 }
 
 export interface Budget {
@@ -74,6 +76,7 @@ export interface Subscription {
   id: string;
   name: string;
   icon: LucideIcon;
+  iconName: string;
   amount: number;
   currency: string;
   billingCycle: 'Monthly' | 'Yearly';
@@ -81,7 +84,6 @@ export interface Subscription {
   category: string;
 }
 
-// A list of all possible permissions in the app
 export type Permission =
   | 'dashboard:view'
   | 'expenses:view'

@@ -62,16 +62,6 @@ const formSchema = z.object({
 
 type EditCategoryValues = z.infer<typeof formSchema>;
 
-const getIconName = (IconComponent: LucideIcon) => {
-    for (const { name, icon } of availableIcons) {
-        if (icon === IconComponent) {
-            return name;
-        }
-    }
-    return 'Shapes'; // fallback
-};
-
-
 interface EditCategoryFormProps {
   category: Category;
   onFinished?: () => void;
@@ -85,12 +75,12 @@ export function EditCategoryForm({ category, onFinished }: EditCategoryFormProps
     defaultValues: {
         name: category.name,
         color: category.color,
-        icon: getIconName(category.icon),
+        icon: category.iconName,
     },
   });
 
-  function onSubmit(values: EditCategoryValues) {
-    editCategory(category.id, values);
+  async function onSubmit(values: EditCategoryValues) {
+    await editCategory(category.id, values);
     if (onFinished) {
       onFinished();
     }

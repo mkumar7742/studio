@@ -53,6 +53,17 @@ export function SidebarNav() {
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },
     ];
+    
+    if (!currentUser) {
+        return (
+            <SidebarHeader className="p-4">
+                <div className='flex flex-col items-center gap-3 w-full text-center'>
+                    <Avatar className="size-16 bg-muted"></Avatar>
+                    <div className="h-4 bg-muted w-24 rounded-md"></div>
+                </div>
+            </SidebarHeader>
+        )
+    }
 
     return <>
         <SidebarHeader className="p-4">

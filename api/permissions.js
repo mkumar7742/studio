@@ -1,7 +1,7 @@
+const express = require('express');
+const router = express.Router();
 
-import type { Permission } from '@/types';
-
-export const allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[] = [
+const allPermissions = [
   {
     group: 'Dashboard',
     permissions: [{ id: 'dashboard:view', label: 'View Dashboard' }],
@@ -73,3 +73,9 @@ export const allPermissions: { group: string; permissions: { id: Permission; lab
     permissions: [{ id: 'subscriptions:view', label: 'View Subscriptions' }],
   },
 ];
+
+router.get('/', (req, res) => {
+    res.json(allPermissions);
+});
+
+module.exports = router;
