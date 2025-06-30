@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from './ui/skeleton';
 import {
   Home,
   CreditCard,
@@ -27,18 +28,20 @@ import {
   Calendar,
   Repeat,
   MessageSquare,
+  LogOut,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
 import type { Permission } from '@/types';
 import { useAppContext } from '@/context/app-provider';
+import { Button } from './ui/button';
 
 export function SidebarNav() {
     const pathname = usePathname();
-    const { currentUser } = useAppContext();
+    const { currentUser, logout } = useAppContext();
 
     const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
-        { href: '/', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
+        { href: '/dashboard', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500', permission: 'trips:view' },
@@ -56,12 +59,19 @@ export function SidebarNav() {
     
     if (!currentUser) {
         return (
-            <SidebarHeader className="p-4">
-                <div className='flex flex-col items-center gap-3 w-full text-center'>
-                    <Avatar className="size-16 bg-muted"></Avatar>
-                    <div className="h-4 bg-muted w-24 rounded-md"></div>
-                </div>
-            </SidebarHeader>
+            <>
+                <SidebarHeader className="p-4">
+                    <div className='flex flex-col items-center gap-3 w-full text-center'>
+                        <Skeleton className="size-16 rounded-full" />
+                        <Skeleton className="h-5 w-24 rounded-md" />
+                    </div>
+                </SidebarHeader>
+                <SidebarContent className="flex-grow px-4 space-y-2">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                </SidebarContent>
+            </>
         )
     }
 
@@ -80,7 +90,7 @@ export function SidebarNav() {
         <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
                 {menuItems.map(item => {
-                    const isActive = (item.href === '/') ? pathname === item.href : pathname.startsWith(item.href);
+                    const isActive = pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/');
                     
                     const menuItemContent = (
                          <SidebarMenuButton
@@ -119,11 +129,10 @@ export function SidebarNav() {
                 })}
             </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4">
-            <div className="flex items-center gap-2">
-                <ArrowRightLeft className="size-6 text-primary" />
-                <span className="text-xl font-bold text-foreground">TrackWise</span>
-            </div>
+        <SidebarFooter className="p-4 border-t border-sidebar-border/50">
+            <Button variant="ghost" onClick={logout} className="w-full justify-start text-base h-12 text-sidebar-foreground hover:bg-sidebar-accent/50">
+                <LogOut className="mr-2" /> Logout
+            </Button>
         </SidebarFooter>
     </>
 }

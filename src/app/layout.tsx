@@ -1,8 +1,6 @@
 import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/sidebar-nav';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AppProvider } from '@/context/app-provider';
 
@@ -40,16 +38,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppProvider>
-            <SidebarProvider>
-                <Sidebar className="bg-sidebar">
-                  <SidebarNav />
-                </Sidebar>
-                <SidebarInset>
-                  {children}
-                </SidebarInset>
-            </SidebarProvider>
-            <Toaster />
+            {children}
           </AppProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -2,15 +2,18 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
-import { allPermissions as initialAllPermissions } from '@/lib/data';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
+import { jwtDecode } from "jwt-decode";
 
 const API_BASE_URL = 'http://localhost:5001/api';
+
+let apiHeaders = { 'Content-Type': 'application/json' };
 
 const iconMap: { [key: string]: LucideIcon } = {
     Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet
@@ -21,6 +24,8 @@ export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon' | 'iconName'
 export type TripFormData = Omit<Trip, 'id' | 'status' | 'report'>;
 
 interface AppContextType {
+    isAuthenticated: boolean;
+    isLoading: boolean;
     transactions: Transaction[];
     accounts: Account[];
     categories: Category[];
@@ -31,10 +36,12 @@ interface AppContextType {
     members: MemberProfile[];
     roles: Role[];
     subscriptions: Subscription[];
-    allPermissions: typeof initialAllPermissions;
+    allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
     currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
     conversations: Conversation[];
+    login: (email: string, pass: string) => Promise<boolean>;
+    logout: () => void;
     addTransaction: (values: Omit<Transaction, 'id'>) => Promise<void>;
     deleteTransactions: (transactionIds: string[]) => Promise<void>;
     addBudget: (values: Omit<Budget, 'id' | 'status'>) => Promise<void>;
@@ -70,26 +77,18 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
 
-const mapAccountData = (account: any): Account => ({
-    ...account,
-    icon: iconMap[account.icon] || Wallet,
-});
-
-const mapCategoryData = (category: any): Category => ({
-    ...category,
-    icon: iconMap[category.icon] || Shapes,
-    iconName: category.icon,
-});
-
-const mapSubscriptionData = (subscription: any): Subscription => ({
-    ...subscription,
-    icon: iconMap[subscription.icon] || Repeat,
-    iconName: subscription.icon,
-});
-
+const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[account.icon] || Wallet });
+const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
+const mapSubscriptionData = (subscription: any): Subscription => ({ ...subscription, icon: iconMap[subscription.icon] || Repeat, iconName: subscription.icon });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
+    const router = useRouter();
+    
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser] = useState<MemberProfile | null>(null);
+
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -99,23 +98,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [members, setMembers] = useState<MemberProfile[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-    const [allPermissions, setAllPermissions] = useState(initialAllPermissions);
-    const [currentUser, setCurrentUser] = useState<MemberProfile | null>(null);
-
-    const [conversations, setConversations] = useState<Conversation[]>([
-      { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
-      { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
-    ]);
+    const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
 
     const fetchData = useCallback(async () => {
         try {
-            const [
-                transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes
-            ] = await Promise.all([
-                fetch(`${API_BASE_URL}/transactions`), fetch(`${API_BASE_URL}/accounts`), fetch(`${API_BASE_URL}/categories`),
-                fetch(`${API_BASE_URL}/budgets`), fetch(`${API_BASE_URL}/trips`), fetch(`${API_BASE_URL}/approvals`),
-                fetch(`${API_BASE_URL}/members`), fetch(`${API_BASE_URL}/roles`), fetch(`${API_BASE_URL}/subscriptions`),
-                fetch(`${API_BASE_URL}/permissions`)
+            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes ] = await Promise.all([
+                fetch(`${API_BASE_URL}/transactions`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/accounts`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/categories`, { headers: apiHeaders }),
+                fetch(`${API_BASE_URL}/budgets`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/trips`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/approvals`, { headers: apiHeaders }),
+                fetch(`${API_BASE_URL}/members`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/roles`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/subscriptions`, { headers: apiHeaders }),
+                fetch(`${API_BASE_URL}/permissions`, { headers: apiHeaders })
             ]);
             
             setTransactions(await transactionsRes.json());
@@ -126,7 +118,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setApprovals(await approvalsRes.json());
             const memberData = await membersRes.json();
             setMembers(memberData);
-            setCurrentUser(memberData[0]); // Set first member as current user
             setRoles(await rolesRes.json());
             setSubscriptions((await subscriptionsRes.json()).map(mapSubscriptionData));
             setAllPermissions(await permissionsRes.json());
@@ -137,17 +128,104 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
-    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => {
-        return roles.find(r => r.id === member.roleId);
-    }, [roles]);
-
+    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
     const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
     const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
+
+    const makeApiRequest = async (url: string, options: RequestInit = {}) => {
+        try {
+            const response = await fetch(url, { headers: apiHeaders, ...options });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'An API error occurred');
+            }
+            return response.json();
+        } catch (error) {
+            console.error('API Request Failed:', error);
+            toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
+            throw error;
+        }
+    };
     
+    const login = async (email: string, password: string): Promise<boolean> => {
+        try {
+            const data = await makeApiRequest(`${API_BASE_URL}/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) });
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${data.token}` };
+                const decoded: { member: MemberProfile } = jwtDecode(data.token);
+                await fetchData();
+                // We need to fetch members list first to find the full profile
+                const membersList = await (await fetch(`${API_BASE_URL}/members`, { headers: apiHeaders })).json();
+                const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
+                setMembers(membersList);
+
+                if (userProfile) {
+                    setCurrentUser(userProfile);
+                    setIsAuthenticated(true);
+                    setConversations([
+                      { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
+                      { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
+                    ]);
+                    return true;
+                }
+            }
+            return false;
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        apiHeaders = { 'Content-Type': 'application/json' };
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+        // Clear all data
+        setTransactions([]);
+        setAccounts([]);
+        setCategories([]);
+        setBudgets([]);
+        setTrips([]);
+        setApprovals([]);
+        setMembers([]);
+        setRoles([]);
+        setSubscriptions([]);
+        setAllPermissions([]);
+        setConversations([]);
+        router.push('/login');
+    };
+
+    useEffect(() => {
+        const initializeAuth = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${token}` };
+                 try {
+                    const decoded: { member: MemberProfile } = jwtDecode(token);
+                    // TODO: Could add token expiration check here
+                    await fetchData();
+                    const membersList = await (await fetch(`${API_BASE_URL}/members`, { headers: apiHeaders })).json();
+                    const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
+                    setMembers(membersList);
+                    if (userProfile) {
+                        setCurrentUser(userProfile);
+                        setIsAuthenticated(true);
+                         setConversations([
+                          { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
+                          { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
+                        ]);
+                    }
+                } catch(e) {
+                    // Invalid token
+                    logout();
+                }
+            }
+            setIsLoading(false);
+        };
+        initializeAuth();
+    }, [fetchData]);
+
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
         const unsubmittedCount = transactions.filter(t => t.status === 'Not Submitted').length;
@@ -178,24 +256,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
 
     }, [transactions, trips, approvals, currentUserPermissions, subscriptions, currentUser]);
-
-    const makeApiRequest = async (url: string, options: RequestInit = {}) => {
-        try {
-            const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
-                ...options,
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'An API error occurred');
-            }
-            return response.json();
-        } catch (error) {
-            console.error('API Request Failed:', error);
-            toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
-            throw error;
-        }
-    };
 
     const addTransaction = async (values: Omit<Transaction, 'id'>) => {
         const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify({ ...values, id: `txn-${Date.now()}` }) });
@@ -249,7 +309,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const reorderCategories = async (orderedIds: string[]) => {
         await makeApiRequest(`${API_BASE_URL}/categories/reorder`, { method: 'POST', body: JSON.stringify({ orderedIds }) });
-        // The local state update is handled optimistically by the component
     };
 
     const deleteCategory = async (categoryId: string) => {
@@ -262,7 +321,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             id: `mem-${Date.now()}`,
             ...values,
             avatar: 'https://placehold.co/100x100.png',
-            avatarHint: 'person portrait'
+            avatarHint: 'person portrait',
+            password: 'password123' // default password for new members
         };
         const newMember = await makeApiRequest(`${API_BASE_URL}/members`, { method: 'POST', body: JSON.stringify(newMemberData) });
         setMembers(prev => [...prev, newMember]);
@@ -270,9 +330,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const editMember = async (memberId: string, values: Partial<MemberProfile>) => {
         const updatedMember = await makeApiRequest(`${API_BASE_URL}/members/${memberId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setMembers(prev => prev.map(m => (m.id === memberId ? updatedMember : m)));
+        setMembers(prev => prev.map(m => (m.id === memberId ? { ...m, ...updatedMember } : m)));
         if(currentUser && currentUser.id === memberId) {
-            setCurrentUser(updatedMember);
+            setCurrentUser(prev => prev ? { ...prev, ...updatedMember } : null);
         }
     };
 
@@ -336,7 +396,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const editTrip = async (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
-        const updatedTrip = await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
+        await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
         setTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
     };
 
@@ -377,6 +437,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const value = {
+        isAuthenticated, isLoading, login, logout,
         transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addBudget, editBudget, deleteBudget,
         archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
