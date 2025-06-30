@@ -1,3 +1,4 @@
+
 # TrackWise - A Firebase Studio Project
 
 This is a full-stack Next.js project bootstrapped with `create-next-app`, designed and built in Firebase Studio. It includes a Node.js/Express backend that connects to a MongoDB database.
