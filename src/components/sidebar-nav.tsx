@@ -28,6 +28,7 @@ import {
   Repeat,
   MessageSquare,
   LogOut,
+  ScrollText,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -46,12 +47,13 @@ export function SidebarNav() {
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500', permission: 'trips:view' },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500', permission: 'approvals:view' },
         { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-teal-500', permission: 'budgets:manage' },
-        { href: '/subscriptions', label: 'Subscriptions', icon: Repeat, color: 'bg-orange-500' },
+        { href: '/subscriptions', label: 'Subscriptions', icon: Repeat, color: 'bg-orange-500', permission: 'subscriptions:manage' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500', permission: 'members:view' },
         { href: '/chat', label: 'Chat', icon: MessageSquare, color: 'bg-cyan-500' },
         { href: '/roles', label: 'Roles', icon: ShieldCheck, color: 'bg-yellow-500', permission: 'roles:manage' },
+        { href: '/audit', label: 'Audit Log', icon: ScrollText, color: 'bg-gray-500', permission: 'audit:view' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
         { href: '/support', label: 'Support', icon: LifeBuoy, color: 'bg-orange-500' },
     ];

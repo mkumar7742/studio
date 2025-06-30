@@ -163,3 +163,12 @@ export interface Conversation {
   messages: ChatMessage[];
   unreadCount?: number;
 }
+
+export interface AuditLog {
+  _id: string;
+  timestamp: string;
+  memberId: string;
+  memberName: string;
+  action: string;
+  details: any;
+}
