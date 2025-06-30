@@ -2,12 +2,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const seedDatabase = require('./seed');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Basic security headers
+app.use(helmet());
 
 // Middleware
 app.use(cors());
@@ -40,8 +45,18 @@ if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv:
         });
 }
 
+// Rate limiter for login attempts
+const loginLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 20, // Limit each IP to 20 login requests per windowMs
+	standardHeaders: true,
+	legacyHeaders: false,
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+});
+
+
 // API Routes
-app.use('/api/auth', require('./api/auth'));
+app.use('/api/auth', loginLimiter, require('./api/auth'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));
 app.use('/api/categories', require('./api/categories'));

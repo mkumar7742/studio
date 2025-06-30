@@ -36,8 +36,16 @@ router.put('/:id', auth, async (req, res) => {
     if (!req.member.permissions.includes('members:edit')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
+    
+    // Admins should not change passwords via this generic update endpoint.
+    // Password changes should have a dedicated, more secure flow.
+    const { password, ...updateData } = req.body;
+    if (password) {
+        return res.status(400).json({ message: 'Password cannot be updated from this endpoint.' });
+    }
+
     try {
-        const updatedMember = await Member.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+        const updatedMember = await Member.findOneAndUpdate({ id: req.params.id }, updateData, { new: true });
         if (!updatedMember) {
             return res.status(404).json({ message: 'Member not found' });
         }

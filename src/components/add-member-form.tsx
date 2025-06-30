@@ -10,10 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppContext } from "@/context/app-provider";
 
+const passwordValidation = new RegExp(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+);
+
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters." })
+           .regex(passwordValidation, {
+             message: "Password must contain an uppercase letter, a lowercase letter, a number, and a special character."
+           }),
   roleId: z.string({ required_error: "Please select a role." }),
 });
 
