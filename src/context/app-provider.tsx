@@ -53,7 +53,7 @@ interface AppContextType {
     deleteCategory: (categoryId: string) => Promise<void>;
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     reorderCategories: (orderedIds: string[]) => Promise<void>;
-    addMember: (values: { name: string; email: string; roleId: string; }) => Promise<void>;
+    addMember: (values: { name: string; email: string; roleId: string; password: string;}) => Promise<void>;
     editMember: (memberId: string, values: Partial<MemberProfile>) => Promise<void>;
     deleteMember: (memberId: string) => Promise<void>;
     getMemberRole: (member: MemberProfile) => Role | undefined;
@@ -316,13 +316,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCategories(prev => prev.filter(c => c.id !== categoryId));
     };
 
-    const addMember = async (values: { name: string; email: string; roleId: string; }) => {
+    const addMember = async (values: { name: string; email: string; roleId: string; password: string;}) => {
         const newMemberData = {
             id: `mem-${Date.now()}`,
             ...values,
             avatar: 'https://placehold.co/100x100.png',
             avatarHint: 'person portrait',
-            password: 'password123' // default password for new members
         };
         const newMember = await makeApiRequest(`${API_BASE_URL}/members`, { method: 'POST', body: JSON.stringify(newMemberData) });
         setMembers(prev => [...prev, newMember]);

@@ -13,6 +13,7 @@ import { useAppContext } from "@/context/app-provider";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
   roleId: z.string({ required_error: "Please select a role." }),
 });
 
@@ -30,6 +31,7 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       roleId: roles.find(r => r.name === 'Member')?.id,
     },
   });
@@ -66,6 +68,19 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="john.doe@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Initial Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
