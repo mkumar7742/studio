@@ -2,9 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/category');
+const auth = require('../middleware/auth');
 
 // GET all categories, sorted by order
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('categories:view')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const categories = await Category.find().sort({ order: 1 });
     res.json(categories);
@@ -14,7 +18,10 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new category
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('categories:create')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   const category = new Category(req.body);
   try {
     const newCategory = await category.save();
@@ -25,7 +32,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) a category
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('categories:edit')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const updatedCategory = await Category.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
         if (!updatedCategory) {
@@ -38,7 +48,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // POST reorder categories
-router.post('/reorder', async (req, res) => {
+router.post('/reorder', auth, async (req, res) => {
+    if (!req.member.permissions.includes('categories:edit')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     const { orderedIds } = req.body;
     try {
         const bulkOps = orderedIds.map((id, index) => ({
@@ -56,7 +69,10 @@ router.post('/reorder', async (req, res) => {
 
 
 // DELETE a category
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('categories:delete')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const deletedCategory = await Category.findOneAndDelete({ id: req.params.id });
         if (!deletedCategory) {

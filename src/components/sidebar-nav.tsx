@@ -19,7 +19,6 @@ import {
   ClipboardCheck,
   Settings,
   LifeBuoy,
-  ArrowRightLeft,
   Shapes,
   Users,
   ShieldCheck,
@@ -38,7 +37,7 @@ import { Button } from './ui/button';
 
 export function SidebarNav() {
     const pathname = usePathname();
-    const { currentUser, logout } = useAppContext();
+    const { currentUser, logout, currentUserPermissions } = useAppContext();
 
     const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
         { href: '/dashboard', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
@@ -47,7 +46,7 @@ export function SidebarNav() {
         { href: '/trips', label: 'Trips', icon: Plane, color: 'bg-blue-500', permission: 'trips:view' },
         { href: '/approvals', label: 'Approvals', icon: ClipboardCheck, color: 'bg-pink-500', permission: 'approvals:view' },
         { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-teal-500', permission: 'budgets:manage' },
-        { href: '/subscriptions', label: 'Subscriptions', icon: Repeat, color: 'bg-orange-500', permission: 'subscriptions:view' },
+        { href: '/subscriptions', label: 'Subscriptions', icon: Repeat, color: 'bg-orange-500' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500', permission: 'members:view' },
@@ -75,6 +74,12 @@ export function SidebarNav() {
         )
     }
 
+    const hasPermission = (permission?: Permission) => {
+        if (!permission) return true; // No permission required
+        if (currentUserPermissions.includes('roles:manage')) return true; // Admin override
+        return currentUserPermissions.includes(permission);
+    };
+
     return <>
         <SidebarHeader className="p-4">
             <Link href="/profile" className='flex flex-col items-center gap-3 w-full text-center'>
@@ -90,40 +95,30 @@ export function SidebarNav() {
         <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
                 {menuItems.map(item => {
-                    const isActive = pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/');
-                    
-                    const menuItemContent = (
-                         <SidebarMenuButton
-                            asChild
-                            isActive={isActive}
-                            className={cn(
-                                "justify-start h-12 text-base",
-                                isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
-                                !isActive && "hover:bg-sidebar-accent/50 text-sidebar-foreground"
-                            )}
-                        >
-                            <Link href={item.href}>
-                                <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-md text-primary-foreground", item.color)}>
-                                    <item.icon className="size-5" />
-                                </div>
-                                <span>{item.label}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    );
-
-                    if (item.permission) {
-                        return (
-                            <RequirePermission key={item.label} permission={item.permission}>
-                                <SidebarMenuItem>
-                                    {menuItemContent}
-                                </SidebarMenuItem>
-                            </RequirePermission>
-                        );
+                    if (!hasPermission(item.permission)) {
+                        return null;
                     }
+                    
+                    const isActive = pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard');
                     
                     return (
                         <SidebarMenuItem key={item.label}>
-                            {menuItemContent}
+                             <SidebarMenuButton
+                                asChild
+                                isActive={isActive}
+                                className={cn(
+                                    "justify-start h-12 text-base",
+                                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
+                                    !isActive && "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                                )}
+                            >
+                                <Link href={item.href}>
+                                    <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-md text-primary-foreground", item.color)}>
+                                        <item.icon className="size-5" />
+                                    </div>
+                                    <span>{item.label}</span>
+                                </Link>
+                            </SidebarMenuButton>
                         </SidebarMenuItem>
                     );
                 })}

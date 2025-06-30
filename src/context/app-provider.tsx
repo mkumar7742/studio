@@ -101,43 +101,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
 
-    const fetchData = useCallback(async () => {
-        try {
-            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes ] = await Promise.all([
-                fetch(`${API_BASE_URL}/transactions`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/accounts`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/categories`, { headers: apiHeaders }),
-                fetch(`${API_BASE_URL}/budgets`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/trips`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/approvals`, { headers: apiHeaders }),
-                fetch(`${API_BASE_URL}/members`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/roles`, { headers: apiHeaders }), fetch(`${API_BASE_URL}/subscriptions`, { headers: apiHeaders }),
-                fetch(`${API_BASE_URL}/permissions`, { headers: apiHeaders })
-            ]);
-            
-            setTransactions(await transactionsRes.json());
-            setAccounts((await accountsRes.json()).map(mapAccountData));
-            setCategories((await categoriesRes.json()).map(mapCategoryData));
-            setBudgets(await budgetsRes.json());
-            setTrips(await tripsRes.json());
-            setApprovals(await approvalsRes.json());
-            const memberData = await membersRes.json();
-            setMembers(memberData);
-            setRoles(await rolesRes.json());
-            setSubscriptions((await subscriptionsRes.json()).map(mapSubscriptionData));
-            setAllPermissions(await permissionsRes.json());
-
-        } catch (error) {
-            console.error("Failed to fetch initial data", error);
-            toast({ title: "Error", description: "Could not connect to the server.", variant: "destructive" });
-        }
-    }, [toast]);
-
-    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
-    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
-    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
-
-    const makeApiRequest = async (url: string, options: RequestInit = {}) => {
+    const makeApiRequest = useCallback(async (url: string, options: RequestInit = {}) => {
         try {
             const response = await fetch(url, { headers: apiHeaders, ...options });
+            if (response.status === 401) {
+                // Token is invalid or expired, log out
+                logout();
+                throw new Error('Session expired. Please log in again.');
+            }
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'An API error occurred');
+            }
+            if (response.status === 204 || response.headers.get('content-length') === '0') {
+              return null;
             }
             return response.json();
         } catch (error) {
@@ -145,7 +122,36 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
             throw error;
         }
-    };
+    }, [toast]);
+
+    const fetchData = useCallback(async () => {
+        try {
+            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes ] = await Promise.all([
+                makeApiRequest(`${API_BASE_URL}/transactions`), makeApiRequest(`${API_BASE_URL}/accounts`), makeApiRequest(`${API_BASE_URL}/categories`),
+                makeApiRequest(`${API_BASE_URL}/budgets`), makeApiRequest(`${API_BASE_URL}/trips`), makeApiRequest(`${API_BASE_URL}/approvals`),
+                makeApiRequest(`${API_BASE_URL}/members`), makeApiRequest(`${API_BASE_URL}/roles`), makeApiRequest(`${API_BASE_URL}/subscriptions`),
+                makeApiRequest(`${API_BASE_URL}/permissions`)
+            ]);
+            
+            setTransactions(transactionsRes);
+            setAccounts(accountsRes.map(mapAccountData));
+            setCategories(categoriesRes.map(mapCategoryData));
+            setBudgets(budgetsRes);
+            setTrips(tripsRes);
+            setApprovals(approvalsRes);
+            setMembers(membersRes);
+            setRoles(rolesRes.map((r: any) => ({...r, id: r._id})));
+            setSubscriptions(subscriptionsRes.map(mapSubscriptionData));
+            setAllPermissions(permissionsRes);
+
+        } catch (error) {
+            console.error("Failed to fetch initial data", error);
+        }
+    }, [makeApiRequest]);
+
+    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
+    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
+    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
     
     const login = async (email: string, password: string): Promise<boolean> => {
         try {
@@ -154,15 +160,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 localStorage.setItem('token', data.token);
                 apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${data.token}` };
                 const decoded: { member: MemberProfile } = jwtDecode(data.token);
-                await fetchData();
-                // We need to fetch members list first to find the full profile
-                const membersList = await (await fetch(`${API_BASE_URL}/members`, { headers: apiHeaders })).json();
+                
+                // Fetch members list first to find the full profile
+                const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
                 const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
-                setMembers(membersList);
 
                 if (userProfile) {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
+                    await fetchData(); // Fetch all data after authentication
                     setConversations([
                       { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
                       { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
@@ -202,29 +208,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             if (token) {
                 apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${token}` };
                  try {
-                    const decoded: { member: MemberProfile } = jwtDecode(token);
-                    // TODO: Could add token expiration check here
-                    await fetchData();
-                    const membersList = await (await fetch(`${API_BASE_URL}/members`, { headers: apiHeaders })).json();
+                    const decoded: { member: { id: string } } = jwtDecode(token);
+                    const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
                     const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
-                    setMembers(membersList);
+
                     if (userProfile) {
                         setCurrentUser(userProfile);
                         setIsAuthenticated(true);
-                         setConversations([
+                        await fetchData();
+                        setConversations([
                           { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
                           { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
                         ]);
+                    } else {
+                        logout();
                     }
                 } catch(e) {
-                    // Invalid token
                     logout();
                 }
             }
             setIsLoading(false);
         };
         initializeAuth();
-    }, [fetchData]);
+    }, [fetchData, makeApiRequest]);
 
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
@@ -342,12 +348,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const addRole = async (values: { name: string; permissions: Permission[] }) => {
         const newRole = await makeApiRequest(`${API_BASE_URL}/roles`, { method: 'POST', body: JSON.stringify(values) });
-        setRoles(prev => [...prev, newRole]);
+        setRoles(prev => [...prev, {...newRole, id: newRole._id}]);
     };
 
     const editRole = async (roleId: string, values: { name: string; permissions: Permission[] }) => {
         const updatedRole = await makeApiRequest(`${API_BASE_URL}/roles/${roleId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setRoles(prev => prev.map(r => (r.id === roleId ? updatedRole : r)));
+        setRoles(prev => prev.map(r => (r.id === roleId ? {...updatedRole, id: updatedRole._id} : r)));
     };
 
     const deleteRole = async (roleId: string) => {

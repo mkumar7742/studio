@@ -14,6 +14,7 @@ import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialo
 import type { Subscription } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { SubscriptionDialog } from "@/components/subscription-dialog";
+import { RequirePermission } from "@/components/require-permission";
 
 export default function SubscriptionsPage() {
     const { subscriptions, deleteSubscription } = useAppContext();
@@ -47,7 +48,9 @@ export default function SubscriptionsPage() {
     return (
         <div className="flex flex-col h-full">
             <PageHeader title="Subscriptions" description="Manage your recurring subscriptions.">
-                 <Button onClick={handleNewClick}><Plus className="mr-2 size-4" /> New Subscription</Button>
+                <RequirePermission permission="subscriptions:manage">
+                    <Button onClick={handleNewClick}><Plus className="mr-2 size-4" /> New Subscription</Button>
+                </RequirePermission>
             </PageHeader>
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
                 {subscriptions.length > 0 ? (
@@ -63,19 +66,21 @@ export default function SubscriptionsPage() {
                                             </div>
                                             <CardTitle className="text-base font-semibold">{sub.name}</CardTitle>
                                         </div>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="size-8">
-                                                    <MoreHorizontal className="size-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditClick(sub)}><Pencil className="mr-2 size-4" /> Edit</DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setSubscriptionToDelete(sub)}>
-                                                    <Trash2 className="mr-2 size-4" /> Cancel
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                         <RequirePermission permission="subscriptions:manage">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-8">
+                                                        <MoreHorizontal className="size-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleEditClick(sub)}><Pencil className="mr-2 size-4" /> Edit</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setSubscriptionToDelete(sub)}>
+                                                        <Trash2 className="mr-2 size-4" /> Cancel
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </RequirePermission>
                                     </CardHeader>
                                     <CardContent className="space-y-4 pt-4">
                                         <div className="flex items-baseline gap-1">
@@ -94,7 +99,9 @@ export default function SubscriptionsPage() {
                     <div className="flex flex-col items-center justify-center h-full rounded-lg border-2 border-dashed border-border py-24">
                         <h3 className="text-2xl font-semibold tracking-tight">No Subscriptions Found</h3>
                         <p className="text-muted-foreground mt-2">You haven't added any subscriptions yet.</p>
-                        <Button onClick={handleNewClick} className="mt-4"><Plus className="mr-2 size-4" /> Add Subscription</Button>
+                         <RequirePermission permission="subscriptions:manage">
+                            <Button onClick={handleNewClick} className="mt-4"><Plus className="mr-2 size-4" /> Add Subscription</Button>
+                        </RequirePermission>
                     </div>
                 )}
             </main>

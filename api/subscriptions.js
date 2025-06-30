@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/subscription');
+const auth = require('../middleware/auth');
 
 // GET all subscriptions
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const subscriptions = await Subscription.find().sort({ nextPaymentDate: 1 });
     res.json(subscriptions);
@@ -14,7 +15,10 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new subscription
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('subscriptions:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   const subscription = new Subscription(req.body);
   try {
     const newSubscription = await subscription.save();
@@ -25,7 +29,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) a subscription
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
+  if (!req.member.permissions.includes('subscriptions:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const updatedSubscription = await Subscription.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     if (!updatedSubscription) {
@@ -38,7 +45,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE a subscription
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('subscriptions:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const deletedSubscription = await Subscription.findOneAndDelete({ id: req.params.id });
         if (!deletedSubscription) {

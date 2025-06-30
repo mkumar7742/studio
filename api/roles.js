@@ -2,9 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const Role = require('../models/role');
+const auth = require('../middleware/auth');
 
 // GET all roles
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+    if (!req.member.permissions.includes('roles:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
   try {
     const roles = await Role.find();
     res.json(roles);
@@ -14,7 +18,10 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new role
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+    if (!req.member.permissions.includes('roles:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
   const role = new Role({
       _id: `role-${Date.now()}`,
       ...req.body
@@ -28,7 +35,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) a role
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('roles:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const updatedRole = await Role.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedRole) {
@@ -41,7 +51,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE a role
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('roles:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const deletedRole = await Role.findByIdAndDelete(req.params.id);
         if (!deletedRole) {

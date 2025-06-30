@@ -2,9 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const Member = require('../models/member');
+const auth = require('../middleware/auth');
 
 // GET all members
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('members:view')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const members = await Member.find();
     res.json(members);
@@ -14,7 +18,10 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new member
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('members:create')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   const member = new Member(req.body);
   try {
     const newMember = await member.save();
@@ -25,7 +32,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) a member
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('members:edit')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const updatedMember = await Member.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
         if (!updatedMember) {
@@ -38,7 +48,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE a member
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('members:delete')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const deletedMember = await Member.findOneAndDelete({ id: req.params.id });
         if (!deletedMember) {

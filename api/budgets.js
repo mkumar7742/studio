@@ -2,9 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const Budget = require('../models/budget');
+const auth = require('../middleware/auth');
 
 // GET all budgets
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('budgets:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const budgets = await Budget.find();
     res.json(budgets);
@@ -14,7 +18,10 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new budget
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+    if (!req.member.permissions.includes('budgets:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
   const budget = new Budget(req.body);
   try {
     const newBudget = await budget.save();
@@ -25,7 +32,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) a budget
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('budgets:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
   try {
     const updatedBudget = await Budget.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     if (!updatedBudget) {
@@ -38,7 +48,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE a budget
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+    if (!req.member.permissions.includes('budgets:manage')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const deletedBudget = await Budget.findOneAndDelete({ id: req.params.id });
         if (!deletedBudget) {

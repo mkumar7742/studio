@@ -1,6 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 
 const allPermissions = [
   {
@@ -71,11 +72,11 @@ const allPermissions = [
   },
   {
     group: 'Subscriptions',
-    permissions: [{ id: 'subscriptions:view', label: 'View Subscriptions' }],
+    permissions: [{ id: 'subscriptions:manage', label: 'Manage Subscriptions' }],
   },
 ];
 
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
     res.json(allPermissions);
 });
 

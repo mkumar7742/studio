@@ -2,9 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const Approval = require('../models/approval');
+const auth = require('../middleware/auth');
 
 // GET all approvals
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('approvals:view')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const approvals = await Approval.find().sort({ _id: -1 });
     res.json(approvals);
@@ -14,7 +18,9 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new approval
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
+  // Any member can create an approval request, so no specific permission check is needed here
+  // as long as they are authenticated. The actioning requires permission.
   const approval = new Approval(req.body);
   try {
     const newApproval = await approval.save();
@@ -25,7 +31,10 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (update) an approval status
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', auth, async (req, res) => {
+  if (!req.member.permissions.includes('approvals:action')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const { status } = req.body;
     const updatedApproval = await Approval.findOneAndUpdate(
