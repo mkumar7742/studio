@@ -41,6 +41,7 @@ if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv:
 }
 
 // API Routes
+app.use('/api/auth', require('./api/auth'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));
 app.use('/api/categories', require('./api/categories'));

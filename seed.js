@@ -23,9 +23,12 @@ const seedDatabase = async () => {
 
         await Role.insertMany(initialData.roles);
         console.log('Roles seeded.');
-
-        await Member.insertMany(initialData.members);
-        console.log('Members seeded.');
+        
+        // Use create instead of insertMany to trigger the 'save' hook for password hashing
+        for (const memberData of initialData.members) {
+            await Member.create(memberData);
+        }
+        console.log('Members seeded and passwords hashed.');
 
         await Account.insertMany(initialData.accounts);
         console.log('Accounts seeded.');
