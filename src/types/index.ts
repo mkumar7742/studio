@@ -109,7 +109,8 @@ export type Permission =
   | 'roles:manage'
   | 'budgets:manage'
   | 'calendar:view'
-  | 'subscriptions:manage';
+  | 'subscriptions:manage'
+  | 'audit:view';
 
 export interface Role {
   id: string;

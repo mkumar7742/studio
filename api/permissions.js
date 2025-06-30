@@ -74,6 +74,10 @@ const allPermissions = [
     group: 'Subscriptions',
     permissions: [{ id: 'subscriptions:manage', label: 'Manage Subscriptions' }],
   },
+  {
+    group: 'Audit Log',
+    permissions: [{ id: 'audit:view', label: 'View Audit Log' }],
+  },
 ];
 
 router.get('/', auth, (req, res) => {
