@@ -2,6 +2,8 @@
 
 This is a Next.js project bootstrapped with `create-next-app`, designed and built in Firebase Studio.
 
+This project is a frontend-only application using mock data. It is structured to be easily connected to a custom backend.
+
 ## Getting Started
 
 To get the development environment running on your local machine, follow these steps:
