@@ -22,7 +22,10 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('categories:create')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const category = new Category(req.body);
+  const category = new Category({
+      _id: `cat-${Date.now()}`,
+      ...req.body
+  });
   try {
     const newCategory = await category.save();
     res.status(201).json(newCategory);
@@ -37,7 +40,7 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     try {
-        const updatedCategory = await Category.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+        const updatedCategory = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -56,7 +59,7 @@ router.post('/reorder', auth, async (req, res) => {
     try {
         const bulkOps = orderedIds.map((id, index) => ({
             updateOne: {
-                filter: { id: id },
+                filter: { _id: id },
                 update: { $set: { order: index } }
             }
         }));
@@ -74,7 +77,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     try {
-        const deletedCategory = await Category.findOneAndDelete({ id: req.params.id });
+        const deletedCategory = await Category.findByIdAndDelete(req.params.id);
         if (!deletedCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }

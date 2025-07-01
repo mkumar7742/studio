@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
+  _id: { type: String, required: true },
   type: { type: String, enum: ['income', 'expense'], required: true },
   category: { type: String, required: true },
   description: { type: String, required: true },
@@ -19,6 +19,6 @@ const TransactionSchema = new mongoose.Schema({
   isRecurring: { type: Boolean, default: false },
   recurrenceFrequency: { type: String, enum: ['weekly', 'monthly', 'yearly'] },
   reimbursable: { type: Boolean, default: false },
-});
+}, { _id: false });
 
 module.exports = mongoose.model('Transaction', TransactionSchema);

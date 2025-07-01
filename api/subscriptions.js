@@ -19,7 +19,10 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('subscriptions:manage')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const subscription = new Subscription(req.body);
+  const subscription = new Subscription({
+      _id: `sub-${Date.now()}`,
+      ...req.body
+  });
   try {
     const newSubscription = await subscription.save();
     res.status(201).json(newSubscription);
@@ -34,7 +37,7 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
   }
   try {
-    const updatedSubscription = await Subscription.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+    const updatedSubscription = await Subscription.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedSubscription) {
         return res.status(404).json({ message: 'Subscription not found' });
     }
@@ -50,7 +53,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     try {
-        const deletedSubscription = await Subscription.findOneAndDelete({ id: req.params.id });
+        const deletedSubscription = await Subscription.findByIdAndDelete(req.params.id);
         if (!deletedSubscription) {
             return res.status(404).json({ message: 'Subscription not found' });
         }

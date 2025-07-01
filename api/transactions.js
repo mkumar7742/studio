@@ -26,7 +26,10 @@ router.post('/', auth, async (req, res) => {
     return res.status(403).json({ message: 'Forbidden' });
   }
 
-  const transaction = new Transaction(req.body);
+  const transaction = new Transaction({
+      _id: `txn-${Date.now()}`,
+      ...req.body
+  });
   try {
     const newTransaction = await transaction.save();
     res.status(201).json(newTransaction);
@@ -46,7 +49,7 @@ router.post('/bulk-delete', auth, async (req, res) => {
         return res.status(400).json({ message: 'Invalid request body, expected "ids" array.' });
     }
     try {
-        await Transaction.deleteMany({ id: { $in: ids } });
+        await Transaction.deleteMany({ _id: { $in: ids } });
         res.status(200).json({ message: 'Transactions deleted successfully.' });
     } catch (err) {
         res.status(500).json({ message: err.message });

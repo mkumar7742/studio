@@ -22,7 +22,10 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('trips:create')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const trip = new Trip(req.body);
+  const trip = new Trip({
+      _id: `trip-${Date.now()}`,
+      ...req.body
+  });
   try {
     const newTrip = await trip.save();
     res.status(201).json(newTrip);
@@ -34,7 +37,7 @@ router.post('/', auth, async (req, res) => {
 // PUT (update) a trip
 router.put('/:id', auth, async (req, res) => {
   // A trip can be edited by its creator or an admin
-  const trip = await Trip.findOne({ id: req.params.id });
+  const trip = await Trip.findById(req.params.id);
   if (!trip) {
     return res.status(404).json({ message: 'Trip not found' });
   }
@@ -45,7 +48,7 @@ router.put('/:id', auth, async (req, res) => {
   }
 
   try {
-    const updatedTrip = await Trip.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+    const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedTrip);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -55,7 +58,7 @@ router.put('/:id', auth, async (req, res) => {
 // DELETE a trip
 router.delete('/:id', auth, async (req, res) => {
     // A trip can be deleted by its creator or an admin
-    const trip = await Trip.findOne({ id: req.params.id });
+    const trip = await Trip.findById(req.params.id);
     if (!trip) {
         return res.status(404).json({ message: 'Trip not found' });
     }
@@ -66,7 +69,7 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     try {
-        const deletedTrip = await Trip.findOneAndDelete({ id: req.params.id });
+        const deletedTrip = await Trip.findByIdAndDelete(req.params.id);
         if (!deletedTrip) {
             return res.status(404).json({ message: 'Trip not found' });
         }

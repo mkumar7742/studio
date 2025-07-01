@@ -22,7 +22,10 @@ router.post('/', auth, async (req, res) => {
     if (!req.member.permissions.includes('budgets:manage')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
-  const budget = new Budget(req.body);
+  const budget = new Budget({
+      _id: `bud-${Date.now()}`,
+      ...req.body
+  });
   try {
     const newBudget = await budget.save();
     res.status(201).json(newBudget);
@@ -37,7 +40,7 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
   try {
-    const updatedBudget = await Budget.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+    const updatedBudget = await Budget.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedBudget) {
         return res.status(404).json({ message: 'Budget not found' });
     }
@@ -53,7 +56,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     try {
-        const deletedBudget = await Budget.findOneAndDelete({ id: req.params.id });
+        const deletedBudget = await Budget.findByIdAndDelete(req.params.id);
         if (!deletedBudget) {
             return res.status(404).json({ message: 'Budget not found' });
         }

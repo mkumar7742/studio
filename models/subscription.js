@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const SubscriptionSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
+  _id: { type: String, required: true },
   name: { type: String, required: true },
   icon: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -10,6 +10,6 @@ const SubscriptionSchema = new mongoose.Schema({
   billingCycle: { type: String, enum: ['Monthly', 'Yearly'], required: true },
   nextPaymentDate: { type: String, required: true },
   category: { type: String, required: true },
-});
+}, { _id: false });
 
 module.exports = mongoose.model('Subscription', SubscriptionSchema);

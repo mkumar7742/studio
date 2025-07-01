@@ -21,7 +21,10 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   // Any member can create an approval request, so no specific permission check is needed here
   // as long as they are authenticated. The actioning requires permission.
-  const approval = new Approval(req.body);
+  const approval = new Approval({
+    _id: `appr-${Date.now()}`,
+    ...req.body
+  });
   try {
     const newApproval = await approval.save();
     res.status(201).json(newApproval);
@@ -37,8 +40,8 @@ router.put('/:id/status', auth, async (req, res) => {
   }
   try {
     const { status } = req.body;
-    const updatedApproval = await Approval.findOneAndUpdate(
-      { id: req.params.id },
+    const updatedApproval = await Approval.findByIdAndUpdate(
+      req.params.id,
       { $set: { status: status } },
       { new: true }
     );

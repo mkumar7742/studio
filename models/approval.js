@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const ApprovalSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
+  _id: { type: String, required: true },
   owner: {
     name: { type: String, required: true },
     title: { type: String, required: true },
@@ -17,6 +17,6 @@ const ApprovalSchema = new mongoose.Schema({
   description: { type: String, required: true },
   team: { type: String, required: true },
   status: { type: String, enum: ['Pending', 'Approved', 'Declined'], required: true },
-});
+}, { _id: false });
 
 module.exports = mongoose.model('Approval', ApprovalSchema);
