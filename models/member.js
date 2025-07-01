@@ -18,7 +18,7 @@ const MemberSchema = new mongoose.Schema({
   phone: { type: String },
   address: { type: String },
   socials: [SocialSchema],
-}, { _id: false });
+});
 
 // Password complexity validation
 const passwordValidator = (password) => {

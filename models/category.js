@@ -7,6 +7,6 @@ const CategorySchema = new mongoose.Schema({
   icon: { type: String, required: true },
   color: { type: String, required: true },
   order: { type: Number, required: true },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Category', CategorySchema);

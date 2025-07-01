@@ -7,6 +7,6 @@ const AccountSchema = new mongoose.Schema({
   balance: { type: Number, required: true },
   currency: { type: String, required: true },
   icon: { type: String, required: true },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Account', AccountSchema);

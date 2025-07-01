@@ -12,6 +12,6 @@ const BudgetSchema = new mongoose.Schema({
   month: { type: Number, required: true },
   year: { type: Number, required: true },
   status: { type: String, enum: ['active', 'archived'], required: true },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Budget', BudgetSchema);

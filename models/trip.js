@@ -13,6 +13,6 @@ const TripSchema = new mongoose.Schema({
   status: { type: String, enum: ['Approved', 'Pending', 'Not Approved'], required: true },
   memberId: { type: String, required: true },
   hotel: { type: String },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Trip', TripSchema);

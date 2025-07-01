@@ -17,6 +17,6 @@ const ApprovalSchema = new mongoose.Schema({
   description: { type: String, required: true },
   team: { type: String, required: true },
   status: { type: String, enum: ['Pending', 'Approved', 'Declined'], required: true },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Approval', ApprovalSchema);

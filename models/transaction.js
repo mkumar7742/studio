@@ -19,6 +19,6 @@ const TransactionSchema = new mongoose.Schema({
   isRecurring: { type: Boolean, default: false },
   recurrenceFrequency: { type: String, enum: ['weekly', 'monthly', 'yearly'] },
   reimbursable: { type: Boolean, default: false },
-}, { _id: false });
+});
 
 module.exports = mongoose.model('Transaction', TransactionSchema);
