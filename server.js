@@ -15,7 +15,11 @@ const PORT = process.env.PORT || 5001;
 app.use(helmet());
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3000', // Allow requests from your Next.js frontend
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
