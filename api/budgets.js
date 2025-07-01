@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Budget = require('../models/budget');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all budgets
 router.get('/', auth, async (req, res) => {

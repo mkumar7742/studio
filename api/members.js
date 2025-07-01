@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Member = require('../models/member');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 const { logAuditEvent } = require('../lib/audit');
 
 // GET all members

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Approval = require('../models/approval');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all approvals
 router.get('/', auth, async (req, res) => {

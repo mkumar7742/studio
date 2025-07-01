@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/category');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all categories, sorted by order
 router.get('/', auth, async (req, res) => {

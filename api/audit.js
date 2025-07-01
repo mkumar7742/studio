@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const AuditLog = require('../models/auditLog');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all audit logs
 router.get('/', auth, async (req, res) => {

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Trip = require('../models/trip');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all trips
 router.get('/', auth, async (req, res) => {

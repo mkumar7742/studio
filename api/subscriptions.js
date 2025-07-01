@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/subscription');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // GET all subscriptions
 router.get('/', auth, async (req, res) => {
