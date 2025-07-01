@@ -49,17 +49,27 @@ if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv:
         });
 }
 
-// Rate limiter for login attempts
-const loginLimiter = rateLimit({
+// General API rate limiter
+const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 20, // Limit each IP to 20 login requests per windowMs
+	max: 100, // Limit each IP to 100 requests per window
 	standardHeaders: true,
 	legacyHeaders: false,
-    message: 'Too many login attempts from this IP, please try again after 15 minutes',
 });
 
+// Stricter rate limiter for login attempts
+const loginLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 20, // Limit each IP to 20 login requests per window
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+	legacyHeaders: false,
+});
 
-// API Routes
+// Apply the general limiter to all API routes
+app.use('/api/', apiLimiter);
+
+// API Routes (Login route has its own stricter limiter)
 app.use('/api/auth', loginLimiter, require('./api/auth'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));

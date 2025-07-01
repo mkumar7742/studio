@@ -1,6 +1,6 @@
 
 {
-  "name": "nextn",
+  "name": "trackwise",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,9 +8,12 @@
     "dev:frontend": "next dev",
     "server": "nodemon server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "concurrently \"npm:start:frontend\" \"npm:start:backend\"",
+    "start:frontend": "next start",
+    "start:backend": "NODE_ENV=production node server.js",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
