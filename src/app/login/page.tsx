@@ -31,7 +31,7 @@ export default function LoginPage() {
         resolver: zodResolver(loginFormSchema),
         defaultValues: {
             email: "janice.chandler@example.com",
-            password: "password123",
+            password: "Password123!",
         },
     });
 
@@ -102,7 +102,7 @@ export default function LoginPage() {
                         <p>Administrator: janice.chandler@example.com</p>
                         <p>Manager: john.doe@example.com</p>
                         <p>Member: jane.smith@example.com</p>
-                        <p>Password (for all): password123</p>
+                        <p>Password (for all): Password123!</p>
                     </div>
                 </CardContent>
             </Card>
