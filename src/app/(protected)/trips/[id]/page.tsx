@@ -33,7 +33,7 @@ const InfoRow = ({ icon: Icon, label, value, valueClassName }: { icon: React.Ele
 export default function TripDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { trips, deleteTrip, members } = useAppContext();
+    const { trips, deleteTrip, members, editTrip } = useAppContext();
     const { toast } = useToast();
     
     const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);

@@ -3,16 +3,13 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage, AuditLog } from '@/types';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2 } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 import { jwtDecode } from "jwt-decode";
-import { AuthGuard } from '@/components/auth-guard';
-import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/sidebar-nav';
 
 
 const API_BASE_URL = 'http://localhost:5001/api';
@@ -20,7 +17,7 @@ const API_BASE_URL = 'http://localhost:5001/api';
 let apiHeaders = { 'Content-Type': 'application/json' };
 
 const iconMap: { [key: string]: LucideIcon } = {
-    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
@@ -41,6 +38,7 @@ interface AppContextType {
     roles: Role[];
     subscriptions: Subscription[];
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
+    auditLogs: AuditLog[];
     currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
     conversations: Conversation[];
@@ -85,47 +83,6 @@ const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[a
 const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
 const mapSubscriptionData = (subscription: any): Subscription => ({ ...subscription, icon: iconMap[subscription.icon] || Repeat, iconName: subscription.icon });
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated, isLoading } = useAppContext();
-    const pathname = usePathname();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isLoading && pathname === '/') {
-            if (isAuthenticated) {
-                router.replace('/dashboard');
-            } else {
-                router.replace('/login');
-            }
-        }
-    }, [isLoading, isAuthenticated, pathname, router]);
-
-    if (isLoading || pathname === '/') {
-        return (
-            <div className="flex h-screen w-screen items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
-    }
-    
-    if (pathname === '/login') {
-        return <>{children}</>;
-    }
-    
-    return (
-        <AuthGuard>
-            <SidebarProvider>
-                <Sidebar className="bg-sidebar">
-                    <SidebarNav />
-                </Sidebar>
-                <SidebarInset>
-                    {children}
-                </SidebarInset>
-            </SidebarProvider>
-        </AuthGuard>
-    );
-};
-
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
     const router = useRouter();
@@ -145,12 +102,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
     const makeApiRequest = useCallback(async (url: string, options: RequestInit = {}) => {
         try {
             const response = await fetch(url, { headers: apiHeaders, ...options });
             if (response.status === 401) {
-                logout();
+                // We use a direct router push here instead of calling logout to avoid circular dependencies
+                // and to ensure a clean redirect without triggering extra state updates.
+                localStorage.removeItem('token');
+                window.location.href = '/login';
                 throw new Error('Session expired. Please log in again.');
             }
             if (!response.ok) {
@@ -163,18 +124,37 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             return response.json();
         } catch (error) {
             console.error('API Request Failed:', error);
-            toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
+            // Avoid showing a toast for auth errors since we're redirecting.
+            if ((error as Error).message.includes('Session expired')) {
+                // Do nothing
+            } else {
+                 toast({ title: "API Error", description: (error as Error).message, variant: "destructive" });
+            }
             throw error;
         }
     }, [toast]);
+    
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        apiHeaders = { 'Content-Type': 'application/json' };
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+        // Clear all state
+        setTransactions([]); setAccounts([]); setCategories([]); setBudgets([]); setTrips([]); 
+        setApprovals([]); setMembers([]); setRoles([]); setSubscriptions([]); setAllPermissions([]); 
+        setConversations([]); setAuditLogs([]);
+        
+        // Use window.location to ensure a full page refresh, clearing all component state.
+        window.location.href = '/login';
+    }, []);
 
     const fetchData = useCallback(async () => {
         try {
-            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes ] = await Promise.all([
+            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes, auditLogsRes ] = await Promise.all([
                 makeApiRequest(`${API_BASE_URL}/transactions`), makeApiRequest(`${API_BASE_URL}/accounts`), makeApiRequest(`${API_BASE_URL}/categories`),
                 makeApiRequest(`${API_BASE_URL}/budgets`), makeApiRequest(`${API_BASE_URL}/trips`), makeApiRequest(`${API_BASE_URL}/approvals`),
                 makeApiRequest(`${API_BASE_URL}/members`), makeApiRequest(`${API_BASE_URL}/roles`), makeApiRequest(`${API_BASE_URL}/subscriptions`),
-                makeApiRequest(`${API_BASE_URL}/permissions`)
+                makeApiRequest(`${API_BASE_URL}/permissions`), makeApiRequest(`${API_BASE_URL}/audit`)
             ]);
             
             setTransactions(transactionsRes);
@@ -187,51 +167,45 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setRoles(rolesRes.map((r: any) => ({...r, id: r._id})));
             setSubscriptions(subscriptionsRes.map(mapSubscriptionData));
             setAllPermissions(permissionsRes);
+            setAuditLogs(auditLogsRes);
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
         }
     }, [makeApiRequest]);
 
-    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
-    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
-    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
-    
     const login = async (email: string, password: string): Promise<boolean> => {
+        setIsLoading(true);
         try {
             const data = await makeApiRequest(`${API_BASE_URL}/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) });
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${data.token}` };
-                const decoded: { member: MemberProfile } = jwtDecode(data.token);
                 
+                // Fetch members first to identify the current user
                 const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
+                const decoded: { member: MemberProfile } = jwtDecode(data.token);
                 const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
 
                 if (userProfile) {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
-                    await fetchData();
+                    await fetchData(); // Fetch all other data after user is set
+                    // Initialize chat conversations
                     setConversations([
                       { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
                       { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
                     ]);
+                    setIsLoading(false);
                     return true;
                 }
             }
+            setIsLoading(false);
             return false;
         } catch (error) {
+            setIsLoading(false);
             return false;
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        apiHeaders = { 'Content-Type': 'application/json' };
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-        setTransactions([]); setAccounts([]); setCategories([]); setBudgets([]); setTrips([]); setApprovals([]); setMembers([]); setRoles([]); setSubscriptions([]); setAllPermissions([]); setConversations([]);
-        router.push('/login');
     };
 
     useEffect(() => {
@@ -240,7 +214,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             if (token) {
                 apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${token}` };
                  try {
-                    const decoded: { member: { id: string } } = jwtDecode(token);
+                    const decoded: { exp: number, member: { id: string } } = jwtDecode(token);
+
+                    // Check if token is expired
+                    if (decoded.exp * 1000 < Date.now()) {
+                        logout();
+                        return;
+                    }
+
+                    // Pre-fetch members to find the user profile
                     const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
                     const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
 
@@ -262,8 +244,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(false);
         };
         initializeAuth();
-    }, [fetchData, makeApiRequest]);
+    }, [fetchData, makeApiRequest, logout]);
 
+    const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
+    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
+    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
+    
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
         const unsubmittedCount = transactions.filter(t => t.status === 'Not Submitted').length;
@@ -433,8 +419,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const editTrip = async (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
-        await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...values } : t));
+        const updatedTrip = await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
+        setTrips(prev => prev.map(t => t.id === tripId ? updatedTrip : t));
     };
 
     const deleteTrip = async (tripId: string) => {
@@ -475,7 +461,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = {
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions,
+        transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions, auditLogs,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addBudget, editBudget, deleteBudget,
         archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
@@ -484,7 +470,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     return (
       <AppContext.Provider value={value}>
-        <MainLayout>{children}</MainLayout>
+        {children}
       </AppContext.Provider>
     );
 }
