@@ -13,13 +13,29 @@ const { initialData } = require('./lib/seed-data');
 
 const seedDatabase = async () => {
     try {
-        const memberCount = await Member.countDocuments();
-        if (memberCount > 0) {
-            console.log('Database already seeded. Skipping.');
-            return;
+        // To ensure a clean state in development, we'll wipe the collections first.
+        // This is useful if seed data or schemas change.
+        // This check prevents it from running in a real production environment.
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Development environment detected. Clearing database for fresh seed...');
+            const collections = mongoose.connection.collections;
+            // Await all deletions to complete before proceeding
+            await Promise.all(Object.values(collections).map(collection => {
+                if (collection.collectionName !== 'system.views') {
+                   return collection.deleteMany({});
+                }
+                return Promise.resolve();
+            }));
+            console.log('Database cleared.');
+        } else {
+             const memberCount = await Member.countDocuments();
+             if (memberCount > 0) {
+                console.log('Production environment already seeded. Skipping.');
+                return;
+             }
         }
 
-        console.log('Empty database detected. Seeding initial data...');
+        console.log('Seeding initial data...');
 
         await Role.insertMany(initialData.roles);
         console.log('Roles seeded.');
