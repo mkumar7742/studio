@@ -19,9 +19,8 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { ExpenseReceiptScanner } from '@/components/expense-receipt-scanner';
 import { Calendar } from '@/components/ui/calendar';
 
 const expenseFormSchema = z.object({
@@ -278,7 +277,12 @@ export default function NewExpensePage() {
                         </div>
 
                         <div className="lg:col-span-1">
-                            <ExpenseReceiptScanner />
+                            <label className="flex flex-col items-center justify-center w-full h-64 lg:h-full border-2 border-dashed border-border rounded-lg bg-card p-6 text-center cursor-pointer hover:bg-muted/50">
+                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4"><FilePlus2 className="size-10"/></div>
+                                <span className="text-base font-semibold">Upload a receipt</span>
+                                <span className="text-sm text-muted-foreground mt-1">e.g., photo, PDF, etc.</span>
+                                <Input type="file" className="hidden" />
+                            </label>
                         </div>
                     </div>
                 </main>
