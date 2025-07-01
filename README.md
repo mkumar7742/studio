@@ -42,3 +42,4 @@ This will:
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 The application is now running in a full-stack configuration. Any data you create will be sent to the backend and stored in your MongoDB database.
+# studio
