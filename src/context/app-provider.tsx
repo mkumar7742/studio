@@ -2,14 +2,18 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage } from '@/types';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2 } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 import { jwtDecode } from "jwt-decode";
+import { AuthGuard } from '@/components/auth-guard';
+import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarNav } from '@/components/sidebar-nav';
+
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
@@ -81,6 +85,47 @@ const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[a
 const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
 const mapSubscriptionData = (subscription: any): Subscription => ({ ...subscription, icon: iconMap[subscription.icon] || Repeat, iconName: subscription.icon });
 
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated, isLoading } = useAppContext();
+    const pathname = usePathname();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && pathname === '/') {
+            if (isAuthenticated) {
+                router.replace('/dashboard');
+            } else {
+                router.replace('/login');
+            }
+        }
+    }, [isLoading, isAuthenticated, pathname, router]);
+
+    if (isLoading || pathname === '/') {
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-background">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+    
+    if (pathname === '/login') {
+        return <>{children}</>;
+    }
+    
+    return (
+        <AuthGuard>
+            <SidebarProvider>
+                <Sidebar className="bg-sidebar">
+                    <SidebarNav />
+                </Sidebar>
+                <SidebarInset>
+                    {children}
+                </SidebarInset>
+            </SidebarProvider>
+        </AuthGuard>
+    );
+};
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
     const router = useRouter();
@@ -105,7 +150,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         try {
             const response = await fetch(url, { headers: apiHeaders, ...options });
             if (response.status === 401) {
-                // Token is invalid or expired, log out
                 logout();
                 throw new Error('Session expired. Please log in again.');
             }
@@ -161,14 +205,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${data.token}` };
                 const decoded: { member: MemberProfile } = jwtDecode(data.token);
                 
-                // Fetch members list first to find the full profile
                 const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
                 const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
 
                 if (userProfile) {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
-                    await fetchData(); // Fetch all data after authentication
+                    await fetchData();
                     setConversations([
                       { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
                       { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
@@ -187,18 +230,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         apiHeaders = { 'Content-Type': 'application/json' };
         setCurrentUser(null);
         setIsAuthenticated(false);
-        // Clear all data
-        setTransactions([]);
-        setAccounts([]);
-        setCategories([]);
-        setBudgets([]);
-        setTrips([]);
-        setApprovals([]);
-        setMembers([]);
-        setRoles([]);
-        setSubscriptions([]);
-        setAllPermissions([]);
-        setConversations([]);
+        setTransactions([]); setAccounts([]); setCategories([]); setBudgets([]); setTrips([]); setApprovals([]); setMembers([]); setRoles([]); setSubscriptions([]); setAllPermissions([]); setConversations([]);
         router.push('/login');
     };
 
@@ -450,7 +482,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,
     };
 
-    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+    return (
+      <AppContext.Provider value={value}>
+        <MainLayout>{children}</MainLayout>
+      </AppContext.Provider>
+    );
 }
 
 export const useAppContext = () => {
