@@ -154,9 +154,9 @@ export default function HomePage() {
           if (response.ok) {
             return await response.json();
           }
-          console.warn(`Attempt ${i + 1}: Server responded with status ${response.status}. Retrying in ${delay}ms...`);
+          console.warn(`Attempt ${i+1}: Server responded with status ${response.status}. Retrying in ${delay}ms...`);
         } catch (error) {
-          console.warn(`Attempt ${i + 1}: Fetch failed. Retrying in ${delay}ms...`);
+          console.warn(`Attempt ${i+1}: Fetch failed. Retrying in ${delay}ms...`);
         }
         await new Promise(res => setTimeout(res, delay));
       }
@@ -166,15 +166,34 @@ export default function HomePage() {
     const performCheck = async () => {
       const data = await checkSetupStatusWithRetry();
       
-      if (data?.needsSetup) {
+      if (data === null) {
+          // If the server never responds, maybe show an error page or just the login page.
+          // For now, let's assume it might be set up and default to login.
+          router.replace('/login');
+          return;
+      }
+
+      if (data.needsSetup) {
         router.replace('/setup');
       } else {
-        setShouldRender(true);
+        // If already set up, check for a token and try to go to dashboard, otherwise login.
+        const token = localStorage.getItem('token');
+        if (token) {
+          router.replace('/dashboard');
+        } else {
+          setShouldRender(true);
+        }
       }
     };
 
     performCheck();
   }, [router]);
 
-  return shouldRender ? <LandingPage /> : <LoadingScreen />;
+  // This logic ensures that if setup is not needed, we show the landing page,
+  // from which the user can navigate to login.
+  if (!shouldRender) {
+      return <LoadingScreen />;
+  }
+
+  return <LandingPage />;
 }
