@@ -6,6 +6,9 @@ const auth = require('./middleware/auth');
 
 // GET all subscriptions
 router.get('/', auth, async (req, res) => {
+  if (!req.member.permissions.includes('subscriptions:view')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const subscriptions = await Subscription.find().sort({ nextPaymentDate: 1 });
     res.json(subscriptions);

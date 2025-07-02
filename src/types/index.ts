@@ -109,6 +109,7 @@ export type Permission =
   | 'roles:manage'
   | 'budgets:manage'
   | 'calendar:view'
+  | 'subscriptions:view'
   | 'subscriptions:manage'
   | 'audit:view';
 
@@ -120,6 +121,7 @@ export interface Role {
 
 export interface MemberProfile {
   id: string;
+  _id: string;
   name: string;
   email: string;
   roleId: string;
@@ -135,6 +137,7 @@ export interface MemberProfile {
 
 export interface Approval {
   id: string;
+  _id: string;
   owner: {
     name: string;
     title: string;
@@ -166,6 +169,7 @@ export interface Conversation {
 
 export interface AuditLog {
   id: string;
+  _id: string;
   timestamp: string;
   memberId: string;
   memberName: string;

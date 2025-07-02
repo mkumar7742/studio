@@ -72,7 +72,10 @@ const allPermissions = [
   },
   {
     group: 'Subscriptions',
-    permissions: [{ id: 'subscriptions:manage', label: 'Manage Subscriptions' }],
+    permissions: [
+      { id: 'subscriptions:view', label: 'View Subscriptions' },
+      { id: 'subscriptions:manage', label: 'Manage Subscriptions' }
+    ],
   },
   {
     group: 'Audit Log',
