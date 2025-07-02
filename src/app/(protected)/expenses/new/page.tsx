@@ -10,8 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, FilePlus2, Repeat } from 'lucide-react';
+import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, Repeat } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { Switch } from '@/components/ui/switch';
@@ -29,11 +28,8 @@ const expenseFormSchema = z.object({
     date: z.date({ required_error: "A date is required." }),
     amount: z.coerce.number().positive({ message: "Amount must be positive." }),
     currency: z.string({ required_error: "Please select a currency." }),
-    reimbursable: z.boolean().default(false),
     category: z.string({ required_error: "Please select a category." }),
-    textDescription: z.string().optional(),
     member: z.string({ required_error: "Please select a member." }),
-    report: z.string().optional(),
     isRecurring: z.boolean().default(false),
     recurrenceFrequency: z.enum(["weekly", "monthly", "yearly"]).optional(),
 }).refine(data => {
@@ -61,12 +57,9 @@ export default function NewExpensePage() {
             date: new Date(),
             amount: '' as any,
             currency: "USD",
-            reimbursable: true,
             member: currentUser.name,
-            report: `Report ${format(new Date(), 'MM-yyyy')}`,
             isRecurring: false,
             category: "",
-            textDescription: "",
         }
     });
 
@@ -79,11 +72,7 @@ export default function NewExpensePage() {
             date: format(values.date, "yyyy-MM-dd"),
             category: values.category,
             member: values.member,
-            team: "General",
             merchant: values.merchant,
-            report: values.report || '',
-            status: 'Not Submitted',
-            reimbursable: values.reimbursable,
             isRecurring: values.isRecurring,
             recurrenceFrequency: values.recurrenceFrequency,
         });
@@ -176,18 +165,6 @@ export default function NewExpensePage() {
                                 <FormField control={form.control} name="currency" render={({ field }) => ( <FormItem className='col-span-1'><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Currency" /></SelectTrigger></FormControl><SelectContent>{SUPPORTED_CURRENCIES.map(c => (<SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )} />
                             </div>
                             
-                            <div />
-                            <FormField
-                                control={form.control}
-                                name="reimbursable"
-                                render={({ field }) => (
-                                    <FormItem className="flex items-center space-x-2">
-                                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                        <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
-                                    </FormItem>
-                                )}
-                            />
-                            
                             <FormField
                                 control={form.control}
                                 name="category"
@@ -201,17 +178,6 @@ export default function NewExpensePage() {
                                             </Select>
                                             <FormMessage />
                                         </FormItem>
-                                    </>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="textDescription"
-                                render={({ field }) => (
-                                    <>
-                                        <Label htmlFor="textDescription" className="flex items-center gap-4 self-start pt-2"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-500 text-white"><BookText className="size-4" /></div><span>Description</span></Label>
-                                        <FormItem className='w-full'><FormControl><Textarea id="textDescription" className="bg-card border-border" {...field} /></FormControl><FormMessage /></FormItem>
                                     </>
                                 )}
                             />
@@ -229,17 +195,6 @@ export default function NewExpensePage() {
                                             </Select>
                                             <FormMessage />
                                         </FormItem>
-                                    </>
-                                )}
-                            />
-                            
-                            <FormField
-                                control={form.control}
-                                name="report"
-                                render={({ field }) => (
-                                    <>
-                                        <Label htmlFor="report" className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-pink-500 text-white"><FilePlus2 className="size-4" /></div><span>Expense Report</span></Label>
-                                        <FormItem className='w-full'><FormControl><Input id="report" className="bg-card border-border" {...field} /></FormControl><FormMessage /></FormItem>
                                     </>
                                 )}
                             />
@@ -281,7 +236,7 @@ export default function NewExpensePage() {
 
                         <div className="lg:col-span-1">
                             <label className="flex flex-col items-center justify-center w-full h-64 lg:h-full border-2 border-dashed border-border rounded-lg bg-card p-6 text-center cursor-pointer hover:bg-muted/50">
-                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4"><FilePlus2 className="size-10"/></div>
+                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4"><BookText className="size-10"/></div>
                                 <span className="text-base font-semibold">Upload a receipt</span>
                                 <span className="text-sm text-muted-foreground mt-1">e.g., photo, PDF, etc.</span>
                                 <Input type="file" className="hidden" />

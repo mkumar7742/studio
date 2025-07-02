@@ -71,11 +71,7 @@ export default function NewIncomePage() {
             date: format(values.date, "yyyy-MM-dd"),
             category: values.category,
             member: values.member,
-            team: 'General',
             merchant: values.merchant,
-            report: 'N/A',
-            status: 'Submitted',
-            reimbursable: false,
             isRecurring: values.isRecurring,
             recurrenceFrequency: values.recurrenceFrequency,
         });

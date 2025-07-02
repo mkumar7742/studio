@@ -6,10 +6,8 @@ import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
-import { cn } from '@/lib/utils';
 import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -63,7 +61,7 @@ export default function ExpensesPage() {
     };
 
     const handleExport = () => {
-        const headers = ["Date", "Description", "Member", "Merchant", "Category", "Amount", "Currency", "Status", "Report"];
+        const headers = ["Date", "Description", "Member", "Merchant", "Category", "Amount", "Currency"];
         const csvRows = [
             headers.join(','),
             ...transactions.map(txn => {
@@ -75,8 +73,6 @@ export default function ExpensesPage() {
                     `"${txn.category}"`,
                     txn.amount,
                     txn.currency,
-                    `"${txn.status}"`,
-                    `"${txn.report}"`,
                 ];
                 return row.join(',');
             })
@@ -140,8 +136,6 @@ export default function ExpensesPage() {
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">MERCHANT</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">EXPENSE REPORT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -199,19 +193,6 @@ export default function ExpensesPage() {
                                             </TableCell>
                                             <TableCell>{txn.merchant}</TableCell>
                                             <TableCell>{formatCurrency(txn.amount, txn.currency)}</TableCell>
-                                            <TableCell>{txn.report}</TableCell>
-                                            <TableCell>
-                                                <Badge 
-                                                    variant="outline"
-                                                    className={cn("border-none rounded-md text-xs font-semibold py-1 px-2.5", 
-                                                        txn.status === 'Submitted' && 'bg-violet-500/20 text-violet-400',
-                                                        txn.status === 'Not Submitted' && 'bg-pink-500/20 text-pink-400',
-                                                        txn.status === 'Reimbursed' && 'bg-green-500/20 text-green-400'
-                                                    )}
-                                                >
-                                                    {txn.status}
-                                                </Badge>
-                                            </TableCell>
                                         </TableRow>
                                     )
                                 })}

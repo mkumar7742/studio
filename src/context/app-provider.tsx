@@ -2,11 +2,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import type { Transaction, Account, Category, PendingTask, MemberProfile, Role, Permission, Conversation, AuditLog } from '@/types';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText, Building } from "lucide-react";
+import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog } from '@/types';
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText, Building } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
-import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 import { jwtDecode } from "jwt-decode";
 
@@ -19,7 +17,7 @@ const iconMap: { [key: string]: LucideIcon } = {
     Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText, Building
 };
 
-export type FullTransaction = Omit<Transaction, 'id' | 'team' | 'receiptUrl'>;
+export type FullTransaction = Omit<Transaction, 'id' | 'receiptUrl'>;
 
 interface AppContextType {
     isAuthenticated: boolean;
@@ -27,7 +25,6 @@ interface AppContextType {
     transactions: Transaction[];
     accounts: Account[];
     categories: Category[];
-    pendingTasks: PendingTask[];
     members: MemberProfile[];
     roles: Role[];
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
@@ -208,22 +205,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
     const currentUserPermissions = useMemo(() => currentUser?.permissions ?? [], [currentUser]);
-    
-    const pendingTasks = useMemo(() => {
-        if (!currentUser) return [];
-        
-        const myUnsubmittedCount = transactions.filter(t => t.member === currentUser.name && t.status === 'Not Submitted').length;
-
-        const pendingReimbursementsAmount = transactions
-            .filter(t => t.reimbursable && t.status === 'Submitted')
-            .reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
-
-        return [
-            { icon: Receipt, label: 'My Unsubmitted Expenses', value: myUnsubmittedCount, color: 'bg-emerald-600' },
-            { icon: Undo2, label: 'Pending Reimbursements', value: formatCurrency(pendingReimbursementsAmount, 'USD'), color: 'bg-purple-500' }
-        ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
-
-    }, [transactions, currentUser]);
 
     const addTransaction = useCallback(async (values: Omit<Transaction, 'id'>) => {
         const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(values) });
@@ -311,12 +292,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, pendingTasks, members, roles, allPermissions, auditLogs,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, pendingTasks, members, roles, allPermissions, auditLogs,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
     ]);

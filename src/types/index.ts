@@ -9,15 +9,11 @@ export interface Transaction {
   amount: number;
   currency: string;
   date: string; // yyyy-MM-dd
-  receiptUrl: string | null;
+  receiptUrl?: string | null;
   member: string;
-  team?: string;
   merchant: string;
-  report: string;
-  status: 'Submitted' | 'Not Submitted' | 'Reimbursed';
   isRecurring?: boolean;
   recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
-  reimbursable?: boolean;
 }
 
 export interface Account {
@@ -35,13 +31,6 @@ export interface Category {
   iconName: string;
   color: string;
   order: number;
-}
-
-export interface PendingTask {
-    icon: LucideIcon;
-    label: string;
-    value: string | number;
-    color: string;
 }
 
 export type Permission =

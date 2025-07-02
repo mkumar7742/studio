@@ -6,10 +6,8 @@ import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
-import { cn } from '@/lib/utils';
 import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
 import type { Category, Transaction } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -138,7 +136,6 @@ export default function IncomePage() {
                                     <TableHead className="text-muted-foreground font-bold">DETAILS</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">SOURCE</TableHead>
                                     <TableHead className="text-muted-foreground font-bold">AMOUNT</TableHead>
-                                    <TableHead className="text-muted-foreground font-bold">STATUS</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -196,14 +193,6 @@ export default function IncomePage() {
                                             </TableCell>
                                             <TableCell>{txn.merchant}</TableCell>
                                             <TableCell className="text-primary">{formatCurrency(txn.amount, txn.currency)}</TableCell>
-                                            <TableCell>
-                                                <Badge 
-                                                    variant="outline"
-                                                    className="border-none rounded-md text-xs font-semibold py-1 px-2.5 bg-green-500/20 text-green-400"
-                                                >
-                                                   Received
-                                                </Badge>
-                                            </TableCell>
                                         </TableRow>
                                     )
                                 })}

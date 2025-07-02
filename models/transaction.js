@@ -10,13 +10,9 @@ const TransactionSchema = new mongoose.Schema({
   date: { type: String, required: true },
   receiptUrl: { type: String },
   member: { type: String, required: true },
-  team: { type: String },
   merchant: { type: String, required: true },
-  report: { type: String, required: true },
-  status: { type: String, enum: ['Submitted', 'Not Submitted', 'Reimbursed'], required: true },
   isRecurring: { type: Boolean, default: false },
   recurrenceFrequency: { type: String, enum: ['weekly', 'monthly', 'yearly'] },
-  reimbursable: { type: Boolean, default: false },
 });
 
 TransactionSchema.virtual('id').get(function(){

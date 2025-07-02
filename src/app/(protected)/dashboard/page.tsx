@@ -10,15 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SpendingCharts } from "@/components/spending-charts";
-import type { PendingTask, Transaction } from "@/types";
 import { useAppContext } from '@/context/app-provider';
-import { cn } from '@/lib/utils';
 import { CategorySpending } from "@/components/category-spending";
 import { ActivitySidebar } from '@/components/activity-sidebar';
 import { CreditCard, TrendingUp, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getMonth, getYear, subMonths, startOfMonth, format } from 'date-fns';
+import { getMonth, getYear, subMonths, startOfMonth } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from "@/components/ui/calendar";
 
@@ -148,7 +146,7 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 }
 
 export default function DashboardPage() {
-  const { transactions, pendingTasks } = useAppContext();
+  const { transactions } = useAppContext();
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
   const now = new Date();
@@ -178,11 +176,6 @@ export default function DashboardPage() {
       return acc;
   }, { income: 0, expenses: 0 });
 
-
-  const taskLinks: { [key: string]: string } = {
-    'Unsubmitted Expenses': '/expenses',
-    'Pending Reimbursements': '/expenses',
-  };
   
   const [calendarDate, setCalendarDate] = useState<Date>();
 
@@ -251,36 +244,11 @@ export default function DashboardPage() {
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="bg-card flex flex-col h-full">
-            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
-              <CardTitle className="text-base font-semibold">Pending Tasks</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow p-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 h-full">
-                {pendingTasks.map((task: PendingTask) => {
-                  const link = taskLinks[task.label] || '#';
-                  return (
-                    <Link href={link} key={task.label} className="block group">
-                      <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-between">
-                        <div className="flex items-start justify-between">
-                          <p className="font-semibold text-foreground/90">{task.label}</p>
-                          <div className={cn("flex size-8 items-center justify-center rounded-lg text-white", task.color)}>
-                            <task.icon className="size-4" />
-                          </div>
-                        </div>
-                        <p className="mt-4 text-3xl font-bold text-foreground">{task.value}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card flex flex-col h-full">
               <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                   <CardTitle className="text-base font-semibold">Quick Access</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow p-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 h-full">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 h-full">
                   <Link href="/expenses/new" className="block group">
                       <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
                       <CreditCard className="size-8 text-red-500 mb-2" />
