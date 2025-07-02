@@ -132,6 +132,7 @@ export interface MemberProfile {
     platform: string;
     url: string;
   }[];
+  permissions?: Permission[];
 }
 
 export interface Approval {

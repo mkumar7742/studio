@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useMemo, useCall
 import { useRouter, usePathname } from 'next/navigation';
 import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, AuditLog } from '@/types';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText, Building } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
@@ -17,10 +17,10 @@ const API_BASE_URL = 'http://localhost:5001/api';
 const apiHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
 
 const iconMap: { [key: string]: LucideIcon } = {
-    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText, Building
 };
 
-export type FullTransaction = Omit<Transaction, 'id' | 'accountId' | 'team' | 'receiptUrl'>;
+export type FullTransaction = Omit<Transaction, 'id' | 'team' | 'receiptUrl'>;
 export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon' | 'iconName'> & { iconName: string };
 export type TripFormData = Omit<Trip, 'id' | 'status' | 'report'>;
 
@@ -139,26 +139,37 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [toast, logout]);
     
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (permissions: Permission[]) => {
+        const hasPermission = (p: Permission) => permissions.includes(p) || permissions.includes('roles:manage');
+
         try {
-            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes, auditLogsRes ] = await Promise.all([
-                makeApiRequest(`${API_BASE_URL}/transactions`), makeApiRequest(`${API_BASE_URL}/accounts`), makeApiRequest(`${API_BASE_URL}/categories`),
-                makeApiRequest(`${API_BASE_URL}/budgets`), makeApiRequest(`${API_BASE_URL}/trips`), makeApiRequest(`${API_BASE_URL}/approvals`),
-                makeApiRequest(`${API_BASE_URL}/members`), makeApiRequest(`${API_BASE_URL}/roles`), makeApiRequest(`${API_BASE_URL}/subscriptions`),
-                makeApiRequest(`${API_BASE_URL}/permissions`), makeApiRequest(`${API_BASE_URL}/audit`)
-            ]);
+            const promises = [
+                hasPermission('expenses:view') || hasPermission('income:view') ? makeApiRequest(`${API_BASE_URL}/transactions`) : Promise.resolve([]),
+                makeApiRequest(`${API_BASE_URL}/accounts`),
+                hasPermission('categories:view') ? makeApiRequest(`${API_BASE_URL}/categories`) : Promise.resolve([]),
+                hasPermission('budgets:manage') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([]),
+                hasPermission('trips:view') ? makeApiRequest(`${API_BASE_URL}/trips`) : Promise.resolve([]),
+                hasPermission('approvals:view') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([]),
+                hasPermission('members:view') ? makeApiRequest(`${API_BASE_URL}/members`) : Promise.resolve([]),
+                hasPermission('roles:manage') ? makeApiRequest(`${API_BASE_URL}/roles`) : Promise.resolve([]),
+                hasPermission('subscriptions:view') ? makeApiRequest(`${API_BASE_URL}/subscriptions`) : Promise.resolve([]),
+                makeApiRequest(`${API_BASE_URL}/permissions`),
+                hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([])
+            ];
+
+            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes, auditLogsRes ] = await Promise.all(promises);
             
-            setTransactions(transactionsRes);
-            setAccounts(accountsRes.map(mapAccountData));
-            setCategories(categoriesRes.map(mapCategoryData));
-            setBudgets(budgetsRes);
-            setTrips(tripsRes);
-            setApprovals(approvalsRes);
-            setMembers(membersRes);
-            setRoles(rolesRes);
-            setSubscriptions(subscriptionsRes.map(mapSubscriptionData));
-            setAllPermissions(permissionsRes);
-            setAuditLogs(auditLogsRes);
+            setTransactions(transactionsRes || []);
+            setAccounts((accountsRes || []).map(mapAccountData));
+            setCategories((categoriesRes || []).map(mapCategoryData));
+            setBudgets(budgetsRes || []);
+            setTrips(tripsRes || []);
+            setApprovals(approvalsRes || []);
+            setMembers(membersRes || []);
+            setRoles(rolesRes || []);
+            setSubscriptions((subscriptionsRes || []).map(mapSubscriptionData));
+            setAllPermissions(permissionsRes || []);
+            setAuditLogs(auditLogsRes || []);
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
@@ -176,7 +187,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 const userProfile = data.user as MemberProfile;
                 setCurrentUser(userProfile);
                 setIsAuthenticated(true);
-                await fetchData();
+                await fetchData(userProfile.permissions || []);
                 
                 setConversations([
                   { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
@@ -209,7 +220,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 if (userProfile) {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
-                    await fetchData();
+                    await fetchData(userProfile.permissions || []);
                     setConversations([
                       { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
                       { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
@@ -229,8 +240,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [initializeAuth]);
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
-    const currentUserRole = useMemo(() => currentUser ? getMemberRole(currentUser) : undefined, [currentUser, getMemberRole]);
-    const currentUserPermissions = useMemo(() => currentUserRole?.permissions ?? [], [currentUserRole]);
+    const currentUserPermissions = useMemo(() => currentUser?.permissions ?? [], [currentUser]);
     
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
