@@ -58,6 +58,8 @@ MemberSchema.set('toJSON', {
     transform: (doc, ret) => {
         delete ret._id;
         delete ret.__v;
+        // IMPORTANT: Ensure hashed password is not sent in responses
+        delete ret.password;
     }
 });
 

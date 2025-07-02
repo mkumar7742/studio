@@ -4,10 +4,6 @@ const Role = require('./models/role');
 const Category = require('./models/category');
 const Member = require('./models/member');
 const Transaction = require('./models/transaction');
-const Budget = require('./models/budget');
-const Trip = require('./models/trip');
-const Approval = require('./models/approval');
-const Subscription = require('./models/subscription');
 const AuditLog = require('./models/auditLog');
 const { initialData } = require('./lib/seed-data');
 
