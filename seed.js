@@ -2,6 +2,13 @@
 const mongoose = require('mongoose');
 const Role = require('./models/role');
 const Category = require('./models/category');
+const Member = require('./models/member');
+const Transaction = require('./models/transaction');
+const Budget = require('./models/budget');
+const Trip = require('./models/trip');
+const Approval = require('./models/approval');
+const Subscription = require('./models/subscription');
+const AuditLog = require('./models/auditLog');
 const { initialData } = require('./lib/seed-data');
 
 const seedDatabase = async () => {
@@ -9,19 +16,28 @@ const seedDatabase = async () => {
     // It ensures a clean, consistent state every time the server restarts.
     if (process.env.NODE_ENV !== 'production') {
         try {
-            console.log('--- Development mode detected: Resetting essential data ---');
-            
-            // Clear and re-seed Roles
+            console.log('--- Development mode detected: Wiping and resetting database ---');
+
+            // Clear all collections to ensure a clean slate
+            await Member.deleteMany({});
+            await Transaction.deleteMany({});
+            await Budget.deleteMany({});
+            await Trip.deleteMany({});
+            await Approval.deleteMany({});
+            await Subscription.deleteMany({});
+            await AuditLog.deleteMany({});
             await Role.deleteMany({});
+            await Category.deleteMany({});
+            console.log('All collections wiped.');
+            
+            // Re-seed essential data
             await Role.insertMany(initialData.roles);
             console.log('Roles seeded successfully.');
 
-            // Clear and re-seed Categories
-            await Category.deleteMany({});
             await Category.insertMany(initialData.categories);
             console.log('Categories seeded successfully.');
 
-            console.log('--- Essential data reset complete. ---');
+            console.log('--- Database reset complete. ---');
 
         } catch (error) {
             console.error('Error resetting and seeding database:', error);
