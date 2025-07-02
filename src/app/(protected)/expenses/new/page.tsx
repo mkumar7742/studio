@@ -243,7 +243,7 @@ export default function NewExpensePage() {
                                         <FormItem className='w-full'>
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Select a member" /></SelectTrigger></FormControl>
-                                                <SelectContent>{members.map((m) => (<SelectItem key={m._id} value={m.name}>{m.name}</SelectItem>))}</SelectContent>
+                                                <SelectContent>{members.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}</SelectContent>
                                             </Select>
                                             <FormMessage />
                                         </FormItem>
