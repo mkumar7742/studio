@@ -48,12 +48,8 @@ app.use('/api/setup', require('./api/setup'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));
 app.use('/api/categories', require('./api/categories'));
-app.use('/api/budgets', require('./api/budgets'));
-app.use('/api/trips', require('./api/trips'));
-app.use('/api/approvals', require('./api/approvals'));
 app.use('/api/members', require('./api/members'));
 app.use('/api/roles', require('./api/roles'));
-app.use('/api/subscriptions', require('./api/subscriptions'));
 app.use('/api/permissions', require('./api/permissions'));
 app.use('/api/audit', require('./api/audit'));
 

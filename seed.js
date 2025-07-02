@@ -21,10 +21,6 @@ const seedDatabase = async () => {
             // Clear all collections to ensure a clean slate
             await Member.deleteMany({});
             await Transaction.deleteMany({});
-            await Budget.deleteMany({});
-            await Trip.deleteMany({});
-            await Approval.deleteMany({});
-            await Subscription.deleteMany({});
             await AuditLog.deleteMany({});
             await Role.deleteMany({});
             await Category.deleteMany({});

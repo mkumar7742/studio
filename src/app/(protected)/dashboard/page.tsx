@@ -15,8 +15,7 @@ import { useAppContext } from '@/context/app-provider';
 import { cn } from '@/lib/utils';
 import { CategorySpending } from "@/components/category-spending";
 import { ActivitySidebar } from '@/components/activity-sidebar';
-import { BudgetsOverview } from './budgets-overview';
-import { CreditCard, Plane, TrendingUp, ClipboardCheck, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
+import { CreditCard, TrendingUp, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { getMonth, getYear, subMonths, startOfMonth, format } from 'date-fns';
@@ -181,10 +180,7 @@ export default function DashboardPage() {
 
 
   const taskLinks: { [key: string]: string } = {
-    'Pending Approvals': '/approvals',
-    'New Trips Registered': '/trips',
     'Unsubmitted Expenses': '/expenses',
-    'Upcoming Bills & Subscriptions': '/subscriptions',
     'Pending Reimbursements': '/expenses',
   };
   
@@ -254,7 +250,6 @@ export default function DashboardPage() {
       </div>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <BudgetsOverview className="h-full" />
           <Card className="bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
               <CardTitle className="text-base font-semibold">Pending Tasks</CardTitle>
@@ -298,20 +293,6 @@ export default function DashboardPage() {
                       <TrendingUp className="size-8 text-green-500 mb-2" />
                       <h3 className="font-semibold">New Income</h3>
                       <p className="text-sm text-muted-foreground">Record a new source of income.</p>
-                      </div>
-                  </Link>
-                  <Link href="/trips/new" className="block group">
-                      <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                      <Plane className="size-8 text-blue-500 mb-2" />
-                      <h3 className="font-semibold">New Trip</h3>
-                      <p className="text-sm text-muted-foreground">Plan and budget a new trip.</p>
-                      </div>
-                  </Link>
-                  <Link href="/approvals/new" className="block group">
-                      <div className="h-full rounded-lg bg-muted/50 p-4 transition-colors group-hover:bg-accent/80 flex flex-col justify-center">
-                      <ClipboardCheck className="size-8 text-pink-500 mb-2" />
-                      <h3 className="font-semibold">New Approval</h3>
-                      <p className="text-sm text-muted-foreground">Submit a new request for approval.</p>
                       </div>
                   </Link>
                   </div>

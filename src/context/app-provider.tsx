@@ -3,8 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, AuditLog } from '@/types';
-import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
+import type { Transaction, Account, Category, PendingTask, MemberProfile, Role, Permission, Conversation, AuditLog } from '@/types';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText, Building } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
@@ -21,8 +20,6 @@ const iconMap: { [key: string]: LucideIcon } = {
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'team' | 'receiptUrl'>;
-export type SubscriptionFormData = Omit<Subscription, 'id' | 'icon' | 'iconName'> & { iconName: string };
-export type TripFormData = Omit<Trip, 'id' | 'status' | 'report'>;
 
 interface AppContextType {
     isAuthenticated: boolean;
@@ -30,13 +27,9 @@ interface AppContextType {
     transactions: Transaction[];
     accounts: Account[];
     categories: Category[];
-    budgets: Budget[];
     pendingTasks: PendingTask[];
-    trips: Trip[];
-    approvals: Approval[];
     members: MemberProfile[];
     roles: Role[];
-    subscriptions: Subscription[];
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
     auditLogs: AuditLog[];
     currentUser: MemberProfile | null;
@@ -46,11 +39,6 @@ interface AppContextType {
     logout: () => void;
     addTransaction: (values: Omit<Transaction, 'id'>) => Promise<void>;
     deleteTransactions: (transactionIds: string[]) => Promise<void>;
-    updateTransactionStatus: (transactionId: string, status: 'Approved' | 'Declined') => Promise<void>;
-    addBudget: (values: Omit<Budget, 'id' | 'status'>) => Promise<void>;
-    editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => Promise<void>;
-    deleteBudget: (budgetId: string) => Promise<void>;
-    archiveBudget: (budgetId: string, status: 'active' | 'archived') => Promise<void>;
     addCategory: (values: { name: string; color: string; icon: string }) => Promise<void>;
     editCategory: (categoryId: string, values: { name: string; color: string; icon: string }) => Promise<void>;
     deleteCategory: (categoryId: string) => Promise<void>;
@@ -64,14 +52,6 @@ interface AppContextType {
     editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => Promise<void>;
     deleteRole: (roleId: string) => Promise<void>;
     updateCurrentUser: (data: Partial<MemberProfile>) => Promise<void>;
-    updateApprovalStatus: (approvalId: string, status: 'Approved' | 'Declined') => Promise<void>;
-    addApproval: (values: Omit<Approval, 'id' | 'status' | 'owner'>) => Promise<void>;
-    addTrip: (trip: TripFormData) => Promise<void>;
-    editTrip: (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => Promise<void>;
-    deleteTrip: (tripId: string) => Promise<void>;
-    addSubscription: (values: SubscriptionFormData) => Promise<void>;
-    editSubscription: (subscriptionId: string, values: SubscriptionFormData) => Promise<void>;
-    deleteSubscription: (subscriptionId: string) => Promise<void>;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
 }
@@ -82,7 +62,6 @@ const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
 
 const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[account.icon] || Wallet });
 const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
-const mapSubscriptionData = (subscription: any): Subscription => ({ ...subscription, icon: iconMap[subscription.icon] || Repeat, iconName: subscription.icon });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
@@ -94,12 +73,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [budgets, setBudgets] = useState<Budget[]>([]);
-    const [trips, setTrips] = useState<Trip[]>([]);
-    const [approvals, setApprovals] = useState<Approval[]>([]);
     const [members, setMembers] = useState<MemberProfile[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
-    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -109,8 +84,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         delete apiHeaders['Authorization'];
         setCurrentUser(null);
         setIsAuthenticated(false);
-        setTransactions([]); setAccounts([]); setCategories([]); setBudgets([]); setTrips([]); 
-        setApprovals([]); setMembers([]); setRoles([]); setSubscriptions([]); setAllPermissions([]); 
+        setTransactions([]); setAccounts([]); setCategories([]); 
+        setMembers([]); setRoles([]); setAllPermissions([]); 
         setConversations([]); setAuditLogs([]);
         window.location.href = '/login';
     }, []);
@@ -147,27 +122,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 hasPermission('expenses:view') || hasPermission('income:view') ? makeApiRequest(`${API_BASE_URL}/transactions`) : Promise.resolve([]),
                 makeApiRequest(`${API_BASE_URL}/accounts`),
                 hasPermission('categories:view') ? makeApiRequest(`${API_BASE_URL}/categories`) : Promise.resolve([]),
-                hasPermission('budgets:manage') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([]),
-                hasPermission('trips:view') ? makeApiRequest(`${API_BASE_URL}/trips`) : Promise.resolve([]),
-                hasPermission('approvals:view') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([]),
                 hasPermission('members:view') ? makeApiRequest(`${API_BASE_URL}/members`) : Promise.resolve([]),
                 hasPermission('roles:manage') ? makeApiRequest(`${API_BASE_URL}/roles`) : Promise.resolve([]),
-                hasPermission('subscriptions:view') ? makeApiRequest(`${API_BASE_URL}/subscriptions`) : Promise.resolve([]),
                 makeApiRequest(`${API_BASE_URL}/permissions`),
                 hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([])
             ];
 
-            const [ transactionsRes, accountsRes, categoriesRes, budgetsRes, tripsRes, approvalsRes, membersRes, rolesRes, subscriptionsRes, permissionsRes, auditLogsRes ] = await Promise.all(promises);
+            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes ] = await Promise.all(promises);
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
             setCategories((categoriesRes || []).map(mapCategoryData));
-            setBudgets(budgetsRes || []);
-            setTrips(tripsRes || []);
-            setApprovals(approvalsRes || []);
             setMembers(membersRes || []);
             setRoles(rolesRes || []);
-            setSubscriptions((subscriptionsRes || []).map(mapSubscriptionData));
             setAllPermissions(permissionsRes || []);
             setAuditLogs(auditLogsRes || []);
 
@@ -245,36 +212,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
         
-        const pendingLegacyApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
-        const pendingTripsCount = trips.filter(t => t.status === 'Pending').length;
-        const pendingTransactionsCount = transactions.filter(t => t.reimbursable && t.status === 'Submitted').length;
         const myUnsubmittedCount = transactions.filter(t => t.member === currentUser.name && t.status === 'Not Submitted').length;
-        
-        let visibleApprovals = 0;
-        if(currentUserPermissions.includes('approvals:action')) {
-            visibleApprovals = pendingLegacyApprovalsCount + pendingTripsCount + pendingTransactionsCount;
-        }
-
-        const now = new Date();
-        const next30Days = addDays(now, 30);
-        const upcomingSubscriptionsCount = subscriptions.filter(s => {
-            const paymentDate = parseISO(s.nextPaymentDate);
-            return isAfter(paymentDate, now) && isBefore(paymentDate, next30Days);
-        }).length;
 
         const pendingReimbursementsAmount = transactions
             .filter(t => t.reimbursable && t.status === 'Submitted')
             .reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
 
         return [
-            { icon: ClipboardCheck, label: 'Pending Approvals', value: visibleApprovals, color: 'bg-pink-600' },
-            { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending' && t.memberId === currentUser.id).length, color: 'bg-blue-600' },
             { icon: Receipt, label: 'My Unsubmitted Expenses', value: myUnsubmittedCount, color: 'bg-emerald-600' },
-            { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: upcomingSubscriptionsCount, color: 'bg-orange-500' },
             { icon: Undo2, label: 'Pending Reimbursements', value: formatCurrency(pendingReimbursementsAmount, 'USD'), color: 'bg-purple-500' }
         ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
 
-    }, [transactions, trips, approvals, currentUserPermissions, subscriptions, currentUser]);
+    }, [transactions, currentUser]);
 
     const addTransaction = useCallback(async (values: Omit<Transaction, 'id'>) => {
         const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(values) });
@@ -285,34 +234,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         await makeApiRequest(`${API_BASE_URL}/transactions/bulk-delete`, { method: 'POST', body: JSON.stringify({ ids: transactionIds }) });
         setTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
     }, [makeApiRequest]);
-
-    const updateTransactionStatus = useCallback(async (transactionId: string, status: 'Approved' | 'Declined') => {
-        const updatedTransaction = await makeApiRequest(`${API_BASE_URL}/transactions/${transactionId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-        setTransactions(prev => prev.map(t => t.id === transactionId ? updatedTransaction : t));
-    }, [makeApiRequest]);
-
-    const addBudget = useCallback(async (values: Omit<Budget, 'id' | 'status'>) => {
-        const newBudget = await makeApiRequest(`${API_BASE_URL}/budgets`, { method: 'POST', body: JSON.stringify({ ...values, status: 'active' }) });
-        setBudgets(prev => [...prev, newBudget]);
-    }, [makeApiRequest]);
-
-    const editBudget = useCallback(async (budgetId: string, values: Omit<Budget, 'id'>) => {
-        const updatedBudget = await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setBudgets(prev => prev.map(b => b.id === budgetId ? updatedBudget : b));
-    }, [makeApiRequest]);
-
-    const deleteBudget = useCallback(async (budgetId: string) => {
-        await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'DELETE' });
-        setBudgets(prev => prev.filter(b => b.id !== budgetId));
-    }, [makeApiRequest]);
-
-    const archiveBudget = useCallback(async (budgetId: string, status: 'active' | 'archived') => {
-        const budget = budgets.find(b => b.id === budgetId);
-        if(budget) {
-            const updatedBudget = await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'PUT', body: JSON.stringify({ ...budget, status }) });
-            setBudgets(prev => prev.map(b => b.id === budgetId ? updatedBudget : b));
-        }
-    }, [makeApiRequest, budgets]);
 
     const addCategory = useCallback(async (values: { name: string; color: string; icon: string }) => {
         const newCategoryData = { ...values, order: categories.length };
@@ -374,50 +295,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [currentUser, editMember]);
     
-    const addApproval = useCallback(async (values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
-        if(!currentUser) return;
-        const newApprovalData = { ...values, status: 'Pending', owner: { name: currentUser.name, title: getMemberRole(currentUser)?.name || 'Member', avatar: currentUser.avatar, avatarHint: currentUser.avatarHint } };
-        const newApproval = await makeApiRequest(`${API_BASE_URL}/approvals`, { method: 'POST', body: JSON.stringify(newApprovalData) });
-        setApprovals(prev => [newApproval, ...prev]);
-    }, [makeApiRequest, currentUser, getMemberRole]);
-    
-    const updateApprovalStatus = useCallback(async (approvalId: string, status: 'Approved' | 'Declined') => {
-        const updatedApproval = await makeApiRequest(`${API_BASE_URL}/approvals/${approvalId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-        setApprovals(prev => prev.map(a => a.id === approvalId ? updatedApproval : a));
-    }, [makeApiRequest]);
-    
-    const addTrip = useCallback(async (tripData: TripFormData) => {
-        const newTripData = { ...tripData, status: 'Pending', report: `${format(parseISO(tripData.departDate), 'MMMM_yyyy')}` };
-        const newTrip = await makeApiRequest(`${API_BASE_URL}/trips`, { method: 'POST', body: JSON.stringify(newTripData) });
-        setTrips(prev => [...prev, newTrip]);
-    }, [makeApiRequest]);
-    
-    const editTrip = useCallback(async (tripId: string, values: Partial<Omit<Trip, 'id' | 'report' | 'memberId'>>) => {
-        const updatedTrip = await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setTrips(prev => prev.map(t => t.id === tripId ? updatedTrip : t));
-    }, [makeApiRequest]);
-
-    const deleteTrip = useCallback(async (tripId: string) => {
-        await makeApiRequest(`${API_BASE_URL}/trips/${tripId}`, { method: 'DELETE' });
-        setTrips(prev => prev.filter(t => t.id !== tripId));
-    }, [makeApiRequest]);
-
-    const addSubscription = useCallback(async (values: SubscriptionFormData) => {
-        const newSubscriptionData = { ...values, icon: values.iconName };
-        const newSubscription = await makeApiRequest(`${API_BASE_URL}/subscriptions`, { method: 'POST', body: JSON.stringify(newSubscriptionData) });
-        setSubscriptions(prev => [...prev, mapSubscriptionData(newSubscription)]);
-    }, [makeApiRequest]);
-
-    const editSubscription = useCallback(async (subscriptionId: string, values: SubscriptionFormData) => {
-        const updatedSubscription = await makeApiRequest(`${API_BASE_URL}/subscriptions/${subscriptionId}`, { method: 'PUT', body: JSON.stringify({ ...values, icon: values.iconName }) });
-        setSubscriptions(prev => prev.map(s => s.id === subscriptionId ? mapSubscriptionData(updatedSubscription) : s));
-    }, [makeApiRequest]);
-
-    const deleteSubscription = useCallback(async (subscriptionId: string) => {
-        await makeApiRequest(`${API_BASE_URL}/subscriptions/${subscriptionId}`, { method: 'DELETE' });
-        setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
-    }, [makeApiRequest]);
-
     const markConversationAsRead = useCallback((memberId: string) => {
         setConversations(prev => prev.map(c => c.memberId === memberId ? { ...c, unreadCount: 0 } : c));
     }, []);
@@ -434,18 +311,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions, auditLogs,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, updateTransactionStatus, addBudget, editBudget, deleteBudget,
-        archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
-        deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,
+        transactions, accounts, categories, pendingTasks, members, roles, allPermissions, auditLogs,
+        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
+        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions, auditLogs,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, updateTransactionStatus, addBudget, editBudget, deleteBudget,
-        archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
-        deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,
+        transactions, accounts, categories, pendingTasks, members, roles, allPermissions, auditLogs,
+        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
+        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
     ]);
 
     return (

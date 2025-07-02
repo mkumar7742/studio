@@ -14,7 +14,7 @@ export interface Transaction {
   team?: string;
   merchant: string;
   report: string;
-  status: 'Submitted' | 'Not Submitted' | 'Reimbursed' | 'Approved' | 'Declined';
+  status: 'Submitted' | 'Not Submitted' | 'Reimbursed';
   isRecurring?: boolean;
   recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
   reimbursable?: boolean;
@@ -37,50 +37,11 @@ export interface Category {
   order: number;
 }
 
-export interface Budget {
-    id: string;
-    name: string;
-    category: string;
-    allocated: number;
-    currency: string;
-    scope: 'global' | 'member';
-    memberId?: string;
-    month: number; // 0-11
-    year: number;
-    status: 'active' | 'archived';
-}
-
 export interface PendingTask {
     icon: LucideIcon;
     label: string;
     value: string | number;
     color: string;
-}
-
-export interface Trip {
-  id: string;
-  departDate: string; // yyyy-MM-dd
-  returnDate: string; // yyyy-MM-dd
-  location: string;
-  purpose: string;
-  amount: number;
-  currency: string;
-  report: string;
-  status: 'Approved' | 'Pending' | 'Not Approved';
-  memberId: string;
-  hotel?: string;
-}
-
-export interface Subscription {
-  id: string;
-  name: string;
-  icon: LucideIcon;
-  iconName: string;
-  amount: number;
-  currency: string;
-  billingCycle: 'Monthly' | 'Yearly';
-  nextPaymentDate: string; // yyyy-MM-dd
-  category: string;
 }
 
 export type Permission =
@@ -93,10 +54,6 @@ export type Permission =
   | 'income:create'
   | 'income:edit'
   | 'income:delete'
-  | 'trips:view'
-  | 'trips:create'
-  | 'approvals:view'
-  | 'approvals:action'
   | 'categories:view'
   | 'categories:create'
   | 'categories:edit'
@@ -106,10 +63,7 @@ export type Permission =
   | 'members:edit'
   | 'members:delete'
   | 'roles:manage'
-  | 'budgets:manage'
   | 'calendar:view'
-  | 'subscriptions:view'
-  | 'subscriptions:manage'
   | 'audit:view';
 
 export interface Role {
@@ -133,25 +87,6 @@ export interface MemberProfile {
     url: string;
   }[];
   permissions?: Permission[];
-}
-
-export interface Approval {
-  id: string;
-  _id: string;
-  owner: {
-    name: string;
-    title: string;
-    avatar: string;
-    avatarHint: string;
-  };
-  category: 'Travel' | 'Food' | 'Software';
-  amount: number;
-  currency: string;
-  frequency: 'Once' | 'Monthly' | 'Bi-Monthly';
-  project: string;
-  description: string;
-  team: string;
-  status: 'Pending' | 'Approved' | 'Declined';
 }
 
 export interface ChatMessage {

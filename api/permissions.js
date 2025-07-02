@@ -27,20 +27,6 @@ const allPermissions = [
     ],
   },
   {
-    group: 'Trips',
-    permissions: [
-      { id: 'trips:view', label: 'View Trips' },
-      { id: 'trips:create', label: 'Create Trips' },
-    ],
-  },
-  {
-    group: 'Approvals',
-    permissions: [
-      { id: 'approvals:view', label: 'View Approvals' },
-      { id: 'approvals:action', label: 'Action Approvals' },
-    ],
-  },
-  {
     group: 'Categories',
     permissions: [
       { id: 'categories:view', label: 'View Categories' },
@@ -63,19 +49,8 @@ const allPermissions = [
     permissions: [{ id: 'roles:manage', label: 'Manage Roles & Permissions' }],
   },
   {
-    group: 'Budgets',
-    permissions: [{ id: 'budgets:manage', label: 'Manage Budgets' }],
-  },
-  {
     group: 'Calendar',
     permissions: [{ id: 'calendar:view', label: 'View Calendar' }],
-  },
-  {
-    group: 'Subscriptions',
-    permissions: [
-      { id: 'subscriptions:view', label: 'View Subscriptions' },
-      { id: 'subscriptions:manage', label: 'Manage Subscriptions' }
-    ],
   },
   {
     group: 'Audit Log',

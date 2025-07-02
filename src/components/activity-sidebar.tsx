@@ -6,12 +6,10 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowRight, ArrowUpRight, Plane } from 'lucide-react';
+import { ArrowDownLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Transaction, Trip } from '@/types';
+import type { Transaction } from '@/types';
 import { formatCurrency } from '@/lib/currency';
-import { Button } from './ui/button';
 
 const ActivityItem = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-4 py-3 pr-4">
@@ -45,28 +43,16 @@ const ActivityAmount = ({ amount, currency, type }: { amount: number, currency: 
     </div>
 );
 
-const ActivityStatus = ({ status }: { status: Trip['status']}) => {
-    const getStatusClasses = (s: Trip['status']) => {
-        switch (s) {
-            case 'Approved': return 'bg-violet-600/20 text-violet-400 border-transparent';
-            case 'Pending': return 'bg-pink-600/20 text-pink-400 border-transparent';
-            case 'Not Approved': return 'bg-red-600/20 text-red-400 border-transparent';
-            default: return '';
-        }
-    };
-    return <Badge variant="outline" className={cn('text-xs', getStatusClasses(status))}>{status}</Badge>;
-}
 
-const ActivityList = ({ items, type }: { items: (Transaction | Trip)[], type: 'expense' | 'income' | 'trip' }) => {
+const ActivityList = ({ items, type }: { items: Transaction[], type: 'expense' | 'income' }) => {
     if (items.length === 0) {
-      const typeName = type === 'trip' ? 'trips' : `${type}s`;
+      const typeName = `${type}s`;
       return <p className="text-center text-sm text-muted-foreground py-10">No recent {typeName}.</p>;
     }
     return (
       <div>
         {items.map(item => {
-          if (type === 'expense' || type === 'income') {
-            const txn = item as Transaction;
+            const txn = item;
             return (
               <ActivityItem key={txn.id}>
                 <ActivityIcon icon={type === 'income' ? ArrowUpRight : ArrowDownLeft} color={type === 'income' ? "bg-primary" : "bg-destructive"} />
@@ -74,25 +60,13 @@ const ActivityList = ({ items, type }: { items: (Transaction | Trip)[], type: 'e
                 <ActivityAmount amount={txn.amount} currency={txn.currency} type={type} />
               </ActivityItem>
             )
-          }
-          if (type === 'trip') {
-            const trip = item as Trip;
-            return (
-              <ActivityItem key={trip.id}>
-                <ActivityIcon icon={Plane} color="bg-blue-500" />
-                <ActivityContent title={trip.location} description={trip.purpose} link={`/trips/${trip.id}`} />
-                <ActivityStatus status={trip.status} />
-              </ActivityItem>
-            )
-          }
-          return null;
         })}
       </div>
     );
   }
 
 export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolean }) {
-    const { transactions, trips } = useAppContext();
+    const { transactions } = useAppContext();
 
     const recentExpenses = transactions
         .filter(t => t.type === 'expense')
@@ -104,10 +78,6 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 7);
 
-    const recentTrips = trips
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 7);
-        
     return (
         <aside className={cn("flex flex-col gap-6", showCalendar ? "sticky top-6" : "h-full")}>
             {showCalendar && (
@@ -129,10 +99,9 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                 </CardHeader>
                 <CardContent className={cn("p-4 flex-grow min-h-0", !showCalendar && "flex flex-col")}>
                     <Tabs defaultValue="expenses" className="w-full flex flex-col h-full">
-                        <TabsList className="grid w-full grid-cols-3 shrink-0">
+                        <TabsList className="grid w-full grid-cols-2 shrink-0">
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
                             <TabsTrigger value="income">Income</TabsTrigger>
-                            <TabsTrigger value="trips">Trips</TabsTrigger>
                         </TabsList>
                         <TabsContent value="expenses" className="flex-grow mt-2 relative">
                             <div className="absolute inset-0 overflow-y-auto pr-2">
@@ -144,16 +113,9 @@ export function ActivitySidebar({ showCalendar = true }: { showCalendar?: boolea
                                 <ActivityList items={recentIncome} type="income" />
                              </div>
                         </TabsContent>
-                        <TabsContent value="trips" className="flex-grow mt-2 relative">
-                            <div className="absolute inset-0 overflow-y-auto pr-2">
-                                <ActivityList items={recentTrips} type="trip" />
-                            </div>
-                        </TabsContent>
                     </Tabs>
                 </CardContent>
             </Card>
         </aside>
     );
 }
-
-    
