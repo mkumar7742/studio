@@ -15,7 +15,7 @@ import { CategorySpending } from "@/components/category-spending";
 import { ActivitySidebar } from '@/components/activity-sidebar';
 import { CreditCard, TrendingUp, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { getMonth, getYear, subMonths, startOfMonth } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from "@/components/ui/calendar";
@@ -146,23 +146,80 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
     );
 }
 
-export default function DashboardPage() {
-  const { transactions, currentUser, getMemberRole } = useAppContext();
+const MemberSpendingCard = ({ transactions }: { transactions: Transaction[] }) => {
+    const { members } = useAppContext();
+    const spendingByMember = useMemo(() => {
+        const memberSpending: { [key: string]: number } = {};
 
-  // Determine user's role and filter transactions accordingly
+        transactions.forEach(t => {
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'expense') {
+                if (!memberSpending[t.member]) {
+                    memberSpending[t.member] = 0;
+                }
+                memberSpending[t.member] += amountInUsd;
+            }
+        });
+        
+        return members.map(member => ({
+                name: member.name.split(' ')[0], // Show first name
+                fullName: member.name,
+                total: memberSpending[member.name] || 0,
+            }))
+            .filter(m => m.total > 0)
+            .sort((a, b) => b.total - a.total);
+    }, [transactions, members]);
+
+    const renderMemberTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="rounded-lg border bg-card p-2 shadow-sm text-card-foreground">
+                    <p className="font-bold">{data.fullName}</p>
+                    <p className="text-sm">{formatCurrency(payload[0].value, 'USD')}</p>
+                </div>
+            );
+        }
+        return null;
+    };
+
+     const chartColors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
+    return (
+        <Card className="bg-card lg:col-span-2 h-full flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
+                <CardTitle className="text-base font-semibold">Spending by Member</CardTitle>
+                <Link href="/members" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                    View all <ArrowRight className="size-4" />
+                </Link>
+            </CardHeader>
+            <CardContent className="flex-grow p-4">
+                 <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={spendingByMember} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value, 'USD').replace(/\.\d+/, '')} />
+                        <Tooltip cursor={{fill: 'hsla(var(--muted))'}} content={renderMemberTooltip} />
+                        <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                            {spendingByMember.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </CardContent>
+        </Card>
+    );
+}
+
+export default function DashboardPage() {
+  const { visibleTransactions, currentUser, getMemberRole } = useAppContext();
+
+  // Determine user's role
   const isFamilyHead = useMemo(() => {
     if (!currentUser) return false;
     const role = getMemberRole(currentUser);
     return role?.name === 'Family Head';
   }, [currentUser, getMemberRole]);
-
-  const visibleTransactions = useMemo(() => {
-    if (isFamilyHead) {
-      return transactions;
-    }
-    return transactions.filter(t => t.member === currentUser?.name);
-  }, [transactions, isFamilyHead, currentUser]);
-
 
   const expenseTransactions = visibleTransactions.filter(t => t.type === 'expense');
 
@@ -240,6 +297,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
+        {isFamilyHead && <MemberSpendingCard transactions={visibleTransactions} />}
+        
         <Card className="bg-card lg:col-span-2 h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Monthly Report</CardTitle>
@@ -255,7 +314,7 @@ export default function DashboardPage() {
         <CategorySpending transactions={visibleTransactions} className="lg:col-span-1 h-full" />
         
         <div className="lg:col-span-1 h-full">
-          <ActivitySidebar transactions={visibleTransactions} showCalendar={false} />
+          <ActivitySidebar showCalendar={false} />
         </div>
       </div>
       

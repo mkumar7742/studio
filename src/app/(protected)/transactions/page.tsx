@@ -24,7 +24,7 @@ const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
 };
 
 export default function TransactionsPage() {
-    const { transactions, members } = useAppContext();
+    const { visibleTransactions, members } = useAppContext();
 
     return (
         <div className="flex flex-col h-full">
@@ -45,8 +45,8 @@ export default function TransactionsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {transactions.length > 0 ? (
-                                transactions.map((txn: Transaction) => {
+                                {visibleTransactions.length > 0 ? (
+                                visibleTransactions.map((txn: Transaction) => {
                                     const member = members.find(m => m.name === txn.member);
                                     return (
                                     <TableRow key={txn.id}>

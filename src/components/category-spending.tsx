@@ -16,8 +16,8 @@ const getCategoryDetails = (categories: Category[], categoryName: string) => {
 };
 
 export function CategorySpending({ className, transactions: transactionsProp }: { className?: string, transactions?: Transaction[] }) {
-    const { transactions: contextTransactions, categories } = useAppContext();
-    const transactions = transactionsProp ?? contextTransactions;
+    const { visibleTransactions, categories } = useAppContext();
+    const transactions = transactionsProp ?? visibleTransactions;
 
     const spendingData = useMemo(() => {
         const expenseTransactions = transactions.filter(t => t.type === 'expense');

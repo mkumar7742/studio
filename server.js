@@ -52,6 +52,7 @@ app.use('/api/members', require('./api/members'));
 app.use('/api/roles', require('./api/roles'));
 app.use('/api/permissions', require('./api/permissions'));
 app.use('/api/audit', require('./api/audit'));
+app.use('/api/approvals', require('./api/approvals'));
 
 app.get('/', (req, res) => {
     res.send('TrackWise API Server is running.');

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog } from '@/types';
+import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog, Approval, ChatMessage } from '@/types';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -23,12 +23,14 @@ interface AppContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     transactions: Transaction[];
+    visibleTransactions: Transaction[];
     accounts: Account[];
     categories: Category[];
     members: MemberProfile[];
     roles: Role[];
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
     auditLogs: AuditLog[];
+    approvals: Approval[];
     currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
     conversations: Conversation[];
@@ -48,6 +50,8 @@ interface AppContextType {
     addRole: (values: { name: string; permissions: Permission[] }) => Promise<void>;
     editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => Promise<void>;
     deleteRole: (roleId: string) => Promise<void>;
+    addApproval: (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName'>) => Promise<void>;
+    updateApproval: (approvalId: string, status: 'approved' | 'rejected', notes: string) => Promise<void>;
     updateCurrentUser: (data: Partial<MemberProfile>) => Promise<void>;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
@@ -59,6 +63,13 @@ const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
 
 const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[account.icon] || Wallet });
 const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
+
+const initialMockMessages: Omit<ChatMessage, 'receiverId'>[] = [
+    { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
+    { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
+    { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
+    { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
+];
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
@@ -73,8 +84,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [members, setMembers] = useState<MemberProfile[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
-    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [approvals, setApprovals] = useState<Approval[]>([]);
+
+    // A central, mock message store to simulate a chat backend
+    const [messageStore, setMessageStore] = useState<ChatMessage[]>([]);
+    const [unreadMessageIds, setUnreadMessageIds] = useState<{[key: string]: string[]}>({}); // { 'userId': ['msgId1', 'msgId2'] }
+
 
     const logout = useCallback(() => {
         localStorage.removeItem('token');
@@ -83,7 +99,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(false);
         setTransactions([]); setAccounts([]); setCategories([]); 
         setMembers([]); setRoles([]); setAllPermissions([]); 
-        setConversations([]); setAuditLogs([]);
+        setAuditLogs([]); setApprovals([]);
+        setMessageStore([]); setUnreadMessageIds({});
         window.location.href = '/login';
     }, []);
 
@@ -112,7 +129,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [toast, logout]);
     
     const fetchData = useCallback(async (permissions: Permission[]) => {
-        const hasPermission = (p: Permission) => permissions.includes(p) || permissions.includes('roles:manage');
+        const hasPermission = (p: Permission) => permissions.includes(p);
 
         try {
             const promises = [
@@ -122,10 +139,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 hasPermission('members:view') ? makeApiRequest(`${API_BASE_URL}/members`) : Promise.resolve([]),
                 hasPermission('roles:manage') ? makeApiRequest(`${API_BASE_URL}/roles`) : Promise.resolve([]),
                 makeApiRequest(`${API_BASE_URL}/permissions`),
-                hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([])
+                hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([]),
+                hasPermission('approvals:request') || hasPermission('approvals:manage') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([])
             ];
 
-            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes ] = await Promise.all(promises);
+            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes ] = await Promise.all(promises);
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
@@ -134,6 +152,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setRoles(rolesRes || []);
             setAllPermissions(permissionsRes || []);
             setAuditLogs(auditLogsRes || []);
+            setApprovals(approvalsRes || []);
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
@@ -153,10 +172,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 setIsAuthenticated(true);
                 await fetchData(userProfile.permissions || []);
                 
-                setConversations([
-                  { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
-                  { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
+                // Initialize mock chat data on login
+                setMessageStore([
+                    { id: 'msg1', senderId: 'mem1', receiverId: 'mem2', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
+                    { id: 'msg2', senderId: 'mem2', receiverId: 'mem1', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
+                    { id: 'msg3', senderId: 'mem1', receiverId: 'mem2', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
+                    { id: 'msg4', senderId: 'mem3', receiverId: 'mem1', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
                 ]);
+                setUnreadMessageIds({ 'mem1': ['msg4'] });
+                
                 setIsLoading(false);
                 return true;
             }
@@ -185,10 +209,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
                     await fetchData(userProfile.permissions || []);
-                    setConversations([
-                      { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
-                      { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
+                     // Initialize mock chat data on session restore
+                    setMessageStore([
+                        { id: 'msg1', senderId: 'mem1', receiverId: 'mem2', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
+                        { id: 'msg2', senderId: 'mem2', receiverId: 'mem1', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
+                        { id: 'msg3', senderId: 'mem1', receiverId: 'mem2', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
+                        { id: 'msg4', senderId: 'mem3', receiverId: 'mem1', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
                     ]);
+                    setUnreadMessageIds({ 'mem1': ['msg4'] });
                 } else {
                     logout();
                 }
@@ -205,6 +233,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
     const currentUserPermissions = useMemo(() => currentUser?.permissions ?? [], [currentUser]);
+    const isFamilyHead = useMemo(() => currentUserPermissions.includes('roles:manage'), [currentUserPermissions]);
+
+    const visibleTransactions = useMemo(() => {
+        if (!currentUser) return [];
+        if (isFamilyHead) return transactions;
+        return transactions.filter(t => t.member === currentUser.name);
+    }, [transactions, isFamilyHead, currentUser]);
 
     const addTransaction = useCallback(async (values: Omit<Transaction, 'id'>) => {
         const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(values) });
@@ -270,36 +305,107 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setRoles(prev => prev.filter(r => r.id !== roleId));
     }, [makeApiRequest]);
 
+    const addApproval = useCallback(async (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName'>) => {
+        const newApproval = await makeApiRequest(`${API_BASE_URL}/approvals`, { method: 'POST', body: JSON.stringify(values) });
+        setApprovals(prev => [newApproval, ...prev]);
+    }, [makeApiRequest]);
+
+    const updateApproval = useCallback(async (approvalId: string, status: 'approved' | 'rejected', notes: string) => {
+        const updatedApproval = await makeApiRequest(`${API_BASE_URL}/approvals/${approvalId}`, { method: 'PUT', body: JSON.stringify({ status, notes }) });
+        setApprovals(prev => prev.map(a => a.id === approvalId ? updatedApproval : a));
+    }, [makeApiRequest]);
+    
     const updateCurrentUser = useCallback(async (data: Partial<MemberProfile>) => {
         if(currentUser) {
             await editMember(currentUser.id, data);
         }
     }, [currentUser, editMember]);
     
+    // --- Chat Logic ---
+
+    const conversations = useMemo(() => {
+        if (!currentUser) return [];
+
+        const conversationsMap = new Map<string, ChatMessage[]>();
+        messageStore.forEach(msg => {
+            let partnerId: string | null = null;
+            if (msg.senderId === currentUser.id) partnerId = msg.receiverId;
+            else if (msg.receiverId === currentUser.id) partnerId = msg.senderId;
+
+            if (partnerId) {
+                if (!conversationsMap.has(partnerId)) conversationsMap.set(partnerId, []);
+                conversationsMap.get(partnerId)!.push(msg);
+            }
+        });
+
+        const unreadCounts = (unreadMessageIds[currentUser.id] || []).reduce((acc, msgId) => {
+            const msg = messageStore.find(m => m.id === msgId);
+            if (msg) acc[msg.senderId] = (acc[msg.senderId] || 0) + 1;
+            return acc;
+        }, {} as {[key: string]: number});
+        
+        const result: Conversation[] = [];
+        members.forEach(member => {
+            if (member.id === currentUser.id) return;
+            const messages = conversationsMap.get(member.id) || [];
+            if (messages.length > 0) {
+                 result.push({
+                    memberId: member.id,
+                    messages: messages.sort((a, b) => a.timestamp - b.timestamp),
+                    unreadCount: unreadCounts[member.id] || 0
+                });
+            }
+        });
+        
+        return result.sort((a, b) => {
+            const lastMsgA = a.messages[a.messages.length - 1]?.timestamp || 0;
+            const lastMsgB = b.messages[b.messages.length - 1]?.timestamp || 0;
+            return lastMsgB - lastMsgA;
+        });
+
+    }, [currentUser, members, messageStore, unreadMessageIds]);
+
     const markConversationAsRead = useCallback((memberId: string) => {
-        setConversations(prev => prev.map(c => c.memberId === memberId ? { ...c, unreadCount: 0 } : c));
-    }, []);
+        if (!currentUser) return;
+        setUnreadMessageIds(prev => {
+            const currentUserUnreads = (prev[currentUser.id] || []).filter(msgId => {
+                const msg = messageStore.find(m => m.id === msgId);
+                return msg?.senderId !== memberId;
+            });
+            return { ...prev, [currentUser.id]: currentUserUnreads };
+        });
+    }, [currentUser, messageStore]);
 
     const sendMessage = useCallback((receiverId: string, text: string) => {
         if(!currentUser) return;
-        const newMessage: ChatMessage = { id: `msg-${Date.now()}`, senderId: currentUser.id, text, timestamp: Date.now() };
-        setConversations(prev => {
-            const conversationExists = prev.some(c => c.memberId === receiverId);
-            if (conversationExists) { return prev.map(c => c.memberId === receiverId ? { ...c, messages: [...c.messages, newMessage] } : c); }
-            else { return [...prev, { memberId: receiverId, messages: [newMessage], unreadCount: 0, }]; }
-        });
+        const newMessage: ChatMessage = {
+            id: `msg-${Date.now()}`,
+            senderId: currentUser.id,
+            receiverId: receiverId,
+            text,
+            timestamp: Date.now()
+        };
+        setMessageStore(prev => [...prev, newMessage]);
+        // Simulate receiver getting the message and it becoming "unread"
+        setUnreadMessageIds(prev => ({
+            ...prev,
+            [receiverId]: [...(prev[receiverId] || []), newMessage.id]
+        }));
     }, [currentUser]);
+
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals,
+        visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
+        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals,
+        visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, sendMessage, markConversationAsRead,
+        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, updateCurrentUser, sendMessage, markConversationAsRead,
     ]);
 
     return (

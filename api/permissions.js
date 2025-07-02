@@ -26,6 +26,13 @@ const allPermissions = [
       { id: 'income:delete', label: 'Delete Income' },
     ],
   },
+   {
+    group: 'Approvals',
+    permissions: [
+      { id: 'approvals:request', label: 'Request expense approvals' },
+      { id: 'approvals:manage', label: 'Manage expense approvals' },
+    ],
+  },
   {
     group: 'Categories',
     permissions: [

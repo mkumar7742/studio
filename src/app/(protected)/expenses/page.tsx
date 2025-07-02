@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
 import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
-import type { Category, Transaction } from '@/types';
+import type { Category } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
@@ -18,12 +18,12 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { useToast } from '@/hooks/use-toast';
 
 export default function ExpensesPage() {
-    const { transactions: allTransactions, categories, members, deleteTransactions } = useAppContext();
+    const { visibleTransactions, categories, members, deleteTransactions } = useAppContext();
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
     const [rowsToDelete, setRowsToDelete] = useState<Set<string>>(new Set());
     const { toast } = useToast();
 
-    const transactions = allTransactions.filter(t => t.type === 'expense');
+    const transactions = visibleTransactions.filter(t => t.type === 'expense');
 
     const handleSelectAll = (checked: boolean | 'indeterminate') => {
         if (checked === true) {

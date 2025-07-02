@@ -43,6 +43,8 @@ export type Permission =
   | 'income:create'
   | 'income:edit'
   | 'income:delete'
+  | 'approvals:request'
+  | 'approvals:manage'
   | 'categories:view'
   | 'categories:create'
   | 'categories:edit'
@@ -81,6 +83,7 @@ export interface MemberProfile {
 export interface ChatMessage {
   id: string;
   senderId: string;
+  receiverId: string;
   text: string;
   timestamp: number;
 }
@@ -99,4 +102,21 @@ export interface AuditLog {
   memberName: string;
   action: string;
   details: any;
+}
+
+export interface Approval {
+  id: string;
+  _id: string;
+  memberId: string;
+  memberName: string;
+  description: string;
+  amount: number;
+  currency: string;
+  category: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestDate: string;
+  decisionDate: string;
+  approverId?: string;
+  approverName?: string;
+  notes?: string;
 }

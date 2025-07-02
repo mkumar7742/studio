@@ -26,10 +26,10 @@ const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
 export default function CategoryDetailPage() {
     const params = useParams();
     const { id } = params as { id: string };
-    const { categories, transactions } = useAppContext();
+    const { categories, visibleTransactions } = useAppContext();
 
     const category = categories.find(c => c.id === id);
-    const categoryTransactions = transactions.filter(t => t.category === category?.name);
+    const categoryTransactions = visibleTransactions.filter(t => t.category === category?.name);
 
     if (!category) {
         return (

@@ -25,6 +25,7 @@ import {
   MessageSquare,
   LogOut,
   ScrollText,
+  CheckSquare,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -40,6 +41,7 @@ export function SidebarNav() {
         { href: '/dashboard', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
+        { href: '/approvals', label: 'Approvals', icon: CheckSquare, color: 'bg-blue-500', permission: 'approvals:request' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Family', icon: Users, color: 'bg-green-500', permission: 'members:view' },
@@ -88,7 +90,13 @@ export function SidebarNav() {
         <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
                 {menuItems.map(item => {
-                    if (!hasPermission(item.permission)) {
+                    const hasPerm = hasPermission(item.permission);
+                    // A special case for approvals, as both roles might have one of the perms
+                    const hasApprovalPerm = item.label === 'Approvals' 
+                        ? (hasPermission('approvals:request') || hasPermission('approvals:manage')) 
+                        : hasPerm;
+
+                    if (!hasApprovalPerm) {
                         return null;
                     }
                     

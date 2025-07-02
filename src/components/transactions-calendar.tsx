@@ -138,7 +138,7 @@ function CustomDay(props: DayProps) {
 }
 
 export function TransactionsCalendar() {
-    const { transactions } = useAppContext();
+    const { visibleTransactions } = useAppContext();
     const [month, setMonth] = useState<Date>();
     const [today, setToday] = useState<Date | null>(null);
     const [selectedDay, setSelectedDay] = useState<{ date: Date; data: DayData } | null>(null);
@@ -203,7 +203,7 @@ export function TransactionsCalendar() {
 
     const transactionsByDay = useMemo(() => {
         const map = new Map<string, DayData>();
-        transactions.forEach(t => {
+        visibleTransactions.forEach(t => {
             const date = parseISO(t.date);
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayData = map.get(dateKey) || { net: 0, income: 0, expense: 0, transactions: [] };
@@ -225,7 +225,7 @@ export function TransactionsCalendar() {
         });
         
         return map;
-    }, [transactions]);
+    }, [visibleTransactions]);
     
     const contextValue = { transactionsByDay, handleDayClick, today, highlightedRange };
 

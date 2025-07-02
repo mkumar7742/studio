@@ -66,8 +66,8 @@ const ActivityList = ({ items, type }: { items: Transaction[], type: 'expense' |
   }
 
 export function ActivitySidebar({ showCalendar = true, transactions: transactionsProp }: { showCalendar?: boolean, transactions?: Transaction[] }) {
-    const { transactions: contextTransactions } = useAppContext();
-    const transactions = transactionsProp ?? contextTransactions;
+    const { visibleTransactions } = useAppContext();
+    const transactions = transactionsProp ?? visibleTransactions;
 
     const recentExpenses = transactions
         .filter(t => t.type === 'expense')
