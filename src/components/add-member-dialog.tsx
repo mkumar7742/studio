@@ -14,14 +14,14 @@ export function AddMemberDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
-                    <Plus className="mr-2 size-4" /> Add Member
+                    <Plus className="mr-2 size-4" /> Add Family Member
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add a New Member</DialogTitle>
+                    <DialogTitle>Add a New Family Member</DialogTitle>
                     <DialogDescription>
-                        Invite a new member to your team or family.
+                        Invite a new member to your family.
                     </DialogDescription>
                 </DialogHeader>
                 <AddMemberForm onFinished={() => setOpen(false)} />

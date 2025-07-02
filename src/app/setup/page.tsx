@@ -61,7 +61,7 @@ export default function SetupPage() {
 
             toast({
                 title: "Setup Complete!",
-                description: "Your administrator account has been created. Please log in.",
+                description: "Your Family Head account has been created. Please log in.",
             });
             router.push('/login');
 
@@ -81,7 +81,7 @@ export default function SetupPage() {
                         <span className="text-3xl font-bold text-foreground">TrackWise</span>
                     </div>
                     <CardTitle className="text-2xl">Welcome!</CardTitle>
-                    <CardDescription>Let's set up your administrator account.</CardDescription>
+                    <CardDescription>Let's set up your Family Head account.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -111,7 +111,7 @@ export default function SetupPage() {
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input type="email" placeholder="admin@example.com" {...field} />
+                                            <Input type="email" placeholder="family.head@example.com" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

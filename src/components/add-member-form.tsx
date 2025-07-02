@@ -117,7 +117,7 @@ export function AddMemberForm({ onFinished }: AddMemberFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Add Member</Button>
+        <Button type="submit" className="w-full">Add Family Member</Button>
       </form>
     </Form>
   );

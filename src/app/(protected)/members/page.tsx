@@ -40,13 +40,13 @@ export default function MembersPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <PageHeader title="Members" description="Manage your team or family members." />
+            <PageHeader title="Family Members" description="Invite and manage your family members." />
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>Members ({members.length})</CardTitle>
+                                <CardTitle>Family Members ({members.length})</CardTitle>
                                 <CardDescription>Invite and manage member access.</CardDescription>
                             </div>
                             <RequirePermission permission="members:create">
@@ -68,6 +68,7 @@ export default function MembersPage() {
                                 {members.map((member) => {
                                     const role = getMemberRole(member);
                                     const isCurrentUser = member.id === currentUser.id;
+                                    const isFamilyHead = role?.name === 'Family Head';
                                     return (
                                         <TableRow key={member.id}>
                                             <TableCell>
@@ -83,7 +84,7 @@ export default function MembersPage() {
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">{member.email}</TableCell>
                                             <TableCell>
-                                                <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
+                                                <Badge variant={isFamilyHead ? 'default' : 'secondary'} className={isFamilyHead ? 'bg-primary/80' : ''}>
                                                     {role ? role.name : 'Unknown Role'}
                                                 </Badge>
                                             </TableCell>

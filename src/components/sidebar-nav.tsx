@@ -42,7 +42,7 @@ export function SidebarNav() {
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
-        { href: '/members', label: 'Members', icon: Users, color: 'bg-green-500', permission: 'members:view' },
+        { href: '/members', label: 'Family', icon: Users, color: 'bg-green-500', permission: 'members:view' },
         { href: '/chat', label: 'Chat', icon: MessageSquare, color: 'bg-cyan-500' },
         { href: '/roles', label: 'Roles', icon: ShieldCheck, color: 'bg-yellow-500', permission: 'roles:manage' },
         { href: '/audit', label: 'Audit Log', icon: ScrollText, color: 'bg-gray-500', permission: 'audit:view' },
@@ -70,7 +70,6 @@ export function SidebarNav() {
 
     const hasPermission = (permission?: Permission) => {
         if (!permission) return true; // No permission required
-        if (currentUserPermissions.includes('roles:manage')) return true; // Admin override
         return currentUserPermissions.includes(permission);
     };
 

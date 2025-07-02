@@ -54,19 +54,21 @@ export default function MemberProfilePage() {
     if (!member) {
         return (
             <div className="flex flex-col h-full">
-                <PageHeader title="Member Not Found" description="Could not find the requested category." />
+                <PageHeader title="Member Not Found" description="Could not find the requested member." />
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 text-center">
                     <p>The member you are looking for does not exist.</p>
                      <Button asChild variant="outline" className="mt-4" onClick={() => router.back()}>
                         <Link href="/members">
                             <ArrowLeft className="mr-2 size-4" />
-                            Back to Members
+                            Back to Family Members
                         </Link>
                     </Button>
                 </main>
             </div>
         );
     }
+    
+    const isFamilyHead = role?.name === 'Family Head';
 
     return (
         <div className="flex flex-col h-full">
@@ -88,7 +90,7 @@ export default function MemberProfilePage() {
                                     <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <CardTitle className="text-2xl">{member.name}</CardTitle>
-                                {role && <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>{role.name}</Badge>}
+                                {role && <Badge variant={isFamilyHead ? 'default' : 'secondary'} className={isFamilyHead ? 'bg-primary/80' : ''}>{role.name}</Badge>}
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
@@ -126,7 +128,7 @@ export default function MemberProfilePage() {
                                 <Button asChild variant="outline" className="w-full mt-4">
                                     <Link href="/members">
                                         <ArrowLeft className="mr-2 size-4" />
-                                        Back to All Members
+                                        Back to Family Members
                                     </Link>
                                 </Button>
                             </CardContent>

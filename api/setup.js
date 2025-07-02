@@ -30,11 +30,11 @@ router.post('/create-admin', async (req, res) => {
       return res.status(403).json({ message: 'Setup has already been completed.' });
     }
 
-    // Find the Administrator role, which should have been seeded.
-    const adminRole = await Role.findOne({ name: 'Administrator' });
+    // Find the Family Head role, which should have been seeded.
+    const adminRole = await Role.findOne({ name: 'Family Head' });
     if (!adminRole) {
         // This case is unlikely if seeding runs correctly, but it's a good safeguard.
-        return res.status(500).json({ message: 'Administrator role not found. Please restart the server to trigger seeding.' });
+        return res.status(500).json({ message: 'Family Head role not found. Please restart the server to trigger seeding.' });
     }
 
     // Create the new admin member
@@ -49,7 +49,7 @@ router.post('/create-admin', async (req, res) => {
 
     await newAdmin.save();
 
-    res.status(201).json({ message: 'Administrator account created successfully.' });
+    res.status(201).json({ message: 'Family Head account created successfully.' });
   } catch (err) {
     console.error(err.message);
     // Check for validation errors (e.g., password complexity)

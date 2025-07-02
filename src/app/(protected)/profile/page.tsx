@@ -80,6 +80,8 @@ export default function ProfilePage() {
             });
         }
     };
+    
+    const isFamilyHead = role?.name === 'Family Head';
 
     return (
         <div className="flex flex-col h-full">
@@ -143,7 +145,7 @@ export default function ProfilePage() {
                                         <Label>Role</Label>
                                         <div>
                                         {role && (
-                                            <Badge variant={role?.name === 'Administrator' ? 'default' : 'secondary'} className={role?.name === 'Administrator' ? 'bg-primary/80' : ''}>
+                                            <Badge variant={isFamilyHead ? 'default' : 'secondary'} className={isFamilyHead ? 'bg-primary/80' : ''}>
                                                 {role.name}
                                             </Badge>
                                         )}

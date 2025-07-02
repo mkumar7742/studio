@@ -250,7 +250,7 @@ const Placeholder = () => (
     <div className="hidden md:flex flex-col items-center justify-center h-full bg-card border rounded-lg text-center p-8">
         <MessageSquare className="size-16 text-muted-foreground/50 mb-4" />
         <h2 className="text-xl font-semibold">Select a conversation</h2>
-        <p className="text-muted-foreground">Choose a member from the list to start chatting.</p>
+        <p className="text-muted-foreground">Choose a family member from the list to start chatting.</p>
     </div>
 )
 
@@ -271,7 +271,7 @@ export default function ChatPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <PageHeader title="Chat" description="Communicate with your team members." />
+            <PageHeader title="Chat" description="Communicate with your family members." />
             <main className="flex-1 overflow-y-hidden p-4 sm:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 h-full">
                     <div className={cn("h-full", selectedMember ? "hidden md:block" : "block")}>

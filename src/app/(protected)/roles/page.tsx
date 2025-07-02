@@ -39,14 +39,14 @@ export default function RolesPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <PageHeader title="Roles & Permissions" description="Define roles and manage what users can do." />
+            <PageHeader title="Roles & Permissions" description="Define roles and manage what family members can do." />
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>User Roles ({roles.length})</CardTitle>
-                                <CardDescription>Create and manage custom roles for your members.</CardDescription>
+                                <CardTitle>Family Roles ({roles.length})</CardTitle>
+                                <CardDescription>Create and manage custom roles for your family members.</CardDescription>
                             </div>
                             <RequirePermission permission="roles:manage">
                                 <Button onClick={() => setIsCreating(true)}>
@@ -77,7 +77,7 @@ export default function RolesPage() {
                                             size="icon" 
                                             className="text-destructive hover:text-destructive"
                                             onClick={() => openDeleteDialog(role)}
-                                            disabled={isRoleInUse(role.id)}
+                                            disabled={isRoleInUse(role.id) || role.name === 'Family Head'}
                                             title={isRoleInUse(role.id) ? "Cannot delete role in use" : "Delete role"}
                                         >
                                             <Trash2 className="size-4" />
