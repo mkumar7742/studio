@@ -12,7 +12,7 @@ export interface Transaction {
   accountId: string;
   receiptUrl: string | null;
   member: string;
-  team: string;
+  team?: string;
   merchant: string;
   report: string;
   status: 'Submitted' | 'Not Submitted' | 'Reimbursed';

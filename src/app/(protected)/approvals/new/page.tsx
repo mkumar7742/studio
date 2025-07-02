@@ -37,8 +37,13 @@ export default function NewApprovalPage() {
     const form = useForm<ApprovalFormValues>({
         resolver: zodResolver(approvalFormSchema),
         defaultValues: {
+            category: undefined,
+            amount: '' as any,
             currency: "USD",
             frequency: "Once",
+            project: "",
+            description: "",
+            team: "",
         }
     });
 

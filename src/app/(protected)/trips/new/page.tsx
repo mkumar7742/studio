@@ -49,6 +49,8 @@ export default function NewTripPage() {
             purpose: '',
             amount: '' as any,
             hotel: '',
+            departDate: new Date(),
+            returnDate: new Date(),
         }
     });
 
@@ -128,7 +130,7 @@ export default function NewTripPage() {
                                         <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-orange-500 text-white"><PlaneTakeoff className="size-4" /></div><span>Depart from*</span></Label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Input placeholder="City or Airport" className="bg-card border-border" />
-                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" value={format(field.value, 'yyyy-MM-dd')} onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
                                         </div>
                                     </>
                                 )}
@@ -142,7 +144,7 @@ export default function NewTripPage() {
                                         <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-cyan-500 text-white"><PlaneLanding className="size-4" /></div><span>Destination*</span></Label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Input placeholder="City or Airport" className="bg-card border-border" />
-                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" value={format(field.value, 'yyyy-MM-dd')} onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
                                         </div>
                                     </>
                                 )}

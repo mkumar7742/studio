@@ -30,7 +30,7 @@ const currentYear = getYear(new Date());
 
 const budgetFormSchema = z.object({
   name: z.string().min(3, { message: "Budget name must be at least 3 characters." }),
-  category: z.string({ required_error: "Please select a category." }),
+  category: z.string({ required_error: "Please select a category." }).min(1, { message: "Please select a category." }),
   allocated: z.coerce.number().positive({ message: "Allocated amount must be positive." }),
   currency: z.string({ required_error: "Please select a currency." }),
   scope: z.enum(['global', 'member'], { required_error: "Please select a scope." }),
