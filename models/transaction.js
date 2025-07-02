@@ -8,7 +8,7 @@ const TransactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   currency: { type: String, required: true },
   date: { type: String, required: true },
-  accountId: { type: String, required: true },
+  accountId: { type: String, required: false },
   receiptUrl: { type: String },
   member: { type: String, required: true },
   team: { type: String },
