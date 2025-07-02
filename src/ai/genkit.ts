@@ -1,10 +1,1 @@
-
-import {genkit} from 'genkit';
-import {googleAI} from 'genkit/googleai';
-
-export const ai = genkit({
-  plugins: [
-    googleAI(),
-  ],
-  enableTracing: true,
-});
+// This file is obsolete and will be removed.

@@ -9,7 +9,6 @@ export interface Transaction {
   amount: number;
   currency: string;
   date: string; // yyyy-MM-dd
-  receiptUrl?: string | null;
   member: string;
   merchant: string;
   isRecurring?: boolean;

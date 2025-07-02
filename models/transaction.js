@@ -8,7 +8,6 @@ const TransactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   currency: { type: String, required: true },
   date: { type: String, required: true },
-  receiptUrl: { type: String },
   member: { type: String, required: true },
   merchant: { type: String, required: true },
   isRecurring: { type: Boolean, default: false },

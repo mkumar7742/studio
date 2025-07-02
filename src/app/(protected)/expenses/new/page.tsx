@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, Repeat } from 'lucide-react';
+import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, User, Repeat } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { Switch } from '@/components/ui/switch';
@@ -95,7 +95,7 @@ export default function NewExpensePage() {
                 </header>
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
+                        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-6 items-center">
                             
                             <FormField
                                 control={form.control}
@@ -231,15 +231,6 @@ export default function NewExpensePage() {
                                     </>
                                 )}
                             />
-                        </div>
-
-                        <div className="lg:col-span-1">
-                            <label className="flex flex-col items-center justify-center w-full h-64 lg:h-full border-2 border-dashed border-border rounded-lg bg-card p-6 text-center cursor-pointer hover:bg-muted/50">
-                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4"><BookText className="size-10"/></div>
-                                <span className="text-base font-semibold">Upload a receipt</span>
-                                <span className="text-sm text-muted-foreground mt-1">e.g., photo, PDF, etc.</span>
-                                <Input type="file" className="hidden" />
-                            </label>
                         </div>
                     </div>
                 </main>

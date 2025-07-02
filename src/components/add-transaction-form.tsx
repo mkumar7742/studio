@@ -25,11 +25,10 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Paperclip, X } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppContext } from "@/context/app-provider";
-import Image from "next/image";
 import { Switch } from "./ui/switch";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency";
 
@@ -53,7 +52,6 @@ const formSchema = z.object({
   member: z.string().min(2, {
     message: "Member name must be at least 2 characters.",
   }),
-  receipt: z.custom<File>().optional(),
   isRecurring: z.boolean().default(false),
   recurrenceFrequency: z.enum(["weekly", "monthly", "yearly"]).optional(),
 }).refine(data => {
@@ -89,7 +87,6 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
     },
   });
 
-  const receiptFile = form.watch('receipt');
   const isRecurring = form.watch('isRecurring');
 
   function handleFormSubmit(values: AddTransactionValues) {
@@ -97,7 +94,7 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
         ...values,
         merchant: 'N/A', // Merchant not in this form, so provide default
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', category: '', amount: 0, currency: 'USD', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', category: '', amount: 0, currency: 'USD', member: "", isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -314,54 +311,6 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
                 )}
             />
         )}
-        <FormField
-          control={form.control}
-          name="receipt"
-          render={({ field: { onChange, value, ...rest } }) => (
-            <FormItem>
-              <FormLabel>Receipt</FormLabel>
-              {receiptFile ? (
-                <div className="relative w-full h-24">
-                  <Image src={URL.createObjectURL(receiptFile)} alt="Receipt preview" fill className="object-contain rounded-md border" />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                    onClick={() => form.setValue('receipt', undefined)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <FormControl>
-                  <Button asChild variant="outline" className="w-full">
-                    <label className="cursor-pointer">
-                      <Paperclip className="mr-2" />
-                      Attach a file
-                      <Input
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            onChange(file);
-                          }
-                        }}
-                        {...rest}
-                      />
-                    </label>
-                  </Button>
-                </FormControl>
-              )}
-              <FormDescription>
-                You can attach a photo of your receipt.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <Button type="submit" className="w-full">Add Transaction</Button>
       </form>
     </Form>
