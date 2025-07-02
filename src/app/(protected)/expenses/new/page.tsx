@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, Repeat } from 'lucide-react';
+import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, Repeat, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { Switch } from '@/components/ui/switch';
@@ -18,9 +18,10 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar } from '@/components/ui/calendar';
+import React, { Suspense } from 'react';
 
 const expenseFormSchema = z.object({
     description: z.string().min(2, { message: "Subject must be at least 2 characters." }),
@@ -44,19 +45,23 @@ const expenseFormSchema = z.object({
 
 export type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
-export default function NewExpensePage() {
+function NewExpenseForm() {
     const { categories, members, addTransaction, currentUser } = useAppContext();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
+
+    const parsedDate = parseISO(searchParams.get('date') || '');
+    const defaultDate = isValid(parsedDate) ? parsedDate : new Date();
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(expenseFormSchema),
         defaultValues: {
-            description: "",
-            merchant: "",
-            date: new Date(),
-            amount: '' as any,
-            currency: "USD",
+            description: searchParams.get('description') || "",
+            merchant: searchParams.get('merchant') || "",
+            date: defaultDate,
+            amount: Number(searchParams.get('amount')) || '' as any,
+            currency: searchParams.get('currency') || "USD",
             member: currentUser.name,
             isRecurring: false,
             category: "",
@@ -250,5 +255,13 @@ export default function NewExpensePage() {
                 </footer>
             </form>
         </Form>
+    );
+}
+
+export default function NewExpensePage() {
+    return (
+        <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+            <NewExpenseForm />
+        </Suspense>
     );
 }

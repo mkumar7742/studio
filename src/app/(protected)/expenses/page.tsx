@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/app-provider";
-import { Filter, MoreHorizontal, Plus, Repeat } from 'lucide-react';
+import { Filter, MoreHorizontal, Plus, Repeat, ScanLine } from 'lucide-react';
 import type { Category } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -94,6 +94,11 @@ export default function ExpensesPage() {
             <header className="flex items-center justify-between p-4 sm:p-6">
                 <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
                 <div className="flex items-center gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/expenses/scan">
+                            <ScanLine className="mr-2 size-4" /> Scan Receipt
+                        </Link>
+                    </Button>
                     <Button asChild className="bg-primary hover:bg-primary/90">
                         <Link href="/expenses/new">
                             <Plus className="mr-2 size-4" /> New expense
