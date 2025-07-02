@@ -39,11 +39,10 @@ router.post('/create-admin', async (req, res) => {
 
     // Create the new admin member
     const newAdmin = new Member({
-        _id: `mem-${Date.now()}`,
         name,
         email,
         password, // The 'save' pre-hook in the model will hash this
-        roleId: adminRole._id,
+        roleId: adminRole.id,
         avatar: 'https://placehold.co/100x100.png',
         avatarHint: 'person portrait',
     });

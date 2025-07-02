@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 
 const TripSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
   departDate: { type: String, required: true },
   returnDate: { type: String, required: true },
   location: { type: String, required: true },
@@ -13,6 +12,18 @@ const TripSchema = new mongoose.Schema({
   status: { type: String, enum: ['Approved', 'Pending', 'Not Approved'], required: true },
   memberId: { type: String, required: true },
   hotel: { type: String },
+});
+
+TripSchema.virtual('id').get(function(){
+    return this._id.toHexString();
+});
+
+TripSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    }
 });
 
 module.exports = mongoose.model('Trip', TripSchema);

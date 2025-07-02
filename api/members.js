@@ -23,13 +23,10 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('members:create')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const member = new Member({
-      _id: `mem-${Date.now()}`,
-      ...req.body
-  });
+  const member = new Member(req.body);
   try {
     const newMember = await member.save();
-    await logAuditEvent(req.member, 'MEMBER_CREATE', { targetMemberId: newMember._id, targetMemberName: newMember.name, roleId: newMember.roleId });
+    await logAuditEvent(req.member, 'MEMBER_CREATE', { targetMemberId: newMember.id, targetMemberName: newMember.name, roleId: newMember.roleId });
     res.status(201).json(newMember);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -54,7 +51,7 @@ router.put('/:id', auth, async (req, res) => {
         if (!updatedMember) {
             return res.status(404).json({ message: 'Member not found' });
         }
-        await logAuditEvent(req.member, 'MEMBER_UPDATE', { targetMemberId: updatedMember._id, targetMemberName: updatedMember.name, changes: updateData });
+        await logAuditEvent(req.member, 'MEMBER_UPDATE', { targetMemberId: updatedMember.id, targetMemberName: updatedMember.name, changes: updateData });
         res.json(updatedMember);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -71,7 +68,7 @@ router.delete('/:id', auth, async (req, res) => {
         if (!deletedMember) {
             return res.status(404).json({ message: 'Member not found' });
         }
-        await logAuditEvent(req.member, 'MEMBER_DELETE', { targetMemberId: deletedMember._id, targetMemberName: deletedMember.name });
+        await logAuditEvent(req.member, 'MEMBER_DELETE', { targetMemberId: deletedMember.id, targetMemberName: deletedMember.name });
         res.json({ message: 'Member deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });

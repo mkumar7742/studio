@@ -23,9 +23,7 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('categories:create')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const category = new Category({
-      ...req.body
-  });
+  const category = new Category(req.body);
   try {
     const newCategory = await category.save();
     res.status(201).json(newCategory);

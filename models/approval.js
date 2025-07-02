@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 
 const ApprovalSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
   owner: {
     name: { type: String, required: true },
     title: { type: String, required: true },
@@ -17,6 +16,18 @@ const ApprovalSchema = new mongoose.Schema({
   description: { type: String, required: true },
   team: { type: String, required: true },
   status: { type: String, enum: ['Pending', 'Approved', 'Declined'], required: true },
+});
+
+ApprovalSchema.virtual('id').get(function(){
+    return this._id.toHexString();
+});
+
+ApprovalSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    }
 });
 
 module.exports = mongoose.model('Approval', ApprovalSchema);

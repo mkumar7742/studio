@@ -19,10 +19,7 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('subscriptions:manage')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const subscription = new Subscription({
-      _id: `sub-${Date.now()}`,
-      ...req.body
-  });
+  const subscription = new Subscription(req.body);
   try {
     const newSubscription = await subscription.save();
     res.status(201).json(newSubscription);

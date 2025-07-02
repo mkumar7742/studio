@@ -23,10 +23,7 @@ router.post('/', auth, async (req, res) => {
     if (!req.member.permissions.includes('roles:manage')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
-  const role = new Role({
-      _id: `role-${Date.now()}`,
-      ...req.body
-  });
+  const role = new Role(req.body);
   try {
     const newRole = await role.save();
     await logAuditEvent(req.member, 'ROLE_CREATE', { roleId: newRole.id, roleName: newRole.name });

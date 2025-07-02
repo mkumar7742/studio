@@ -165,7 +165,7 @@ export interface Conversation {
 }
 
 export interface AuditLog {
-  _id: string;
+  id: string;
   timestamp: string;
   memberId: string;
   memberName: string;

@@ -26,10 +26,7 @@ router.post('/', auth, async (req, res) => {
     return res.status(403).json({ message: 'Forbidden' });
   }
 
-  const transaction = new Transaction({
-      _id: `txn-${Date.now()}`,
-      ...req.body
-  });
+  const transaction = new Transaction(req.body);
   try {
     const newTransaction = await transaction.save();
     res.status(201).json(newTransaction);

@@ -22,10 +22,7 @@ router.post('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('trips:create')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
-  const trip = new Trip({
-      _id: `trip-${Date.now()}`,
-      ...req.body
-  });
+  const trip = new Trip(req.body);
   try {
     const newTrip = await trip.save();
     res.status(201).json(newTrip);

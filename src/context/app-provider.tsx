@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, ChatMessage, AuditLog } from '@/types';
+import type { Transaction, Account, Category, Budget, PendingTask, Trip, Approval, MemberProfile, Role, Permission, Subscription, Conversation, AuditLog } from '@/types';
 import { addDays, format, isAfter, isBefore, parseISO } from 'date-fns';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, Loader2, ScrollText } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
@@ -164,7 +164,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setTrips(tripsRes);
             setApprovals(approvalsRes);
             setMembers(membersRes);
-            setRoles(rolesRes.map((r: any) => ({...r, id: r._id})));
+            setRoles(rolesRes);
             setSubscriptions(subscriptionsRes.map(mapSubscriptionData));
             setAllPermissions(permissionsRes);
             setAuditLogs(auditLogsRes);
@@ -282,7 +282,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [transactions, trips, approvals, currentUserPermissions, subscriptions, currentUser]);
 
     const addTransaction = async (values: Omit<Transaction, 'id'>) => {
-        const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify({ ...values, id: `txn-${Date.now()}` }) });
+        const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(values) });
         setTransactions(prev => [newTransaction, ...prev]);
     };
 
@@ -292,7 +292,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const addBudget = async (values: Omit<Budget, 'id' | 'status'>) => {
-        const newBudget = await makeApiRequest(`${API_BASE_URL}/budgets`, { method: 'POST', body: JSON.stringify({ ...values, id: `bud-${Date.now()}`, status: 'active' }) });
+        const newBudget = await makeApiRequest(`${API_BASE_URL}/budgets`, { method: 'POST', body: JSON.stringify({ ...values, status: 'active' }) });
         setBudgets(prev => [...prev, newBudget]);
     };
 
@@ -316,7 +316,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addCategory = async (values: { name: string; color: string; icon: string }) => {
         const newCategoryData = {
-            id: `cat-${Date.now()}`,
             name: values.name,
             color: values.color,
             icon: values.icon,
@@ -342,7 +341,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addMember = async (values: { name: string; email: string; roleId: string; password: string;}) => {
         const newMemberData = {
-            id: `mem-${Date.now()}`,
             ...values,
             avatar: 'https://placehold.co/100x100.png',
             avatarHint: 'person portrait',
@@ -366,12 +364,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const addRole = async (values: { name: string; permissions: Permission[] }) => {
         const newRole = await makeApiRequest(`${API_BASE_URL}/roles`, { method: 'POST', body: JSON.stringify(values) });
-        setRoles(prev => [...prev, {...newRole, id: newRole._id}]);
+        setRoles(prev => [...prev, newRole]);
     };
 
     const editRole = async (roleId: string, values: { name: string; permissions: Permission[] }) => {
         const updatedRole = await makeApiRequest(`${API_BASE_URL}/roles/${roleId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setRoles(prev => prev.map(r => (r.id === roleId ? {...updatedRole, id: updatedRole._id} : r)));
+        setRoles(prev => prev.map(r => (r.id === roleId ? updatedRole : r)));
     };
 
     const deleteRole = async (roleId: string) => {
@@ -388,7 +386,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const addApproval = async (values: Omit<Approval, 'id' | 'status' | 'owner'>) => {
         if(!currentUser) return;
         const newApprovalData = {
-            id: `appr-${Date.now()}`,
             ...values,
             status: 'Pending',
             owner: {
@@ -409,7 +406,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const addTrip = async (tripData: TripFormData) => {
         const newTripData = {
-            id: `trip-${Date.now()}`,
             ...tripData,
             status: 'Pending',
             report: `${format(parseISO(tripData.departDate), 'MMMM_yyyy')}`
@@ -430,7 +426,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addSubscription = async (values: SubscriptionFormData) => {
         const newSubscriptionData = {
-            id: `sub-${Date.now()}`,
             ...values,
             icon: values.iconName
         };

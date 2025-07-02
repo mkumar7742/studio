@@ -8,7 +8,6 @@ const SocialSchema = new mongoose.Schema({
 }, { _id: false });
 
 const MemberSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
@@ -49,5 +48,17 @@ MemberSchema.pre('save', async function(next) {
 MemberSchema.methods.comparePassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+MemberSchema.virtual('id').get(function(){
+    return this._id.toHexString();
+});
+
+MemberSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    }
+});
 
 module.exports = mongoose.model('Member', MemberSchema);

@@ -22,10 +22,7 @@ router.post('/', auth, async (req, res) => {
     if (!req.member.permissions.includes('budgets:manage')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
-  const budget = new Budget({
-      _id: `bud-${Date.now()}`,
-      ...req.body
-  });
+  const budget = new Budget(req.body);
   try {
     const newBudget = await budget.save();
     res.status(201).json(newBudget);

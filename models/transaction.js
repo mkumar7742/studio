@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
   type: { type: String, enum: ['income', 'expense'], required: true },
   category: { type: String, required: true },
   description: { type: String, required: true },
@@ -19,6 +18,18 @@ const TransactionSchema = new mongoose.Schema({
   isRecurring: { type: Boolean, default: false },
   recurrenceFrequency: { type: String, enum: ['weekly', 'monthly', 'yearly'] },
   reimbursable: { type: Boolean, default: false },
+});
+
+TransactionSchema.virtual('id').get(function(){
+    return this._id.toHexString();
+});
+
+TransactionSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+    }
 });
 
 module.exports = mongoose.model('Transaction', TransactionSchema);
