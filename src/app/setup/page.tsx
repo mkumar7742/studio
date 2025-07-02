@@ -10,41 +10,65 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAppContext } from '@/context/app-provider';
 import { Loader2, ArrowRightLeft } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
-const loginFormSchema = z.object({
+const passwordValidation = new RegExp(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+);
+
+const setupFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(1, { message: "Password is required." }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters." })
+           .regex(passwordValidation, {
+             message: "Password must contain an uppercase letter, a lowercase letter, a number, and a special character."
+           }),
 });
 
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+type SetupFormValues = z.infer<typeof setupFormSchema>;
 
-export default function LoginPage() {
-    const { login } = useAppContext();
+export default function SetupPage() {
     const router = useRouter();
+    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const form = useForm<LoginFormValues>({
-        resolver: zodResolver(loginFormSchema),
+    const form = useForm<SetupFormValues>({
+        resolver: zodResolver(setupFormSchema),
         defaultValues: {
+            name: "",
             email: "",
             password: "",
         },
     });
 
-    async function onSubmit(values: LoginFormValues) {
+    async function onSubmit(values: SetupFormValues) {
         setIsLoading(true);
         setError(null);
-        const success = await login(values.email, values.password);
-        setIsLoading(false);
-        
-        if (success) {
-            router.push('/dashboard');
-        } else {
-            setError("Invalid email or password. Please try again.");
+        try {
+            const response = await fetch('http://localhost:5001/api/setup/create-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'An error occurred during setup.');
+            }
+
+            toast({
+                title: "Setup Complete!",
+                description: "Your administrator account has been created. Please log in.",
+            });
+            router.push('/login');
+
+        } catch (err) {
+            setError((err as Error).message);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -56,8 +80,8 @@ export default function LoginPage() {
                         <ArrowRightLeft className="size-8 text-primary" />
                         <span className="text-3xl font-bold text-foreground">TrackWise</span>
                     </div>
-                    <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-                    <CardDescription>Enter your credentials to access your account.</CardDescription>
+                    <CardTitle className="text-2xl">Welcome!</CardTitle>
+                    <CardDescription>Let's set up your administrator account.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -67,6 +91,19 @@ export default function LoginPage() {
                                     <AlertDescription>{error}</AlertDescription>
                                 </Alert>
                             )}
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Full Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Your Name" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -94,7 +131,7 @@ export default function LoginPage() {
                                 )}
                             />
                             <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? <Loader2 className="animate-spin" /> : 'Sign In'}
+                                {isLoading ? <Loader2 className="animate-spin" /> : 'Create Account'}
                             </Button>
                         </form>
                     </Form>

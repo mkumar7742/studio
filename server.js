@@ -39,8 +39,7 @@ if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv:
         .then(async () => {
             console.log('MongoDB connected successfully');
             console.log('---');
-            console.log('NOTE: If this is the first run against an empty database,');
-            console.log('it will be automatically seeded with initial data.');
+            console.log('Seeding database with essential data if needed...');
             console.log('---');
             await seedDatabase();
         })
@@ -71,6 +70,7 @@ app.use('/api/', apiLimiter);
 
 // API Routes (Login route has its own stricter limiter)
 app.use('/api/auth', loginLimiter, require('./api/auth'));
+app.use('/api/setup', require('./api/setup'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));
 app.use('/api/categories', require('./api/categories'));
