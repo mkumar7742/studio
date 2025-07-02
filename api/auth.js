@@ -27,8 +27,8 @@ router.post('/login', async (req, res) => {
 
     // Get user role and permissions
     const role = await Role.findById(member.roleId);
-    if (!role) {
-        return res.status(500).json({ message: 'User role not found.' });
+    if (!role || role.familyId.toString() !== member.familyId.toString()) {
+        return res.status(500).json({ message: 'User role not found or mismatched family.' });
     }
 
     // User matched, create JWT payload
@@ -36,7 +36,8 @@ router.post('/login', async (req, res) => {
       member: {
         id: member._id,
         name: member.name,
-        roleId: member.roleId
+        roleId: member.roleId,
+        familyId: member.familyId,
       }
     };
 

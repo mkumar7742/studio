@@ -7,6 +7,7 @@ const AuditLogSchema = new mongoose.Schema({
   memberName: { type: String, required: true },
   action: { type: String, required: true },
   details: { type: mongoose.Schema.Types.Mixed },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
 });
 
 AuditLogSchema.virtual('id').get(function(){

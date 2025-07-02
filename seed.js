@@ -5,7 +5,9 @@ const Category = require('./models/category');
 const Member = require('./models/member');
 const Transaction = require('./models/transaction');
 const AuditLog = require('./models/auditLog');
-const { initialData } = require('./lib/seed-data');
+const Approval = require('./models/approval');
+const Account = require('./models/account');
+const Family = require('./models/family');
 
 const seedDatabase = async () => {
     // This seeding logic is destructive and should only run in development.
@@ -20,20 +22,19 @@ const seedDatabase = async () => {
             await AuditLog.deleteMany({});
             await Role.deleteMany({});
             await Category.deleteMany({});
+            await Approval.deleteMany({});
+            await Account.deleteMany({});
+            await Family.deleteMany({});
             console.log('All collections wiped.');
             
-            // Re-seed essential data
-            await Role.insertMany(initialData.roles);
-            console.log('Roles seeded successfully.');
+            // Data is now seeded on-demand via the /api/setup endpoint.
+            // This script now only serves to wipe the DB in development.
 
-            await Category.insertMany(initialData.categories);
-            console.log('Categories seeded successfully.');
-
-            console.log('--- Database reset complete. ---');
+            console.log('--- Database reset complete. Ready for initial setup via the application UI. ---');
 
         } catch (error) {
-            console.error('Error resetting and seeding database:', error);
-            process.exit(1); // Exit if seeding fails, as it's a critical startup step
+            console.error('Error resetting database:', error);
+            process.exit(1); // Exit if wiping fails, as it's a critical startup step
         }
     } else {
         // In production, you might want a more sophisticated migration strategy.

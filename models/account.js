@@ -6,6 +6,7 @@ const AccountSchema = new mongoose.Schema({
   balance: { type: Number, required: true },
   currency: { type: String, required: true },
   icon: { type: String, required: true },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
 });
 
 AccountSchema.virtual('id').get(function(){

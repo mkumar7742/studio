@@ -6,6 +6,7 @@ const CategorySchema = new mongoose.Schema({
   icon: { type: String, required: true },
   color: { type: String, required: true },
   order: { type: Number, required: true },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
 });
 
 CategorySchema.virtual('id').get(function(){

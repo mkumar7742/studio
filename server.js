@@ -53,6 +53,7 @@ app.use('/api/roles', require('./api/roles'));
 app.use('/api/permissions', require('./api/permissions'));
 app.use('/api/audit', require('./api/audit'));
 app.use('/api/approvals', require('./api/approvals'));
+app.use('/api/families', require('./api/families')); // Add families route
 
 app.get('/', (req, res) => {
     res.send('TrackWise API Server is running.');
@@ -81,9 +82,9 @@ const startServer = async () => {
         console.log('MongoDB connected successfully.');
 
         console.log('---');
-        console.log('Seeding database with essential data if needed...');
+        console.log('Running development database wipe if needed...');
         await seedDatabase();
-        console.log('Database seeding complete.');
+        console.log('Database initialization complete.');
         console.log('---');
 
         app.listen(PORT, () => {

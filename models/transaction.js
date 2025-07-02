@@ -12,6 +12,7 @@ const TransactionSchema = new mongoose.Schema({
   merchant: { type: String, required: true },
   isRecurring: { type: Boolean, default: false },
   recurrenceFrequency: { type: String, enum: ['weekly', 'monthly', 'yearly'] },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
 });
 
 TransactionSchema.virtual('id').get(function(){

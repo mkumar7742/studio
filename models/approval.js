@@ -14,6 +14,7 @@ const ApprovalSchema = new mongoose.Schema({
   approverId: { type: String },
   approverName: { type: String },
   notes: { type: String },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
 });
 
 ApprovalSchema.virtual('id').get(function(){
