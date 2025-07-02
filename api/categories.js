@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/category');
+const Transaction = require('../models/transaction');
 const auth = require('./middleware/auth');
 
 // GET all categories, sorted by order
@@ -23,7 +24,6 @@ router.post('/', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
   }
   const category = new Category({
-      _id: `cat-${Date.now()}`,
       ...req.body
   });
   try {
@@ -77,10 +77,19 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     try {
-        const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-        if (!deletedCategory) {
+        const categoryToDelete = await Category.findById(req.params.id);
+        if (!categoryToDelete) {
             return res.status(404).json({ message: 'Category not found' });
         }
+
+        // Check if the category is in use by any transaction
+        const transactionCount = await Transaction.countDocuments({ category: categoryToDelete.name });
+        if (transactionCount > 0) {
+            return res.status(400).json({ message: 'Cannot delete category. It is currently in use by transactions.' });
+        }
+        
+        await Category.findByIdAndDelete(req.params.id);
+        
         res.json({ message: 'Category deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
