@@ -282,7 +282,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [transactions, trips, approvals, currentUserPermissions, subscriptions, currentUser]);
 
     const addTransaction = async (values: Omit<Transaction, 'id'>) => {
-        const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(values) });
+        const transactionData = {
+            ...values,
+            team: values.team || 'Default Team', // Add a fallback for team
+        };
+        const newTransaction = await makeApiRequest(`${API_BASE_URL}/transactions`, { method: 'POST', body: JSON.stringify(transactionData) });
         setTransactions(prev => [newTransaction, ...prev]);
     };
 

@@ -9,10 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, FilePlus2, Repeat, X } from 'lucide-react';
+import { TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, Repeat, X, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
-import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -20,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { Calendar } from '@/components/ui/calendar';
 
 const incomeFormSchema = z.object({
     description: z.string().min(2, { message: "Description must be at least 2 characters." }),
@@ -27,6 +27,7 @@ const incomeFormSchema = z.object({
     date: z.date({ required_error: "A date is required." }),
     amount: z.coerce.number().positive({ message: "Amount must be positive." }),
     currency: z.string({ required_error: "Please select a currency." }),
+    accountId: z.string({ required_error: "Please select an account." }),
     category: z.string({ required_error: "Please select a category." }),
     member: z.string({ required_error: "Please select a member." }),
     isRecurring: z.boolean().default(false),
@@ -44,7 +45,7 @@ const incomeFormSchema = z.object({
 type IncomeFormValues = z.infer<typeof incomeFormSchema>;
 
 export default function NewIncomePage() {
-    const { categories, members, addTransaction, currentUser } = useAppContext();
+    const { categories, members, accounts, addTransaction, currentUser } = useAppContext();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -54,8 +55,9 @@ export default function NewIncomePage() {
             description: "",
             merchant: "",
             date: new Date(),
-            amount: 0,
+            amount: '' as any,
             currency: "USD",
+            accountId: "",
             category: "Income",
             member: currentUser.name,
             isRecurring: false,
@@ -70,6 +72,7 @@ export default function NewIncomePage() {
             currency: values.currency,
             date: format(values.date, "yyyy-MM-dd"),
             category: values.category,
+            accountId: values.accountId,
             member: values.member,
             merchant: values.merchant,
             report: 'N/A',
@@ -151,6 +154,23 @@ export default function NewIncomePage() {
                                 <FormField control={form.control} name="amount" render={({ field }) => (<FormItem className='col-span-2'><FormControl><Input type="number" placeholder="0.00" className="col-span-2 bg-card border-border" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                 <FormField control={form.control} name="currency" render={({ field }) => (<FormItem className='col-span-1'><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Currency" /></SelectTrigger></FormControl><SelectContent>{SUPPORTED_CURRENCIES.map(c => (<SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                             </div>
+
+                            <FormField
+                                control={form.control}
+                                name="accountId"
+                                render={({ field }) => (
+                                    <>
+                                        <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-yellow-500 text-white"><Wallet className="size-4" /></div><span>Account*</span></Label>
+                                        <FormItem className='w-full'>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Select an account" /></SelectTrigger></FormControl>
+                                                <SelectContent>{accounts.map((acc) => (<SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>))}</SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    </>
+                                )}
+                            />
                             
                             <FormField
                                 control={form.control}
@@ -219,15 +239,6 @@ export default function NewIncomePage() {
                                     </>
                                 )}
                             />
-                        </div>
-
-                        <div className="lg:col-span-1">
-                            <label className="flex flex-col items-center justify-center w-full h-64 lg:h-full border-2 border-dashed border-border rounded-lg bg-card p-6 text-center cursor-pointer hover:bg-muted/50">
-                                <div className="flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground mb-4"><FilePlus2 className="size-10"/></div>
-                                <span className="text-base font-semibold">Upload a document</span>
-                                <span className="text-sm text-muted-foreground mt-1">e.g., payslip or contract</span>
-                                <Input type="file" className="hidden" />
-                            </label>
                         </div>
                     </div>
                 </main>

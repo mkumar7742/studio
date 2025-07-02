@@ -60,7 +60,7 @@ export function SubscriptionForm({ subscription, onFinished }: SubscriptionFormP
     resolver: zodResolver(formSchema),
     defaultValues: {
         name: subscription?.name || "",
-        amount: subscription?.amount || undefined,
+        amount: subscription?.amount || ('' as any),
         currency: subscription?.currency || "USD",
         billingCycle: subscription?.billingCycle || "Monthly",
         nextPaymentDate: subscription ? parseISO(subscription.nextPaymentDate) : new Date(),

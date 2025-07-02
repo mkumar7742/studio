@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, FilePlus2, Repeat } from 'lucide-react';
+import { X, PenSquare, Store, CalendarDays, CircleDollarSign, Shapes, BookText, User, FilePlus2, Repeat, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { Switch } from '@/components/ui/switch';
@@ -29,6 +29,7 @@ const expenseFormSchema = z.object({
     date: z.date({ required_error: "A date is required." }),
     amount: z.coerce.number().positive({ message: "Amount must be positive." }),
     currency: z.string({ required_error: "Please select a currency." }),
+    accountId: z.string({ required_error: "Please select an account." }),
     reimbursable: z.boolean().default(false),
     category: z.string({ required_error: "Please select a category." }),
     textDescription: z.string().optional(),
@@ -49,7 +50,7 @@ const expenseFormSchema = z.object({
 export type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
 export default function NewExpensePage() {
-    const { categories, members, addTransaction, currentUser } = useAppContext();
+    const { categories, members, addTransaction, currentUser, accounts } = useAppContext();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -59,8 +60,9 @@ export default function NewExpensePage() {
             description: "",
             merchant: "",
             date: new Date(),
-            amount: undefined,
+            amount: '' as any,
             currency: "USD",
+            accountId: "",
             reimbursable: true,
             member: currentUser.name,
             report: `Report ${format(new Date(), 'MM-yyyy')}`,
@@ -76,6 +78,7 @@ export default function NewExpensePage() {
             currency: values.currency,
             date: format(values.date, "yyyy-MM-dd"),
             category: values.category,
+            accountId: values.accountId,
             member: values.member,
             merchant: values.merchant,
             report: values.report || '',
@@ -182,6 +185,23 @@ export default function NewExpensePage() {
                                         <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                         <Label htmlFor="reimbursable" className="font-normal">Reimbursable</Label>
                                     </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="accountId"
+                                render={({ field }) => (
+                                    <>
+                                        <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-yellow-500 text-white"><Wallet className="size-4" /></div><span>Account*</span></Label>
+                                        <FormItem className='w-full'>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Select an account" /></SelectTrigger></FormControl>
+                                                <SelectContent>{accounts.map((acc) => (<SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>))}</SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    </>
                                 )}
                             />
                             

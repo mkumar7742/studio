@@ -45,6 +45,10 @@ export default function NewTripPage() {
         resolver: zodResolver(tripFormSchema),
         defaultValues: {
             currency: 'USD',
+            location: '',
+            purpose: '',
+            amount: '' as any,
+            hotel: '',
         }
     });
 
