@@ -15,7 +15,7 @@ export interface Transaction {
   team?: string;
   merchant: string;
   report: string;
-  status: 'Submitted' | 'Not Submitted' | 'Reimbursed';
+  status: 'Submitted' | 'Not Submitted' | 'Reimbursed' | 'Approved' | 'Declined';
   isRecurring?: boolean;
   recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
   reimbursable?: boolean;

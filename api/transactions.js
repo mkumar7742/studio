@@ -53,4 +53,29 @@ router.post('/bulk-delete', auth, async (req, res) => {
     }
 });
 
+// PUT (update) a transaction status for approval
+router.put('/:id/status', auth, async (req, res) => {
+  if (!req.member.permissions.includes('approvals:action')) {
+      return res.status(403).json({ message: 'Forbidden' });
+  }
+  try {
+    const { status } = req.body;
+    // We're only allowing certain status changes via this route
+    if (!['Approved', 'Declined'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status for approval action.' });
+    }
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: status } },
+      { new: true }
+    );
+    if (!updatedTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.json(updatedTransaction);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;

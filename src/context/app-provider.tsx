@@ -46,6 +46,7 @@ interface AppContextType {
     logout: () => void;
     addTransaction: (values: Omit<Transaction, 'id'>) => Promise<void>;
     deleteTransactions: (transactionIds: string[]) => Promise<void>;
+    updateTransactionStatus: (transactionId: string, status: 'Approved' | 'Declined') => Promise<void>;
     addBudget: (values: Omit<Budget, 'id' | 'status'>) => Promise<void>;
     editBudget: (budgetId: string, values: Omit<Budget, 'id'>) => Promise<void>;
     deleteBudget: (budgetId: string) => Promise<void>;
@@ -237,12 +238,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const pendingTasks = useMemo(() => {
         if (!currentUser) return [];
-        const unsubmittedCount = transactions.filter(t => t.status === 'Not Submitted').length;
-        const pendingApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
+        
+        const pendingLegacyApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
+        const pendingTripsCount = trips.filter(t => t.status === 'Pending').length;
+        const pendingTransactionsCount = transactions.filter(t => t.reimbursable && t.status === 'Submitted').length;
+        const myUnsubmittedCount = transactions.filter(t => t.member === currentUser.name && t.status === 'Not Submitted').length;
         
         let visibleApprovals = 0;
         if(currentUserPermissions.includes('approvals:action')) {
-            visibleApprovals = pendingApprovalsCount;
+            visibleApprovals = pendingLegacyApprovalsCount + pendingTripsCount + pendingTransactionsCount;
         }
 
         const now = new Date();
@@ -259,7 +263,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return [
             { icon: ClipboardCheck, label: 'Pending Approvals', value: visibleApprovals, color: 'bg-pink-600' },
             { icon: Plane, label: 'My Pending Trips', value: trips.filter(t => t.status === 'Pending' && t.memberId === currentUser.id).length, color: 'bg-blue-600' },
-            { icon: Receipt, label: 'My Unsubmitted Expenses', value: unsubmittedCount, color: 'bg-emerald-600' },
+            { icon: Receipt, label: 'My Unsubmitted Expenses', value: myUnsubmittedCount, color: 'bg-emerald-600' },
             { icon: CalendarClock, label: 'Upcoming Bills & Subscriptions', value: upcomingSubscriptionsCount, color: 'bg-orange-500' },
             { icon: Undo2, label: 'Pending Reimbursements', value: formatCurrency(pendingReimbursementsAmount, 'USD'), color: 'bg-purple-500' }
         ].filter(task => task.value > 0 || (typeof task.value === 'string' && task.value !== formatCurrency(0, 'USD')));
@@ -274,6 +278,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const deleteTransactions = useCallback(async (transactionIds: string[]) => {
         await makeApiRequest(`${API_BASE_URL}/transactions/bulk-delete`, { method: 'POST', body: JSON.stringify({ ids: transactionIds }) });
         setTransactions(prev => prev.filter(t => !transactionIds.includes(t.id)));
+    }, [makeApiRequest]);
+
+    const updateTransactionStatus = useCallback(async (transactionId: string, status: 'Approved' | 'Declined') => {
+        const updatedTransaction = await makeApiRequest(`${API_BASE_URL}/transactions/${transactionId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+        setTransactions(prev => prev.map(t => t.id === transactionId ? updatedTransaction : t));
     }, [makeApiRequest]);
 
     const addBudget = useCallback(async (values: Omit<Budget, 'id' | 'status'>) => {
@@ -420,14 +429,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
         transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions, auditLogs,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addBudget, editBudget, deleteBudget,
+        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, updateTransactionStatus, addBudget, editBudget, deleteBudget,
         archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
         deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
         transactions, accounts, categories, budgets, pendingTasks, trips, approvals, members, roles, subscriptions, allPermissions, auditLogs,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addBudget, editBudget, deleteBudget,
+        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, updateTransactionStatus, addBudget, editBudget, deleteBudget,
         archiveBudget, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, updateCurrentUser, addApproval, updateApprovalStatus, addTrip, editTrip,
         deleteTrip, addSubscription, editSubscription, deleteSubscription, sendMessage, markConversationAsRead,

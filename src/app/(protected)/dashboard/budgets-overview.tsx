@@ -26,23 +26,26 @@ export function BudgetsOverview({ className }: { className?: string }) {
         return currentMonthBudgets.map(budget => {
             const member = budget.scope === 'member' ? members.find(m => m.id === budget.memberId) : null;
 
-            const filteredTransactions = transactions.filter(t => {
+            const spent = transactions.filter(t => {
                 const transactionDate = new Date(t.date);
-                const isMatchingBudget = t.type === 'expense' &&
-                    t.category === budget.category &&
-                    getYear(transactionDate) === budget.year &&
-                    getMonth(transactionDate) === budget.month;
-                
-                if (!isMatchingBudget) return false;
+                const isMatchingDate = getYear(transactionDate) === budget.year && getMonth(transactionDate) === budget.month;
 
-                if (budget.scope === 'global') return true;
-                if (budget.scope === 'member' && member) {
-                    return t.member === member.name;
+                if (t.type !== 'expense' || !isMatchingDate) {
+                    return false;
                 }
-                return false;
-            });
-            
-            const spent = filteredTransactions.reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
+
+                const isCategoryMatch = budget.category === 'All Categories' || t.category === budget.category;
+                if (!isCategoryMatch) {
+                    return false;
+                }
+
+                if (budget.scope === 'member') {
+                    return member ? t.member === member.name : false;
+                }
+                
+                return true;
+            }).reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
+
             const allocatedInUsd = convertToUsd(budget.allocated, budget.currency);
             const progress = allocatedInUsd > 0 ? Math.min((spent / allocatedInUsd) * 100, 100) : 0;
             const categoryDetails = categories.find(c => c.name === budget.category);

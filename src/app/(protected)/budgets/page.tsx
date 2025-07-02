@@ -198,6 +198,7 @@ function BudgetForm({ onFinished, budget }: BudgetFormProps) {
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
                                 <SelectContent>
+                                    <SelectItem value="All Categories">All Categories</SelectItem>
                                     {categories.filter(c => c.name !== 'Income').map((cat) => (
                                         <SelectItem key={cat.name} value={cat.name}>{cat.name}</SelectItem>
                                     ))}
@@ -294,22 +295,28 @@ const BudgetCard = ({ budget, onEdit, onDelete, onArchive }: { budget: Budget, o
     }, [members, budget]);
 
     const spent = useMemo(() => {
-        let categoryTransactions = transactions.filter((t) => {
+        let budgetTransactions = transactions.filter((t) => {
             const transactionDate = new Date(t.date);
-            return (
-                t.type === 'expense' &&
-                t.category === budget.category &&
-                getYear(transactionDate) === budget.year &&
-                getMonth(transactionDate) === budget.month
-            );
+            const isMatchingDate = getYear(transactionDate) === budget.year && getMonth(transactionDate) === budget.month;
+            const isExpense = t.type === 'expense';
+            
+            if (!isMatchingDate || !isExpense) {
+                return false;
+            }
+
+            const isCategoryMatch = budget.category === 'All Categories' || t.category === budget.category;
+            if (!isCategoryMatch) {
+                return false;
+            }
+
+            return true;
         });
 
         if (budget.scope === 'member' && member) {
-            categoryTransactions = categoryTransactions.filter(t => t.member === member.name);
+            budgetTransactions = budgetTransactions.filter(t => t.member === member.name);
         }
 
-        // Convert all amounts to USD for a consistent sum
-        return categoryTransactions.reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
+        return budgetTransactions.reduce((sum, t) => sum + convertToUsd(t.amount, t.currency), 0);
     }, [transactions, budget, member]);
     
     // Allocated amount is also converted to USD for comparison
