@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { RequirePermission } from '@/components/require-permission';
 import { EditMemberDialog } from '@/components/edit-member-dialog';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/currency';
 
 const CategoryIcon = ({ categoryName }: { categoryName: string }) => {
     const { categories } = useAppContext();
@@ -135,12 +136,12 @@ export default function MemberProfilePage() {
                         </Card>
                     </div>
 
-                    {/* Right Column - Expenses */}
+                    {/* Right Column - Transaction History */}
                     <div className="lg:col-span-2">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Recent Expenses</CardTitle>
-                                <CardDescription>A log of recent transactions made by {member.name}.</CardDescription>
+                                <CardTitle>Transaction History</CardTitle>
+                                <CardDescription>A complete log of all income and expenses for {member.name}.</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Table>
@@ -170,7 +171,7 @@ export default function MemberProfilePage() {
                                                         txn.type === "income" ? "text-emerald-600" : "text-foreground"
                                                         }`}
                                                     >
-                                                        {txn.type === "income" ? "+" : "-"}${txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                        {txn.type === "income" ? "+" : "-"}{formatCurrency(txn.amount, txn.currency)}
                                                     </TableCell>
                                                 </TableRow>
                                             ))
