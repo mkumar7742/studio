@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppContext } from "@/context/app-provider";
-import type { Category } from '@/types';
+import type { Category, Transaction } from '@/types';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
@@ -15,8 +15,9 @@ const getCategoryDetails = (categories: Category[], categoryName: string) => {
     return categories.find(c => c.name === categoryName);
 };
 
-export function CategorySpending({ className }: { className?: string }) {
-    const { transactions, categories } = useAppContext();
+export function CategorySpending({ className, transactions: transactionsProp }: { className?: string, transactions?: Transaction[] }) {
+    const { transactions: contextTransactions, categories } = useAppContext();
+    const transactions = transactionsProp ?? contextTransactions;
 
     const spendingData = useMemo(() => {
         const expenseTransactions = transactions.filter(t => t.type === 'expense');
@@ -87,5 +88,3 @@ export function CategorySpending({ className }: { className?: string }) {
         </Card>
     );
 }
-
-    

@@ -19,46 +19,47 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { getMonth, getYear, subMonths, startOfMonth } from 'date-fns';
 import { convertToUsd, formatCurrency } from '@/lib/currency';
 import { Calendar } from "@/components/ui/calendar";
+import type { Transaction } from '@/types';
 
 
-// Summary card for total balance and credit
-const SummaryCard = () => {
-    const { accounts } = useAppContext();
-    
-    const balance = accounts
-        .filter(acc => !acc.name.toLowerCase().includes('credit'))
-        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
+// New All-Time Summary Card
+const AllTimeSummaryCard = ({ transactions }: { transactions: Transaction[] }) => {
+    const { totalIncome, totalExpenses } = useMemo(() => {
+        return transactions.reduce((acc, t) => {
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'income') {
+                acc.totalIncome += amountInUsd;
+            } else {
+                acc.totalExpenses += amountInUsd;
+            }
+            return acc;
+        }, { totalIncome: 0, totalExpenses: 0 });
+    }, [transactions]);
 
-    const creditCards = accounts
-        .filter(acc => acc.name.toLowerCase().includes('credit'))
-        .reduce((sum, acc) => sum + convertToUsd(acc.balance, acc.currency), 0);
-
-    const total = balance + creditCards;
+    const netBalance = totalIncome - totalExpenses;
 
     return (
         <Card className="h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
-                <CardTitle className="text-base font-semibold">Summary</CardTitle>
-                <Link href="/accounts" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                <CardTitle className="text-base font-semibold">All-Time Summary</CardTitle>
+                <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View all <ArrowRight className="size-4" />
                 </Link>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col justify-center p-4">
                 <div className="space-y-3 text-sm">
-                    <div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Balance:</span>
-                            <span className="font-semibold text-primary">{formatCurrency(balance, 'USD')}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Credit cards:</span>
-                            <span className="font-semibold text-destructive">{formatCurrency(creditCards, 'USD')}</span>
-                        </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Total Income:</span>
+                        <span className="font-semibold text-primary">{formatCurrency(totalIncome, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Total Expenses:</span>
+                        <span className="font-semibold text-destructive">{formatCurrency(totalExpenses, 'USD')}</span>
                     </div>
                     <Separator className="my-2 bg-border/50" />
                     <div className="flex justify-between items-center">
-                        <span className="font-semibold text-muted-foreground">Total:</span>
-                        <span className="font-bold text-lg text-foreground">{formatCurrency(total, 'USD')}</span>
+                        <span className="font-semibold text-muted-foreground">Net Balance:</span>
+                        <span className="font-bold text-lg text-foreground">{formatCurrency(netBalance, 'USD')}</span>
                     </div>
                 </div>
             </CardContent>
@@ -146,8 +147,24 @@ const MonthStatCard = ({ title, income, expenses }: { title: string, income: num
 }
 
 export default function DashboardPage() {
-  const { transactions } = useAppContext();
-  const expenseTransactions = transactions.filter(t => t.type === 'expense');
+  const { transactions, currentUser, getMemberRole } = useAppContext();
+
+  // Determine user's role and filter transactions accordingly
+  const isFamilyHead = useMemo(() => {
+    if (!currentUser) return false;
+    const role = getMemberRole(currentUser);
+    return role?.name === 'Family Head';
+  }, [currentUser, getMemberRole]);
+
+  const visibleTransactions = useMemo(() => {
+    if (isFamilyHead) {
+      return transactions;
+    }
+    return transactions.filter(t => t.member === currentUser?.name);
+  }, [transactions, isFamilyHead, currentUser]);
+
+
+  const expenseTransactions = visibleTransactions.filter(t => t.type === 'expense');
 
   const now = new Date();
   const thisMonth = getMonth(now);
@@ -156,7 +173,7 @@ export default function DashboardPage() {
   const lastMonth = getMonth(lastMonthDate);
   const lastYear = getYear(lastMonthDate);
 
-  const thisMonthStats = transactions.reduce((acc, t) => {
+  const thisMonthStats = visibleTransactions.reduce((acc, t) => {
       const tDate = new Date(t.date);
       if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
           const amountInUsd = convertToUsd(t.amount, t.currency);
@@ -166,7 +183,7 @@ export default function DashboardPage() {
       return acc;
   }, { income: 0, expenses: 0 });
 
-  const lastMonthStats = transactions.reduce((acc, t) => {
+  const lastMonthStats = visibleTransactions.reduce((acc, t) => {
       const tDate = new Date(t.date);
       if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
           const amountInUsd = convertToUsd(t.amount, t.currency);
@@ -187,7 +204,7 @@ export default function DashboardPage() {
   return (
     <main className="flex flex-col flex-1 gap-6 p-4 md:p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <SummaryCard />
+        <AllTimeSummaryCard transactions={visibleTransactions} />
         <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
         <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
         <Card className="flex flex-col">
@@ -235,10 +252,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <CategorySpending className="lg:col-span-1 h-full" />
+        <CategorySpending transactions={visibleTransactions} className="lg:col-span-1 h-full" />
         
         <div className="lg:col-span-1 h-full">
-          <ActivitySidebar showCalendar={false} />
+          <ActivitySidebar transactions={visibleTransactions} showCalendar={false} />
         </div>
       </div>
       
