@@ -19,6 +19,7 @@ const corsOptions = {
     origin: 'http://localhost:3000', // Allow requests from your Next.js frontend
     optionsSuccessStatus: 200
 };
+app.options('*', cors(corsOptions)); // Enable pre-flight requests for all routes
 app.use(cors(corsOptions));
 app.use(express.json());
 
