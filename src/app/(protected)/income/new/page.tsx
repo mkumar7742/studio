@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, Repeat, X, Wallet } from 'lucide-react';
+import { TrendingUp, Briefcase, CalendarDays, CircleDollarSign, Shapes, User, Repeat, X } from 'lucide-react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/app-provider';
 import { Switch } from '@/components/ui/switch';
@@ -27,7 +27,6 @@ const incomeFormSchema = z.object({
     date: z.date({ required_error: "A date is required." }),
     amount: z.coerce.number().positive({ message: "Amount must be positive." }),
     currency: z.string({ required_error: "Please select a currency." }),
-    accountId: z.string({ required_error: "Please select an account." }).min(1, { message: "Please select an account." }),
     category: z.string({ required_error: "Please select a category." }),
     member: z.string({ required_error: "Please select a member." }),
     isRecurring: z.boolean().default(false),
@@ -45,7 +44,7 @@ const incomeFormSchema = z.object({
 type IncomeFormValues = z.infer<typeof incomeFormSchema>;
 
 export default function NewIncomePage() {
-    const { categories, members, accounts, addTransaction, currentUser } = useAppContext();
+    const { categories, members, addTransaction, currentUser } = useAppContext();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -57,7 +56,6 @@ export default function NewIncomePage() {
             date: new Date(),
             amount: '' as any,
             currency: "USD",
-            accountId: "",
             category: "Income",
             member: currentUser.name,
             isRecurring: false,
@@ -72,7 +70,6 @@ export default function NewIncomePage() {
             currency: values.currency,
             date: format(values.date, "yyyy-MM-dd"),
             category: values.category,
-            accountId: values.accountId,
             member: values.member,
             team: 'General',
             merchant: values.merchant,
@@ -155,23 +152,6 @@ export default function NewIncomePage() {
                                 <FormField control={form.control} name="amount" render={({ field }) => (<FormItem className='col-span-2'><FormControl><Input type="number" placeholder="0.00" className="col-span-2 bg-card border-border" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                 <FormField control={form.control} name="currency" render={({ field }) => (<FormItem className='col-span-1'><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Currency" /></SelectTrigger></FormControl><SelectContent>{SUPPORTED_CURRENCIES.map(c => (<SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                             </div>
-
-                            <FormField
-                                control={form.control}
-                                name="accountId"
-                                render={({ field }) => (
-                                    <>
-                                        <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-yellow-500 text-white"><Wallet className="size-4" /></div><span>Account*</span></Label>
-                                        <FormItem className='w-full'>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Select an account" /></SelectTrigger></FormControl>
-                                                <SelectContent>{accounts.map((acc) => (<SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>))}</SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    </>
-                                )}
-                            />
                             
                             <FormField
                                 control={form.control}

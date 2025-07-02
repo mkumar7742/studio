@@ -9,7 +9,6 @@ export interface Transaction {
   amount: number;
   currency: string;
   date: string; // yyyy-MM-dd
-  accountId: string;
   receiptUrl: string | null;
   member: string;
   team?: string;

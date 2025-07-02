@@ -50,9 +50,6 @@ const formSchema = z.object({
   category: z.string({
     required_error: "Please select a category.",
   }),
-  accountId: z.string({
-      required_error: "Please select an account."
-  }),
   member: z.string().min(2, {
     message: "Member name must be at least 2 characters.",
   }),
@@ -76,7 +73,7 @@ interface AddTransactionFormProps {
 }
 
 export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
-  const { addTransaction, categories, accounts } = useAppContext();
+  const { addTransaction, categories } = useAppContext();
   
   const form = useForm<AddTransactionValues>({
     resolver: zodResolver(formSchema),
@@ -87,6 +84,8 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
       member: "",
       isRecurring: false,
       currency: "USD",
+      amount: 0,
+      category: "",
     },
   });
 
@@ -96,8 +95,11 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
   function handleFormSubmit(values: AddTransactionValues) {
     addTransaction({
         ...values,
+        merchant: 'N/A', // Merchant not in this form, so provide default
+        report: 'N/A',
+        status: 'Submitted',
     });
-    form.reset({ date: new Date(), type: 'expense', description: '', accountId: '', category: '', amount: 0, currency: 'USD', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
+    form.reset({ date: new Date(), type: 'expense', description: '', category: '', amount: 0, currency: 'USD', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
         onFinished();
     }
@@ -256,30 +258,6 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <FormField
-            control={form.control}
-            name="accountId"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Account</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select an account" />
-                    </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                    {accounts.map((acc) => (
-                        <SelectItem key={acc.id} value={acc.id}>
-                        {acc.name}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
-                <FormMessage />
-                </FormItem>
-            )}
         />
         <FormField
           control={form.control}
