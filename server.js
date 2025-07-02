@@ -11,10 +11,9 @@ const seedDatabase = require('./seed');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Basic security headers
-app.use(helmet());
+// --- MIDDLEWARE SETUP ---
+app.use(helmet()); // Basic security headers
 
-// Middleware
 const corsOptions = {
     origin: 'http://localhost:3000', // Allow requests from your Next.js frontend
     optionsSuccessStatus: 200
@@ -23,15 +22,14 @@ app.options('*', cors(corsOptions)); // Enable pre-flight requests for all route
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// General API rate limiter
+
+// --- RATE LIMITING ---
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	max: 100, // Limit each IP to 100 requests per window
 	standardHeaders: true,
 	legacyHeaders: false,
 });
-
-// Stricter rate limiter for login attempts
 const loginLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	max: 20, // Limit each IP to 20 login requests per window
@@ -43,7 +41,8 @@ const loginLimiter = rateLimit({
 // Apply the general limiter to all API routes
 app.use('/api/', apiLimiter);
 
-// API Routes (Login route has its own stricter limiter)
+
+// --- API ROUTES ---
 app.use('/api/auth', loginLimiter, require('./api/auth'));
 app.use('/api/setup', require('./api/setup'));
 app.use('/api/transactions', require('./api/transactions'));
@@ -63,34 +62,41 @@ app.get('/', (req, res) => {
 });
 
 
-// MongoDB Connection
-const dbURI = process.env.MONGODB_URI;
+// --- SERVER STARTUP ---
+const startServer = async () => {
+    const dbURI = process.env.MONGODB_URI;
 
-if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv://'))) {
-    console.error('---');
-    console.error('FATAL ERROR: Invalid or missing MongoDB connection string.');
-    console.error('The MONGODB_URI environment variable is not set correctly.');
-    console.error('Please add it to your .env file.');
-    console.error('Example (Local): MONGODB_URI="mongodb://127.0.0.1:27017/trackwise"');
-    console.error('Example (Atlas): MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/dbname"');
-    console.error('---');
-    // We don't exit the process to allow nodemon to restart on .env file changes
-} else {
-    mongoose.connect(dbURI)
-        .then(async () => {
-            console.log('MongoDB connected successfully');
-            console.log('---');
-            console.log('Seeding database with essential data if needed...');
-            console.log('---');
-            await seedDatabase();
+    if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv://'))) {
+        console.error('---');
+        console.error('FATAL ERROR: Invalid or missing MongoDB connection string.');
+        console.error('The MONGODB_URI environment variable is not set correctly.');
+        console.error('Please add it to your .env file and restart the server.');
+        console.error('Example (Local): MONGODB_URI="mongodb://127.0.0.1:27017/trackwise"');
+        console.error('Example (Atlas): MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/dbname"');
+        console.error('---');
+        // Do not proceed to start the server without a valid URI
+        return;
+    }
 
-            app.listen(PORT, () => {
-                console.log(`Server is running on port ${PORT}`);
-            });
-        })
-        .catch(err => {
-            console.error('MongoDB connection error:', err);
-            // Added process.exit to prevent the server from running in a broken state
-            process.exit(1); 
+    try {
+        console.log('Connecting to MongoDB...');
+        await mongoose.connect(dbURI);
+        console.log('MongoDB connected successfully.');
+
+        console.log('---');
+        console.log('Seeding database with essential data if needed...');
+        await seedDatabase();
+        console.log('Database seeding complete.');
+        console.log('---');
+
+        app.listen(PORT, () => {
+            console.log(`Server is running and listening on port ${PORT}.`);
+            console.log('API is ready to accept connections.');
         });
-}
+    } catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1); // Exit with a failure code
+    }
+};
+
+startServer();
