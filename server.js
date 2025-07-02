@@ -23,32 +23,6 @@ app.options('*', cors(corsOptions)); // Enable pre-flight requests for all route
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// MongoDB Connection
-const dbURI = process.env.MONGODB_URI;
-
-if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv://'))) {
-    console.error('---');
-    console.error('FATAL ERROR: Invalid or missing MongoDB connection string.');
-    console.error('The MONGODB_URI environment variable is not set correctly.');
-    console.error('Please add it to your .env file.');
-    console.error('Example (Local): MONGODB_URI="mongodb://127.0.0.1:27017/trackwise"');
-    console.error('Example (Atlas): MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/dbname"');
-    console.error('---');
-    // We don't exit the process to allow nodemon to restart on .env file changes
-} else {
-    mongoose.connect(dbURI)
-        .then(async () => {
-            console.log('MongoDB connected successfully');
-            console.log('---');
-            console.log('Seeding database with essential data if needed...');
-            console.log('---');
-            await seedDatabase();
-        })
-        .catch(err => {
-            console.error('MongoDB connection error:', err);
-        });
-}
-
 // General API rate limiter
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -88,6 +62,35 @@ app.get('/', (req, res) => {
     res.send('TrackWise API Server is running.');
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+
+// MongoDB Connection
+const dbURI = process.env.MONGODB_URI;
+
+if (!dbURI || !(dbURI.startsWith('mongodb://') || dbURI.startsWith('mongodb+srv://'))) {
+    console.error('---');
+    console.error('FATAL ERROR: Invalid or missing MongoDB connection string.');
+    console.error('The MONGODB_URI environment variable is not set correctly.');
+    console.error('Please add it to your .env file.');
+    console.error('Example (Local): MONGODB_URI="mongodb://127.0.0.1:27017/trackwise"');
+    console.error('Example (Atlas): MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/dbname"');
+    console.error('---');
+    // We don't exit the process to allow nodemon to restart on .env file changes
+} else {
+    mongoose.connect(dbURI)
+        .then(async () => {
+            console.log('MongoDB connected successfully');
+            console.log('---');
+            console.log('Seeding database with essential data if needed...');
+            console.log('---');
+            await seedDatabase();
+
+            app.listen(PORT, () => {
+                console.log(`Server is running on port ${PORT}`);
+            });
+        })
+        .catch(err => {
+            console.error('MongoDB connection error:', err);
+            // Added process.exit to prevent the server from running in a broken state
+            process.exit(1); 
+        });
+}
