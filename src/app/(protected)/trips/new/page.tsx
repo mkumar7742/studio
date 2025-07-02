@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { X, PenSquare, Tag, BookText, Plane, CircleDollarSign, BedDouble, PlaneTakeoff, PlaneLanding, CalendarPlus, CalendarMinus } from "lucide-react";
+import { X, PenSquare, Tag, BookText, Plane, CircleDollarSign, BedDouble, PlaneTakeoff, PlaneLanding, CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency";
@@ -19,6 +19,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useAppContext } from '@/context/app-provider';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 const tripFormSchema = z.object({
   location: z.string().min(2, { message: "Location name is required." }),
@@ -49,8 +52,6 @@ export default function NewTripPage() {
             purpose: '',
             amount: '' as any,
             hotel: '',
-            departDate: new Date(),
-            returnDate: new Date(),
         }
     });
 
@@ -130,7 +131,20 @@ export default function NewTripPage() {
                                         <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-orange-500 text-white"><PlaneTakeoff className="size-4" /></div><span>Depart from*</span></Label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Input placeholder="City or Airport" className="bg-card border-border" />
-                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" value={format(field.value, 'yyyy-MM-dd')} onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem className="w-full">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-card border-border", !field.value && "text-muted-foreground")}>
+                                                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
                                         </div>
                                     </>
                                 )}
@@ -144,7 +158,20 @@ export default function NewTripPage() {
                                         <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-cyan-500 text-white"><PlaneLanding className="size-4" /></div><span>Destination*</span></Label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Input placeholder="City or Airport" className="bg-card border-border" />
-                                            <FormItem className="w-full"><FormControl><Input type="date" className="bg-card border-border" value={format(field.value, 'yyyy-MM-dd')} onChange={e => field.onChange(e.target.valueAsDate)} /></FormControl><FormMessage /></FormItem>
+                                             <FormItem className="w-full">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-card border-border", !field.value && "text-muted-foreground")}>
+                                                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
                                         </div>
                                     </>
                                 )}
@@ -167,7 +194,7 @@ export default function NewTripPage() {
                                 render={({ field }) => (
                                     <>
                                         <Label className="flex items-center gap-4"><div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-500 text-white"><BedDouble className="size-4" /></div><span>Hotel</span></Label>
-                                        <FormItem className="w-full"><FormControl><Input className="bg-card border-border" {...field} /></FormControl><FormMessage /></FormItem>
+                                        <FormItem className="w-full"><FormControl><Input className="bg-card border-border" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                     </>
                                 )}
                             />
