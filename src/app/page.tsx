@@ -8,39 +8,37 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // This effect runs once on component mount to determine the initial route.
-    async function checkSetupStatus() {
-      try {
-        // We fetch the setup status from the server. This is the only way
-        // to know if an admin account has been created yet.
-        const response = await fetch('http://localhost:5001/api/setup/status');
-        
-        // If the server isn't running or there's a network error, we can't
-        // determine the setup status. We'll default to the login page.
-        if (!response.ok) {
-          console.error("Could not reach server to check setup status. Defaulting to login.");
-          router.replace('/login');
-          return;
+    const checkSetupStatusWithRetry = async (retries = 5, delay = 1000): Promise<{ needsSetup: boolean } | null> => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await fetch('http://localhost:5001/api/setup/status');
+          if (response.ok) {
+            return await response.json();
+          }
+          // Log non-OK responses but continue to retry for server-side issues
+          console.warn(`Attempt ${i + 1}: Server responded with status ${response.status}. Retrying in ${delay}ms...`);
+        } catch (error) {
+          // This catches network errors (e.g., server not up yet)
+          console.warn(`Attempt ${i + 1}: Fetch failed. Retrying in ${delay}ms...`);
         }
+        await new Promise(res => setTimeout(res, delay));
+      }
+      return null; // Return null after all retries have failed
+    };
 
-        const data = await response.json();
-        
-        // The server response tells us if setup is needed.
-        if (data.needsSetup) {
-          // If true, an admin account needs to be created. Go to the setup page.
-          router.replace('/setup');
-        } else {
-          // If false, setup is complete. Go to the login page.
-          router.replace('/login');
-        }
-      } catch (error) {
-        console.error("Error checking setup status:", error);
-        // If the fetch fails for any reason, redirect to login as a safe fallback.
+    const performCheck = async () => {
+      const data = await checkSetupStatusWithRetry();
+      
+      // If data is null (all retries failed) or needsSetup is explicitly false, go to login.
+      // Otherwise, if needsSetup is true, go to setup.
+      if (data?.needsSetup) {
+        router.replace('/setup');
+      } else {
         router.replace('/login');
       }
-    }
+    };
 
-    checkSetupStatus();
+    performCheck();
   }, [router]); // The effect depends only on the router, so it runs once.
 
   // Display a loading spinner while the check is in progress.
