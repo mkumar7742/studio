@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Member = require('../models/member');
+const auth = require('./middleware/auth');
 
 // @route   POST api/auth/login
 // @desc    Authenticate user & get token
@@ -39,7 +40,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '5h' }, // Expires in 5 hours
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ token, user: member.toJSON() });
       }
     );
   } catch (err) {
@@ -47,5 +48,22 @@ router.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// @route   GET api/auth/me
+// @desc    Get current user's profile
+// @access  Private
+router.get('/me', auth, async (req, res) => {
+    try {
+        const member = await Member.findById(req.member.id);
+        if (!member) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(member.toJSON());
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 
 module.exports = router;

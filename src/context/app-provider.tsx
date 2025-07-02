@@ -14,7 +14,7 @@ import { jwtDecode } from "jwt-decode";
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
-let apiHeaders = { 'Content-Type': 'application/json' };
+const apiHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
 
 const iconMap: { [key: string]: LucideIcon } = {
     Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, Clock, CalendarClock, Undo2, Repeat, Clapperboard, Music, Cloud, Sparkles, CreditCard, PiggyBank, Wallet, ScrollText
@@ -106,7 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const logout = useCallback(() => {
         localStorage.removeItem('token');
-        apiHeaders = { 'Content-Type': 'application/json' };
+        delete apiHeaders['Authorization'];
         setCurrentUser(null);
         setIsAuthenticated(false);
         setTransactions([]); setAccounts([]); setCategories([]); setBudgets([]); setTrips([]); 
@@ -169,25 +169,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             const data = await makeApiRequest(`${API_BASE_URL}/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) });
-            if (data.token) {
+            if (data.token && data.user) {
                 localStorage.setItem('token', data.token);
-                apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${data.token}` };
+                apiHeaders['Authorization'] = `Bearer ${data.token}`;
                 
-                const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
-                const decoded: { member: MemberProfile } = jwtDecode(data.token);
-                const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
-
-                if (userProfile) {
-                    setCurrentUser(userProfile);
-                    setIsAuthenticated(true);
-                    await fetchData();
-                    setConversations([
-                      { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
-                      { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
-                    ]);
-                    setIsLoading(false);
-                    return true;
-                }
+                const userProfile = data.user as MemberProfile;
+                setCurrentUser(userProfile);
+                setIsAuthenticated(true);
+                await fetchData();
+                
+                setConversations([
+                  { memberId: 'mem2', unreadCount: 0, messages: [ { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 }, { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 }, { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 }, ] },
+                  { memberId: 'mem3', unreadCount: 1, messages: [ { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 }, ] }
+                ]);
+                setIsLoading(false);
+                return true;
             }
             setIsLoading(false);
             return false;
@@ -200,15 +196,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (token) {
-            apiHeaders = { ...apiHeaders, 'Authorization': `Bearer ${token}` };
+            apiHeaders['Authorization'] = `Bearer ${token}`;
              try {
-                const decoded: { exp: number, member: { id: string } } = jwtDecode(token);
+                const decoded: { exp: number } = jwtDecode(token);
                 if (decoded.exp * 1000 < Date.now()) {
                     logout();
                     return;
                 }
-                const membersList = await makeApiRequest(`${API_BASE_URL}/members`);
-                const userProfile = membersList.find((m: MemberProfile) => m.id === decoded.member.id);
+
+                const userProfile = await makeApiRequest(`${API_BASE_URL}/auth/me`);
 
                 if (userProfile) {
                     setCurrentUser(userProfile);
