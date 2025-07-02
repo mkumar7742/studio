@@ -96,8 +96,6 @@ export function AddTransactionForm({ onFinished }: AddTransactionFormProps) {
     addTransaction({
         ...values,
         merchant: 'N/A', // Merchant not in this form, so provide default
-        report: 'N/A',
-        status: 'Submitted',
     });
     form.reset({ date: new Date(), type: 'expense', description: '', category: '', amount: 0, currency: 'USD', member: "", receipt: undefined, isRecurring: false, recurrenceFrequency: undefined });
     if (onFinished) {
