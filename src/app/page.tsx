@@ -8,40 +8,42 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // This effect runs once on component mount.
-    async function checkSetupAndRedirect() {
+    // This effect runs once on component mount to determine the initial route.
+    async function checkSetupStatus() {
       try {
+        // We fetch the setup status from the server. This is the only way
+        // to know if an admin account has been created yet.
         const response = await fetch('http://localhost:5001/api/setup/status');
         
+        // If the server isn't running or there's a network error, we can't
+        // determine the setup status. We'll default to the login page.
         if (!response.ok) {
-          // If the server is not reachable, we can't determine setup status.
-          // It's safer to assume login is the next step, or show an error page.
-          // For this app, we'll redirect to login as a fallback.
-          console.error("Failed to fetch setup status from server.");
+          console.error("Could not reach server to check setup status. Defaulting to login.");
           router.replace('/login');
           return;
         }
 
         const data = await response.json();
+        
+        // The server response tells us if setup is needed.
         if (data.needsSetup) {
-          // If the server says setup is needed, we go to the setup page.
+          // If true, an admin account needs to be created. Go to the setup page.
           router.replace('/setup');
         } else {
-          // If setup is already complete, we redirect to the login page.
-          // The AuthGuard on the protected routes will handle redirecting to the dashboard if already logged in.
+          // If false, setup is complete. Go to the login page.
           router.replace('/login');
         }
       } catch (error) {
-        // Any other fetch error (e.g., network error)
         console.error("Error checking setup status:", error);
+        // If the fetch fails for any reason, redirect to login as a safe fallback.
         router.replace('/login');
       }
     }
 
-    checkSetupAndRedirect();
-  }, [router]); // Only depends on the router, which is stable.
+    checkSetupStatus();
+  }, [router]); // The effect depends only on the router, so it runs once.
 
-  // Display a loader until the check is complete and the redirect happens.
+  // Display a loading spinner while the check is in progress.
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
       <Loader2 className="h-8 w-8 animate-spin" />
