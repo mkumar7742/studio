@@ -186,7 +186,7 @@ const MemberSpendingCard = ({ transactions }: { transactions: Transaction[] }) =
      const chartColors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
     return (
-        <Card className="bg-card lg:col-span-2 h-full flex flex-col">
+        <Card className="bg-card h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Spending by Member</CardTitle>
                 <Link href="/members" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
@@ -296,29 +296,23 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {isFamilyHead && <MemberSpendingCard transactions={visibleTransactions} />}
-        
-        <Card className="bg-card lg:col-span-2 h-full flex flex-col">
+        <CategorySpending transactions={visibleTransactions} className="h-full" />
+        <Card className="bg-card h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Monthly Report</CardTitle>
                 <Link href="/transactions" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary">
                     View all <ArrowRight className="size-4" />
                 </Link>
             </CardHeader>
-          <CardContent className="flex-grow p-4">
-            <SpendingCharts transactions={expenseTransactions} />
-          </CardContent>
+            <CardContent className="flex-grow p-4">
+                <SpendingCharts transactions={expenseTransactions} />
+            </CardContent>
         </Card>
-
-        <CategorySpending transactions={visibleTransactions} className="lg:col-span-1 h-full" />
-        
-        <div className="lg:col-span-1 h-full">
-          <ActivitySidebar showCalendar={false} />
-        </div>
       </div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-card flex flex-col h-full">
               <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                   <CardTitle className="text-base font-semibold">Quick Access</CardTitle>
@@ -342,7 +336,11 @@ export default function DashboardPage() {
                   </div>
               </CardContent>
           </Card>
+          <div className="h-full">
+            <ActivitySidebar showCalendar={false} />
+          </div>
       </div>
     </main>
   );
 }
+
