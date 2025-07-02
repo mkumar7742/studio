@@ -64,12 +64,15 @@ const staticBaseTime = new Date('2024-08-20T10:00:00.000Z').getTime();
 const mapAccountData = (account: any): Account => ({ ...account, icon: iconMap[account.icon] || Wallet });
 const mapCategoryData = (category: any): Category => ({ ...category, icon: iconMap[category.icon] || Shapes, iconName: category.icon });
 
-const initialMockMessages: Omit<ChatMessage, 'receiverId'>[] = [
-    { id: 'msg1', senderId: 'mem1', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
-    { id: 'msg2', senderId: 'mem2', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
-    { id: 'msg3', senderId: 'mem1', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
-    { id: 'msg4', senderId: 'mem3', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
+const initialMockMessages: ChatMessage[] = [
+    { id: 'msg1', senderId: 'mem1', receiverId: 'mem2', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
+    { id: 'msg2', senderId: 'mem2', receiverId: 'mem1', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
+    { id: 'msg3', senderId: 'mem1', receiverId: 'mem2', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
+    { id: 'msg4', senderId: 'mem3', receiverId: 'mem1', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
 ];
+
+const initialUnreadMessages = { 'mem1': ['msg4'] };
+
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { toast } = useToast();
@@ -87,9 +90,47 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
     const [approvals, setApprovals] = useState<Approval[]>([]);
 
-    // A central, mock message store to simulate a chat backend
     const [messageStore, setMessageStore] = useState<ChatMessage[]>([]);
-    const [unreadMessageIds, setUnreadMessageIds] = useState<{[key: string]: string[]}>({}); // { 'userId': ['msgId1', 'msgId2'] }
+    const [unreadMessageIds, setUnreadMessageIds] = useState<{[key: string]: string[]}>({});
+
+    // Load chat data from localStorage on initial mount
+    useEffect(() => {
+        try {
+            const storedMessages = localStorage.getItem('chat_messages');
+            const storedUnreads = localStorage.getItem('chat_unread_ids');
+            
+            if (storedMessages) {
+                setMessageStore(JSON.parse(storedMessages));
+            } else {
+                setMessageStore(initialMockMessages); // Seed if empty
+            }
+
+            if (storedUnreads) {
+                setUnreadMessageIds(JSON.parse(storedUnreads));
+            } else {
+                setUnreadMessageIds(initialUnreadMessages); // Seed if empty
+            }
+        } catch (error) {
+            console.error("Failed to parse chat data from localStorage", error);
+            setMessageStore(initialMockMessages);
+            setUnreadMessageIds(initialUnreadMessages);
+        }
+    }, []);
+
+    // Persist chat data to localStorage whenever it changes
+    useEffect(() => {
+        // Only run on client
+        if (typeof window !== 'undefined' && messageStore.length > 0) {
+            localStorage.setItem('chat_messages', JSON.stringify(messageStore));
+        }
+    }, [messageStore]);
+
+    useEffect(() => {
+        // Only run on client
+        if (typeof window !== 'undefined' && Object.keys(unreadMessageIds).length > 0) {
+            localStorage.setItem('chat_unread_ids', JSON.stringify(unreadMessageIds));
+        }
+    }, [unreadMessageIds]);
 
 
     const logout = useCallback(() => {
@@ -100,7 +141,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setTransactions([]); setAccounts([]); setCategories([]); 
         setMembers([]); setRoles([]); setAllPermissions([]); 
         setAuditLogs([]); setApprovals([]);
-        setMessageStore([]); setUnreadMessageIds({});
+        // We don't clear chat history on logout
         window.location.href = '/login';
     }, []);
 
@@ -172,15 +213,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 setIsAuthenticated(true);
                 await fetchData(userProfile.permissions || []);
                 
-                // Initialize mock chat data on login
-                setMessageStore([
-                    { id: 'msg1', senderId: 'mem1', receiverId: 'mem2', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
-                    { id: 'msg2', senderId: 'mem2', receiverId: 'mem1', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
-                    { id: 'msg3', senderId: 'mem1', receiverId: 'mem2', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
-                    { id: 'msg4', senderId: 'mem3', receiverId: 'mem1', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
-                ]);
-                setUnreadMessageIds({ 'mem1': ['msg4'] });
-                
                 setIsLoading(false);
                 return true;
             }
@@ -209,14 +241,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
                     await fetchData(userProfile.permissions || []);
-                     // Initialize mock chat data on session restore
-                    setMessageStore([
-                        { id: 'msg1', senderId: 'mem1', receiverId: 'mem2', text: 'Hey John, how is the project going?', timestamp: staticBaseTime - 1000 * 60 * 5 },
-                        { id: 'msg2', senderId: 'mem2', receiverId: 'mem1', text: 'Hi Janice! Going well. Just wrapping up the Q3 report.', timestamp: staticBaseTime - 1000 * 60 * 4 },
-                        { id: 'msg3', senderId: 'mem1', receiverId: 'mem2', text: 'Great to hear!', timestamp: staticBaseTime - 1000 * 60 * 3 },
-                        { id: 'msg4', senderId: 'mem3', receiverId: 'mem1', text: 'Could you approve my expense for the flight to Brussels?', timestamp: staticBaseTime - 1000 * 60 * 20 },
-                    ]);
-                    setUnreadMessageIds({ 'mem1': ['msg4'] });
                 } else {
                     logout();
                 }
@@ -338,23 +362,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        const unreadCounts = (unreadMessageIds[currentUser.id] || []).reduce((acc, msgId) => {
+        const unreadCountsBySender = (unreadMessageIds[currentUser.id] || []).reduce((acc, msgId) => {
             const msg = messageStore.find(m => m.id === msgId);
-            if (msg) acc[msg.senderId] = (acc[msg.senderId] || 0) + 1;
+            if (msg) {
+                acc[msg.senderId] = (acc[msg.senderId] || 0) + 1;
+            }
             return acc;
         }, {} as {[key: string]: number});
         
         const result: Conversation[] = [];
         members.forEach(member => {
             if (member.id === currentUser.id) return;
+            
             const messages = conversationsMap.get(member.id) || [];
-            if (messages.length > 0) {
-                 result.push({
-                    memberId: member.id,
-                    messages: messages.sort((a, b) => a.timestamp - b.timestamp),
-                    unreadCount: unreadCounts[member.id] || 0
-                });
-            }
+            
+            result.push({
+                memberId: member.id,
+                messages: messages.sort((a, b) => a.timestamp - b.timestamp),
+                unreadCount: unreadCountsBySender[member.id] || 0
+            });
         });
         
         return result.sort((a, b) => {
