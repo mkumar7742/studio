@@ -31,7 +31,6 @@ interface AppContextType {
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
     auditLogs: AuditLog[];
     approvals: Approval[];
-    budgets: Budget[];
     currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
     conversations: Conversation[];
@@ -53,9 +52,6 @@ interface AppContextType {
     deleteRole: (roleId: string) => Promise<void>;
     addApproval: (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName' | 'familyId'>) => Promise<void>;
     updateApproval: (approvalId: string, status: 'approved' | 'rejected', notes: string) => Promise<void>;
-    addBudget: (values: { categoryId: string; amount: number; period: 'monthly' | 'yearly' }) => Promise<void>;
-    editBudget: (budgetId: string, values: { amount: number; period: 'monthly' | 'yearly' }) => Promise<void>;
-    deleteBudget: (budgetId: string) => Promise<void>;
     updateCurrentUser: (data: Partial<Omit<MemberProfile, 'email' | 'roleId'>>) => Promise<void>;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
@@ -187,11 +183,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 hasPermission('roles:manage') ? makeApiRequest(`${API_BASE_URL}/roles`) : Promise.resolve([]),
                 makeApiRequest(`${API_BASE_URL}/permissions`),
                 hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([]),
-                hasPermission('approvals:request') || hasPermission('approvals:manage') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([]),
-                hasPermission('budgets:view') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([])
+                hasPermission('approvals:request') || hasPermission('approvals:manage') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([])
             ];
 
-            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes, budgetsRes ] = await Promise.all(promises);
+            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes ] = await Promise.all(promises);
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
@@ -201,7 +196,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setAllPermissions(permissionsRes || []);
             setAuditLogs(auditLogsRes || []);
             setApprovals(approvalsRes || []);
-            setBudgets(budgetsRes || []);
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
@@ -350,21 +344,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setApprovals(prev => prev.map(a => a.id === approvalId ? updatedApproval : a));
     }, [makeApiRequest]);
     
-    const addBudget = useCallback(async (values: { categoryId: string; amount: number; period: 'monthly' | 'yearly' }) => {
-        const newBudget = await makeApiRequest(`${API_BASE_URL}/budgets`, { method: 'POST', body: JSON.stringify(values) });
-        setBudgets(prev => [...prev, newBudget]);
-    }, [makeApiRequest]);
-
-    const editBudget = useCallback(async (budgetId: string, values: { amount: number; period: 'monthly' | 'yearly' }) => {
-        const updatedBudget = await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'PUT', body: JSON.stringify(values) });
-        setBudgets(prev => prev.map(b => (b.id === budgetId ? updatedBudget : b)));
-    }, [makeApiRequest]);
-
-    const deleteBudget = useCallback(async (budgetId: string) => {
-        await makeApiRequest(`${API_BASE_URL}/budgets/${budgetId}`, { method: 'DELETE' });
-        setBudgets(prev => prev.filter(b => b.id !== budgetId));
-    }, [makeApiRequest]);
-
     const updateCurrentUser = useCallback(async (data: Partial<Omit<MemberProfile, 'email' | 'roleId'>>) => {
         if(currentUser) {
             await editMember(currentUser.id, data);
@@ -448,16 +427,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals,
         visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,
+        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals,
         visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
-        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,
+        getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, updateCurrentUser, sendMessage, markConversationAsRead,
     ]);
 
     return (

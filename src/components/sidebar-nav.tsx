@@ -26,7 +26,6 @@ import {
   LogOut,
   ScrollText,
   CheckSquare,
-  PiggyBank,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -43,7 +42,6 @@ export function SidebarNav() {
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
         { href: '/approvals', label: 'Approvals', icon: CheckSquare, color: 'bg-blue-500', permission: ['approvals:request', 'approvals:manage'] },
-        { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-pink-500', permission: 'budgets:view' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Family', icon: Users, color: 'bg-green-500', permission: 'members:view' },
