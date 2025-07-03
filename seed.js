@@ -8,6 +8,7 @@ const AuditLog = require('./models/auditLog');
 const Approval = require('./models/approval');
 const Account = require('./models/account');
 const Family = require('./models/family');
+const Budget = require('./models/budget');
 
 const seedDatabase = async () => {
     // This seeding logic is destructive and should only run in development.
@@ -24,6 +25,7 @@ const seedDatabase = async () => {
             await Category.deleteMany({});
             await Approval.deleteMany({});
             await Account.deleteMany({});
+            await Budget.deleteMany({});
             await Family.deleteMany({});
             console.log('All collections wiped.');
             

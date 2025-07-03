@@ -47,6 +47,8 @@ export type Permission =
   | 'income:delete'
   | 'approvals:request'
   | 'approvals:manage'
+  | 'budgets:view'
+  | 'budgets:manage'
   | 'categories:view'
   | 'categories:create'
   | 'categories:edit'
@@ -122,4 +124,13 @@ export interface Approval {
   approverName?: string;
   notes?: string;
   familyId: string;
+}
+
+export interface Budget {
+    id: string;
+    familyId: string;
+    categoryId: string;
+    categoryName: string;
+    amount: number;
+    period: 'monthly' | 'yearly';
 }

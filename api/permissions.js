@@ -34,6 +34,13 @@ const allPermissions = [
     ],
   },
   {
+    group: 'Budgets',
+    permissions: [
+      { id: 'budgets:view', label: 'View Budgets' },
+      { id: 'budgets:manage', label: 'Manage Budgets' },
+    ],
+  },
+  {
     group: 'Categories',
     permissions: [
       { id: 'categories:view', label: 'View Categories' },

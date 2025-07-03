@@ -26,6 +26,7 @@ import {
   LogOut,
   ScrollText,
   CheckSquare,
+  PiggyBank,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { RequirePermission } from './require-permission';
@@ -37,11 +38,12 @@ export function SidebarNav() {
     const pathname = usePathname();
     const { currentUser, logout, currentUserPermissions } = useAppContext();
 
-    const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission }[] = [
+    const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission | Permission[] }[] = [
         { href: '/dashboard', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
-        { href: '/approvals', label: 'Approvals', icon: CheckSquare, color: 'bg-blue-500', permission: 'approvals:request' },
+        { href: '/approvals', label: 'Approvals', icon: CheckSquare, color: 'bg-blue-500', permission: ['approvals:request', 'approvals:manage'] },
+        { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-pink-500', permission: 'budgets:view' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Family', icon: Users, color: 'bg-green-500', permission: 'members:view' },
@@ -70,9 +72,10 @@ export function SidebarNav() {
         )
     }
 
-    const hasPermission = (permission?: Permission) => {
+    const hasPermission = (permission?: Permission | Permission[]) => {
         if (!permission) return true; // No permission required
-        return currentUserPermissions.includes(permission);
+        const requiredPermissions = Array.isArray(permission) ? permission : [permission];
+        return requiredPermissions.some(p => currentUserPermissions.includes(p));
     };
 
     return <>
@@ -90,13 +93,7 @@ export function SidebarNav() {
         <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
                 {menuItems.map(item => {
-                    const hasPerm = hasPermission(item.permission);
-                    // A special case for approvals, as both roles might have one of the perms
-                    const hasApprovalPerm = item.label === 'Approvals' 
-                        ? (hasPermission('approvals:request') || hasPermission('approvals:manage')) 
-                        : hasPerm;
-
-                    if (!hasApprovalPerm) {
+                    if (!hasPermission(item.permission)) {
                         return null;
                     }
                     
