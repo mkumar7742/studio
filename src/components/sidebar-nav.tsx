@@ -29,7 +29,6 @@ import {
   PiggyBank,
 } from "lucide-react";
 import { cn } from '@/lib/utils';
-import { RequirePermission } from './require-permission';
 import type { Permission } from '@/types';
 import { useAppContext } from '@/context/app-provider';
 import { Button } from './ui/button';
@@ -38,7 +37,9 @@ export function SidebarNav() {
     const pathname = usePathname();
     const { currentUser, logout, currentUserPermissions } = useAppContext();
 
-    const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission | Permission[] }[] = [
+    const isSystemAdmin = currentUser?.roleName === 'System Administrator';
+
+    const menuItems: { href: string; label: string; icon: React.ElementType; color: string; permission?: Permission | Permission[]; adminOnly?: boolean }[] = [
         { href: '/dashboard', label: 'Home', icon: Home, color: 'bg-sky-500', permission: 'dashboard:view' },
         { href: '/expenses', label: 'Expenses', icon: CreditCard, color: 'bg-red-500', permission: 'expenses:view' },
         { href: '/income', label: 'Income', icon: TrendingUp, color: 'bg-green-500', permission: 'income:view' },
@@ -77,6 +78,10 @@ export function SidebarNav() {
         const requiredPermissions = Array.isArray(permission) ? permission : [permission];
         return requiredPermissions.some(p => currentUserPermissions.includes(p));
     };
+    
+    const visibleMenuItems = isSystemAdmin 
+        ? menuItems.filter(item => ['Home', 'Settings', 'Support'].includes(item.label))
+        : menuItems;
 
     return <>
         <SidebarHeader className="p-4">
@@ -87,12 +92,13 @@ export function SidebarNav() {
                 </Avatar>
                 <div>
                     <p className='font-semibold text-base'>{currentUser.name}</p>
+                    <p className='text-sm text-muted-foreground'>{currentUser.roleName}</p>
                 </div>
             </Link>
         </SidebarHeader>
         <SidebarContent className="flex-grow px-4">
             <SidebarMenu>
-                {menuItems.map(item => {
+                {visibleMenuItems.map(item => {
                     if (!hasPermission(item.permission)) {
                         return null;
                     }

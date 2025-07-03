@@ -5,13 +5,14 @@ const Member = require('../models/member');
 const auth = require('./middleware/auth');
 const { logAuditEvent } = require('../lib/audit');
 
-// GET all members for the family
+// GET all members for the family or all members for System Admin
 router.get('/', auth, async (req, res) => {
   if (!req.member.permissions.includes('members:view')) {
       return res.status(403).json({ message: 'Forbidden' });
   }
   try {
-    const members = await Member.find({ familyId: req.member.familyId });
+    const query = req.member.roleName === 'System Administrator' ? {} : { familyId: req.member.familyId };
+    const members = await Member.find(query);
     res.json(members);
   } catch (err) {
     res.status(500).json({ message: err.message });

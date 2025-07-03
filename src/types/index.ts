@@ -65,7 +65,7 @@ export interface Role {
   id: string;
   name: string;
   permissions: Permission[];
-  familyId: string;
+  familyId?: string; // Optional for system-wide roles
 }
 
 export interface MemberProfile {
@@ -73,7 +73,7 @@ export interface MemberProfile {
   name: string;
   email: string;
   roleId: string;
-  familyId: string;
+  familyId?: string; // Optional for system-wide users
   avatar: string;
   avatarHint: string;
   phone?: string;
@@ -84,6 +84,7 @@ export interface MemberProfile {
     url: string;
   }[];
   permissions?: Permission[];
+  roleName?: string; // Attached at runtime
 }
 
 export interface ChatMessage {
@@ -134,4 +135,9 @@ export interface Budget {
     categoryName: string;
     amount: number;
     period: 'monthly' | 'yearly';
+}
+
+export interface Family {
+  id: string;
+  name: string;
 }

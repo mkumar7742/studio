@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog, Approval, ChatMessage, Budget } from '@/types';
+import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog, Approval, ChatMessage, Budget, Family } from '@/types';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText, Repeat, PiggyBank } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +28,7 @@ interface AppContextType {
     categories: Category[];
     members: MemberProfile[];
     roles: Role[];
+    families: Family[];
     allPermissions: { group: string; permissions: { id: Permission; label: string }[] }[];
     auditLogs: AuditLog[];
     approvals: Approval[];
@@ -90,6 +91,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberProfile[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
+    const [families, setFamilies] = useState<Family[]>([]);
     const [allPermissions, setAllPermissions] = useState<{ group: string; permissions: { id: Permission; label: string }[] }[]>([]);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
     const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -145,7 +147,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(false);
         setTransactions([]); setAccounts([]); setCategories([]); 
         setMembers([]); setRoles([]); setAllPermissions([]); 
-        setAuditLogs([]); setApprovals([]); setBudgets([]);
+        setAuditLogs([]); setApprovals([]); setBudgets([]); setFamilies([]);
         // We don't clear chat history on logout
         window.location.href = '/login';
     }, []);
@@ -176,6 +178,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const fetchDataForUser = useCallback(async (user: MemberProfile) => {
         const permissions = user.permissions || [];
+        const isSystemAdmin = user.roleName === 'System Administrator';
         const hasPermission = (p: Permission) => permissions.includes(p);
 
         try {
@@ -188,10 +191,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 makeApiRequest(`${API_BASE_URL}/permissions`),
                 hasPermission('audit:view') ? makeApiRequest(`${API_BASE_URL}/audit`) : Promise.resolve([]),
                 hasPermission('approvals:request') || hasPermission('approvals:manage') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([]),
-                hasPermission('budgets:view') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([])
+                hasPermission('budgets:view') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([]),
+                isSystemAdmin ? makeApiRequest(`${API_BASE_URL}/families`) : Promise.resolve([]),
             ];
 
-            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes, budgetsRes ] = await Promise.all(promises);
+            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes, budgetsRes, familiesRes ] = await Promise.all(promises);
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
@@ -202,6 +206,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setAuditLogs(auditLogsRes || []);
             setApprovals(approvalsRes || []);
             setBudgets(budgetsRes || []);
+            setFamilies(familiesRes || []);
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
@@ -267,7 +272,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
     const currentUserPermissions = useMemo(() => currentUser?.permissions ?? [], [currentUser]);
-    const isFamilyHead = useMemo(() => currentUserPermissions.includes('roles:manage'), [currentUserPermissions]);
+    const isFamilyHead = useMemo(() => currentUser?.roleName === 'Family Head', [currentUser]);
 
     const visibleTransactions = useMemo(() => {
         if (!currentUser) return [];
@@ -448,13 +453,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets, families,
         visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
-        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets,
+        transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets, families,
         visibleTransactions,
         currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,

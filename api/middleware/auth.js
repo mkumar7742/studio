@@ -30,10 +30,12 @@ module.exports = async function(req, res, next) {
         if (!role) {
             return res.status(403).json({ msg: 'User role not found, authorization denied.' });
         }
+        
+        const memberWithRole = { ...member.toObject(), permissions: role.permissions, roleName: role.name };
 
         // Handle System Administrator separately (no family checks)
         if (role.name === 'System Administrator') {
-            req.member = { ...member.toObject(), permissions: role.permissions };
+            req.member = memberWithRole;
             return next();
         }
         
@@ -46,7 +48,7 @@ module.exports = async function(req, res, next) {
         }
         
         // Attach the full member object (including familyId) and their permissions to the request
-        req.member = { ...member.toObject(), permissions: role.permissions };
+        req.member = memberWithRole;
         next();
     } catch (err) {
         res.status(401).json({ msg: 'Token is not valid' });
