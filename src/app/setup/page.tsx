@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2, ArrowRightLeft } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 const passwordValidation = new RegExp(
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
@@ -48,7 +49,7 @@ export default function SetupPage() {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch('http://localhost:5001/api/setup/create-admin', {
+            const response = await fetch('http://localhost:5001/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values),
@@ -56,12 +57,12 @@ export default function SetupPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'An error occurred during setup.');
+                throw new Error(data.message || 'An error occurred during registration.');
             }
 
             toast({
-                title: "Setup Complete!",
-                description: "Your Family Head account has been created. Please log in.",
+                title: "Registration Successful!",
+                description: "Your account has been created. Please log in to continue.",
             });
             router.push('/login');
 
@@ -80,8 +81,8 @@ export default function SetupPage() {
                         <ArrowRightLeft className="size-8 text-primary" />
                         <span className="text-3xl font-bold text-foreground">TrackWise</span>
                     </div>
-                    <CardTitle className="text-2xl">Welcome!</CardTitle>
-                    <CardDescription>Let's set up your Family Head account.</CardDescription>
+                    <CardTitle className="text-2xl">Create an Account</CardTitle>
+                    <CardDescription>Get started by creating your Family Head account.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -135,6 +136,12 @@ export default function SetupPage() {
                             </Button>
                         </form>
                     </Form>
+                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                        Already have an account?{' '}
+                        <Link href="/login" className="font-semibold text-primary hover:underline">
+                            Log In
+                        </Link>
+                    </p>
                 </CardContent>
             </Card>
         </div>

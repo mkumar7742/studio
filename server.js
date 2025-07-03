@@ -1,7 +1,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors =require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
@@ -30,10 +30,10 @@ const apiLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false,
 });
-const loginLimiter = rateLimit({
+const authLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 20, // Limit each IP to 20 login requests per window
-    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+	max: 20, // Limit auth-related requests per window
+    message: 'Too many attempts from this IP, please try again after 15 minutes',
     standardHeaders: true,
 	legacyHeaders: false,
 });
@@ -43,8 +43,7 @@ app.use('/api/', apiLimiter);
 
 
 // --- API ROUTES ---
-app.use('/api/auth', loginLimiter, require('./api/auth'));
-app.use('/api/setup', require('./api/setup'));
+app.use('/api/auth', authLimiter, require('./api/auth'));
 app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/accounts', require('./api/accounts'));
 app.use('/api/categories', require('./api/categories'));
@@ -54,6 +53,10 @@ app.use('/api/permissions', require('./api/permissions'));
 app.use('/api/audit', require('./api/audit'));
 app.use('/api/approvals', require('./api/approvals'));
 app.use('/api/families', require('./api/families'));
+// The setup route is being phased out in favor of a public registration endpoint
+// but we keep the file for potential future system-admin setup scripts.
+app.use('/api/setup', require('./api/setup'));
+
 
 app.get('/', (req, res) => {
     res.send('TrackWise API Server is running.');
