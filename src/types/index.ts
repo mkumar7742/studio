@@ -78,6 +78,7 @@ export interface MemberProfile {
   avatarHint: string;
   phone?: string;
   address?: string;
+  bio?: string;
   socials?: {
     platform: string;
     url: string;
@@ -100,7 +101,7 @@ export interface Conversation {
 }
 
 export interface AuditLog {
-  id: string;
+  _id: string;
   timestamp: string;
   memberId: string;
   memberName: string;

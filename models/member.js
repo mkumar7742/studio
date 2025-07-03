@@ -17,6 +17,7 @@ const MemberSchema = new mongoose.Schema({
   avatarHint: { type: String, required: true },
   phone: { type: String },
   address: { type: String },
+  bio: { type: String },
   socials: [SocialSchema],
 });
 

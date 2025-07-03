@@ -4,7 +4,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -39,17 +39,28 @@ export default function ProfilePage() {
     const role = getMemberRole(currentUser);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
-            name: currentUser.name || "",
-            phone: currentUser.phone || "",
-            address: currentUser.address || "",
-            bio: "TrackWise user since 2024. Passionate about personal finance and budgeting.",
-            socials: currentUser.socials || [],
+            name: "",
+            phone: "",
+            address: "",
+            bio: "",
+            socials: [],
         },
     });
+
+    useEffect(() => {
+        if (currentUser) {
+            form.reset({
+                name: currentUser.name || "",
+                phone: currentUser.phone || "",
+                address: currentUser.address || "",
+                bio: currentUser.bio || "",
+                socials: currentUser.socials || [],
+            });
+        }
+    }, [currentUser, form]);
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -82,6 +93,10 @@ export default function ProfilePage() {
     };
     
     const isFamilyHead = role?.name === 'Family Head';
+
+    if (!currentUser) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col h-full">
