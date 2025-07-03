@@ -9,6 +9,7 @@ const Approval = require('./models/approval');
 const Account = require('./models/account');
 const Family = require('./models/family');
 const Budget = require('./models/budget');
+const Message = require('./models/message');
 
 const seedDatabase = async () => {
     // This seeding logic is destructive and should only run in development.
@@ -27,6 +28,7 @@ const seedDatabase = async () => {
             await Account.deleteMany({});
             await Budget.deleteMany({});
             await Family.deleteMany({});
+            await Message.deleteMany({});
             console.log('All collections wiped.');
             
             // Data is now seeded on-demand via the /api/setup endpoint.

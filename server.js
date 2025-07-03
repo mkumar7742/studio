@@ -54,6 +54,7 @@ app.use('/api/audit', require('./api/audit'));
 app.use('/api/approvals', require('./api/approvals'));
 app.use('/api/families', require('./api/families'));
 app.use('/api/budgets', require('./api/budgets'));
+app.use('/api/chat', require('./api/chat'));
 // The setup route is being phased out in favor of a public registration endpoint
 // but we keep the file for potential future system-admin setup scripts.
 app.use('/api/setup', require('./api/setup'));

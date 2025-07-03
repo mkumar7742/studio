@@ -58,8 +58,8 @@ interface AppContextType {
     editBudget: (budgetId: string, values: { categoryId: string; amount: number; period: 'monthly' | 'yearly' }) => Promise<void>;
     deleteBudget: (budgetId: string) => Promise<void>;
     updateCurrentUser: (data: Partial<Omit<MemberProfile, 'email' | 'roleId'>>) => Promise<void>;
-    sendMessage: (receiverId: string, text: string) => void;
-    markConversationAsRead: (memberId: string) => void;
+    sendMessage: (receiverId: string, text: string) => Promise<void>;
+    markConversationAsRead: (partnerId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -85,20 +85,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
     const [approvals, setApprovals] = useState<Approval[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
-    const [messageStore, setMessageStore] = useState<ChatMessage[]>([]);
-    const [unreadMessageIds, setUnreadMessageIds] = useState<{[key: string]: string[]}>({});
 
     const logout = useCallback(() => {
         localStorage.removeItem('token');
-        localStorage.removeItem('chat_messages');
-        localStorage.removeItem('chat_unread_ids');
         delete apiHeaders['Authorization'];
         setCurrentUser(null);
         setIsAuthenticated(false);
         setTransactions([]); setAccounts([]); setCategories([]); 
         setMembers([]); setRoles([]); setAllPermissions([]); 
         setAuditLogs([]); setApprovals([]); setBudgets([]); setFamilies([]);
+        setChatMessages([]);
         window.location.href = '/login';
     }, []);
 
@@ -143,9 +141,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 hasPermission('approvals:request') || hasPermission('approvals:manage') ? makeApiRequest(`${API_BASE_URL}/approvals`) : Promise.resolve([]),
                 hasPermission('budgets:view') ? makeApiRequest(`${API_BASE_URL}/budgets`) : Promise.resolve([]),
                 isSystemAdmin ? makeApiRequest(`${API_BASE_URL}/families`) : Promise.resolve([]),
+                !isSystemAdmin ? makeApiRequest(`${API_BASE_URL}/chat/conversations`) : Promise.resolve([]),
             ];
 
-            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes, budgetsRes, familiesRes ] = await Promise.all(promises);
+            const [ transactionsRes, accountsRes, categoriesRes, membersRes, rolesRes, permissionsRes, auditLogsRes, approvalsRes, budgetsRes, familiesRes, chatMessagesRes ] = await Promise.all(promises);
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
@@ -157,6 +156,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setApprovals(approvalsRes || []);
             setBudgets(budgetsRes || []);
             setFamilies(familiesRes || []);
+            setChatMessages((chatMessagesRes || []).map((msg: any) => ({...msg, timestamp: new Date(msg.timestamp).getTime() })));
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
@@ -219,65 +219,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         initializeAuth();
     }, [initializeAuth]);
 
-    // This effect handles the initial loading or seeding of chat data
-    useEffect(() => {
-        if (currentUser && members.length > 1) {
-            const storedMessages = localStorage.getItem('chat_messages');
-            
-            if (storedMessages) {
-                try {
-                    setMessageStore(JSON.parse(storedMessages));
-                    const storedUnreads = localStorage.getItem('chat_unread_ids');
-                    if (storedUnreads) {
-                        setUnreadMessageIds(JSON.parse(storedUnreads));
-                    }
-                } catch (error) {
-                    console.error("Failed to parse chat data from localStorage", error);
-                    localStorage.removeItem('chat_messages');
-                    localStorage.removeItem('chat_unread_ids');
-                }
-            } else {
-                const otherMembers = members.filter(m => m.id !== currentUser.id);
-                const newMockMessages: ChatMessage[] = [];
-                const newUnreadMessages: {[key: string]: string[]} = {};
-                const baseTime = Date.now();
-
-                if (otherMembers.length > 0) {
-                    const partner1 = otherMembers[0];
-                    const msg1_id = `msg-${baseTime - 1000 * 60 * 5}`;
-                    const msg2_id = `msg-${baseTime - 1000 * 60 * 4}`;
-                    const msg3_id = `msg-${baseTime - 1000 * 60 * 3}`;
-                    
-                    newMockMessages.push({ id: msg1_id, senderId: partner1.id, receiverId: currentUser.id, text: `Hey ${currentUser.name.split(' ')[0]}, just checking in on the latest expenses.`, timestamp: baseTime - 1000 * 60 * 5 });
-                    newMockMessages.push({ id: msg2_id, senderId: currentUser.id, receiverId: partner1.id, text: `Hi ${partner1.name.split(' ')[0]}! Everything looks good. I just added the receipt for the groceries.`, timestamp: baseTime - 1000 * 60 * 4 });
-                    newMockMessages.push({ id: msg3_id, senderId: partner1.id, receiverId: currentUser.id, text: 'Perfect, thanks!', timestamp: baseTime - 1000 * 60 * 3 });
-
-                    if (!newUnreadMessages[currentUser.id]) newUnreadMessages[currentUser.id] = [];
-                    newUnreadMessages[currentUser.id].push(msg3_id);
-                }
-
-                if (otherMembers.length > 1) {
-                    const partner2 = otherMembers[1];
-                     const msg4_id = `msg-${baseTime - 1000 * 60 * 20}`;
-                     newMockMessages.push({ id: msg4_id, senderId: partner2.id, receiverId: currentUser.id, text: 'Could you approve my expense for the flight to Brussels?', timestamp: baseTime - 1000 * 60 * 20 });
-                     
-                     if (!newUnreadMessages[currentUser.id]) newUnreadMessages[currentUser.id] = [];
-                     newUnreadMessages[currentUser.id].push(msg4_id);
-                }
-                
-                setMessageStore(newMockMessages);
-                setUnreadMessageIds(newUnreadMessages);
-            }
-        }
-    }, [currentUser, members]);
-
-    // This effect persists chat data to localStorage whenever it changes
-    useEffect(() => {
-        if (typeof window !== 'undefined' && currentUser) { 
-            localStorage.setItem('chat_messages', JSON.stringify(messageStore));
-            localStorage.setItem('chat_unread_ids', JSON.stringify(unreadMessageIds));
-        }
-    }, [messageStore, unreadMessageIds, currentUser]);
 
     const getMemberRole = useCallback((member: MemberProfile): Role | undefined => roles.find(r => r.id === member.roleId), [roles]);
     const currentUserPermissions = useMemo(() => currentUser?.permissions ?? [], [currentUser]);
@@ -391,7 +332,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!currentUser) return [];
 
         const conversationsMap = new Map<string, ChatMessage[]>();
-        messageStore.forEach(msg => {
+        chatMessages.forEach(msg => {
             let partnerId: string | null = null;
             if (msg.senderId === currentUser.id) partnerId = msg.receiverId;
             else if (msg.receiverId === currentUser.id) partnerId = msg.senderId;
@@ -402,9 +343,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        const unreadCountsBySender = (unreadMessageIds[currentUser.id] || []).reduce((acc, msgId) => {
-            const msg = messageStore.find(m => m.id === msgId);
-            if (msg) {
+        const unreadCountsBySender = chatMessages.reduce((acc, msg) => {
+            if (msg.receiverId === currentUser.id && !msg.isRead) {
                 acc[msg.senderId] = (acc[msg.senderId] || 0) + 1;
             }
             return acc;
@@ -429,35 +369,39 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             return lastMsgB - lastMsgA;
         });
 
-    }, [currentUser, members, messageStore, unreadMessageIds]);
+    }, [currentUser, members, chatMessages]);
 
-    const markConversationAsRead = useCallback((memberId: string) => {
+    const markConversationAsRead = useCallback(async (partnerId: string) => {
         if (!currentUser) return;
-        setUnreadMessageIds(prev => {
-            const currentUserUnreads = (prev[currentUser.id] || []).filter(msgId => {
-                const msg = messageStore.find(m => m.id === msgId);
-                return msg?.senderId !== memberId;
-            });
-            return { ...prev, [currentUser.id]: currentUserUnreads };
-        });
-    }, [currentUser, messageStore]);
+        
+        // Optimistic UI update
+        const updatedMessages = chatMessages.map(msg => 
+            (msg.senderId === partnerId && msg.receiverId === currentUser.id) 
+                ? { ...msg, isRead: true } 
+                : msg
+        );
+        setChatMessages(updatedMessages);
 
-    const sendMessage = useCallback((receiverId: string, text: string) => {
+        // API call
+        await makeApiRequest(`${API_BASE_URL}/chat/mark-as-read`, { 
+            method: 'POST', 
+            body: JSON.stringify({ partnerId }) 
+        });
+    }, [currentUser, chatMessages, makeApiRequest]);
+
+    const sendMessage = useCallback(async (receiverId: string, text: string) => {
         if(!currentUser) return;
-        const newMessage: ChatMessage = {
-            id: `msg-${Date.now()}`,
-            senderId: currentUser.id,
-            receiverId: receiverId,
-            text,
-            timestamp: Date.now()
-        };
-        setMessageStore(prev => [...prev, newMessage]);
-        // Simulate receiver getting the message and it becoming "unread"
-        setUnreadMessageIds(prev => ({
-            ...prev,
-            [receiverId]: [...(prev[receiverId] || []), newMessage.id]
-        }));
-    }, [currentUser]);
+        
+        const response = await makeApiRequest(`${API_BASE_URL}/chat`, {
+            method: 'POST',
+            body: JSON.stringify({ receiverId, text })
+        });
+        
+        const newMessage = { ...response, timestamp: new Date(response.timestamp).getTime() };
+
+        setChatMessages(prev => [...prev, newMessage]);
+
+    }, [currentUser, makeApiRequest]);
 
 
     const value = useMemo(() => ({
