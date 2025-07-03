@@ -47,6 +47,8 @@ export type Permission =
   | 'income:delete'
   | 'approvals:request'
   | 'approvals:manage'
+  | 'budgets:view'
+  | 'budgets:manage'
   | 'categories:view'
   | 'categories:create'
   | 'categories:edit'
