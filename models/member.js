@@ -12,7 +12,7 @@ const MemberSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
   roleId: { type: String, required: true },
-  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family', required: true },
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Family' },
   avatar: { type: String, required: true },
   avatarHint: { type: String, required: true },
   phone: { type: String },

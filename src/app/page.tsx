@@ -42,7 +42,7 @@ export default function LandingPage() {
                             <Link href="/login">Log In</Link>
                         </Button>
                         <Button asChild>
-                            <Link href="/setup">Sign Up</Link>
+                            <Link href="/register">Sign Up</Link>
                         </Button>
                     </div>
                 </div>
@@ -58,7 +58,7 @@ export default function LandingPage() {
                             TrackWise is the easiest way for your family to manage expenses, track income, and build healthy financial habits together.
                         </p>
                         <Button size="lg" asChild>
-                            <Link href="/setup">
+                            <Link href="/register">
                                 Get Started Free <LogIn className="ml-2" />
                             </Link>
                         </Button>
@@ -115,7 +115,7 @@ export default function LandingPage() {
                                 Stop guessing and start knowing. TrackWise empowers you to make smarter financial decisions together. Sign up today and build a stronger financial foundation for your family.
                             </p>
                             <Button size="lg" asChild>
-                            <Link href="/setup">
+                            <Link href="/register">
                                     Sign Up Now
                                 </Link>
                             </Button>

@@ -20,17 +20,29 @@ module.exports = async function(req, res, next) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_default_jwt_secret');
         
-        // Find user and their family context
+        // Find user
         const member = await Member.findById(decoded.member.id);
-        if (!member || member.familyId.toString() !== decoded.member.familyId) {
+        if (!member) {
              return res.status(401).json({ msg: 'Token is not valid' });
         }
         
-        // Find the role within the same family
-        const role = await Role.findOne({ _id: member.roleId, familyId: member.familyId });
+        const role = await Role.findById(member.roleId);
         if (!role) {
-            // This case might happen if a role is deleted while a user is logged in
             return res.status(403).json({ msg: 'User role not found, authorization denied.' });
+        }
+
+        // Handle System Administrator separately (no family checks)
+        if (role.name === 'System Administrator') {
+            req.member = { ...member.toObject(), permissions: role.permissions };
+            return next();
+        }
+        
+        // --- Standard User Family Checks ---
+        if (member.familyId?.toString() !== decoded.member.familyId) {
+             return res.status(401).json({ msg: 'Token is not valid (family mismatch)' });
+        }
+        if (role.familyId?.toString() !== member.familyId.toString()) {
+            return res.status(403).json({ msg: 'User role is not valid for this family.' });
         }
         
         // Attach the full member object (including familyId) and their permissions to the request
