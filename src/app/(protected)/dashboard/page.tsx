@@ -216,7 +216,7 @@ const MemberSpendingCard = ({ transactions }: { transactions: Transaction[] }) =
 
 const FamilyDashboard = () => {
     const { visibleTransactions, currentUser, getMemberRole } = useAppContext();
-    const [calendarDate, setCalendarDate] = useState<Date>();
+    const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
 
     const isFamilyHead = useMemo(() => {
         if (!currentUser) return false;

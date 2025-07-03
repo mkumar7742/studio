@@ -46,9 +46,9 @@ export function SidebarNav() {
         { href: '/approvals', label: 'Approvals', icon: CheckSquare, color: 'bg-blue-500', permission: ['approvals:request', 'approvals:manage'] },
         { href: '/budgets', label: 'Budgets', icon: PiggyBank, color: 'bg-orange-500', permission: 'budgets:view' },
         { href: '/calendar', label: 'Calendar', icon: Calendar, color: 'bg-indigo-500', permission: 'calendar:view' },
+        { href: '/chat', label: 'Chat', icon: MessageSquare, color: 'bg-cyan-500' },
         { href: '/categories', label: 'Categories', icon: Shapes, color: 'bg-purple-500', permission: 'categories:view' },
         { href: '/members', label: 'Family', icon: Users, color: 'bg-green-500', permission: 'members:view' },
-        { href: '/chat', label: 'Chat', icon: MessageSquare, color: 'bg-cyan-500' },
         { href: '/roles', label: 'Roles', icon: ShieldCheck, color: 'bg-yellow-500', permission: 'roles:manage' },
         { href: '/audit', label: 'Audit Log', icon: ScrollText, color: 'bg-gray-500', permission: 'audit:view' },
         { href: '/settings', label: 'Settings', icon: Settings, color: 'bg-slate-500' },
@@ -75,12 +75,13 @@ export function SidebarNav() {
 
     const hasPermission = (permission?: Permission | Permission[]) => {
         if (!permission) return true; // No permission required
+        if (isSystemAdmin) return true; // System admin has all permissions
         const requiredPermissions = Array.isArray(permission) ? permission : [permission];
         return requiredPermissions.some(p => currentUserPermissions.includes(p));
     };
     
     const visibleMenuItems = isSystemAdmin 
-        ? menuItems.filter(item => ['Home', 'Settings', 'Support'].includes(item.label))
+        ? menuItems.filter(item => ['Home', 'Family', 'Roles', 'Settings', 'Support', 'Audit Log'].includes(item.label))
         : menuItems;
 
     return <>

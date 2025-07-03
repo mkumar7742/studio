@@ -89,18 +89,12 @@ export interface MemberProfile {
 
 export interface ChatMessage {
   id: string;
+  familyId: string;
   senderId: string;
   receiverId: string;
   text: string;
-  timestamp: number;
   isRead: boolean;
-  familyId: string;
-}
-
-export interface Conversation {
-  memberId: string; // The ID of the other member in the conversation
-  messages: ChatMessage[];
-  unreadCount?: number;
+  timestamp: number;
 }
 
 export interface AuditLog {

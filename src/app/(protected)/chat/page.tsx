@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,7 +9,7 @@ import { Send, ArrowLeft, MessageSquare, Smile, Search } from 'lucide-react';
 import { useAppContext } from '@/context/app-provider';
 import type { MemberProfile, ChatMessage } from '@/types';
 import { cn } from '@/lib/utils';
-import { format, formatRelative, isSameDay } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { PageHeader } from '@/components/page-header';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import Picker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
 import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
 
 const DateSeparator = ({ date }: { date: number }) => (
     <div className="relative text-center my-4">
@@ -31,18 +32,21 @@ const DateSeparator = ({ date }: { date: number }) => (
     </div>
 );
 
-const ClientRelativeTime = ({ timestamp, className }: { timestamp: number; className: string }) => {
-    const [relativeTime, setRelativeTime] = useState<string | null>(null);
+const ClientRelativeTime = ({ timestamp }: { timestamp: number }) => {
+    const [relativeTime, setRelativeTime] = useState('');
 
     useEffect(() => {
-        // This will only run on the client, after hydration, avoiding the mismatch.
-        setRelativeTime(formatRelative(new Date(timestamp), new Date()));
+        setRelativeTime(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
+
+        const interval = setInterval(() => {
+            setRelativeTime(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
+        }, 60000); // Update every minute
+
+        return () => clearInterval(interval);
     }, [timestamp]);
 
-    // By rendering `null` on the server and during initial client render, we avoid the mismatch.
-    // The correct time will appear once the component mounts on the client.
     return (
-        <time dateTime={new Date(timestamp).toISOString()} className={className}>
+        <time dateTime={new Date(timestamp).toISOString()} className="text-xs text-muted-foreground shrink-0">
             {relativeTime}
         </time>
     );
@@ -50,11 +54,28 @@ const ClientRelativeTime = ({ timestamp, className }: { timestamp: number; class
 
 
 const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: () => void }) => {
-    const { currentUser, conversations, sendMessage, members } = useAppContext();
+    const { currentUser, sendMessage, members, chatMessages } = useAppContext();
     const [message, setMessage] = useState('');
-    const conversation = conversations.find(c => c.memberId === member.id);
     const { theme } = useTheme();
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    const conversationMessages = useMemo(() => {
+        return chatMessages.filter(
+            (msg) =>
+                (msg.senderId === currentUser?.id && msg.receiverId === member.id) ||
+                (msg.senderId === member.id && msg.receiverId === currentUser?.id)
+        );
+    }, [chatMessages, currentUser?.id, member.id]);
     
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTo({
+                top: scrollAreaRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [conversationMessages]);
+
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
         if (message.trim()) {
@@ -68,8 +89,7 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
     };
 
     const messagesWithSeparators = useMemo(() => {
-        if (!conversation?.messages) return [];
-        const sortedMessages = [...conversation.messages].sort((a,b) => a.timestamp - b.timestamp);
+        const sortedMessages = [...conversationMessages].sort((a,b) => a.timestamp - b.timestamp);
         
         const result: (ChatMessage | { type: 'separator', date: number, id: string })[] = [];
         let lastDate: Date | null = null;
@@ -84,7 +104,7 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
         });
 
         return result;
-    }, [conversation]);
+    }, [conversationMessages]);
 
 
     const getSender = (senderId: string) => {
@@ -103,7 +123,7 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
                 </Avatar>
                 <h3 className="font-semibold text-lg">{member.name}</h3>
             </header>
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1" viewportRef={scrollAreaRef}>
                 <div className="p-4 space-y-4">
                     {messagesWithSeparators.map(item => {
                         if (item.type === 'separator') {
@@ -111,7 +131,7 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
                         }
 
                         const msg = item as ChatMessage;
-                        const isCurrentUser = msg.senderId === currentUser.id;
+                        const isCurrentUser = msg.senderId === currentUser?.id;
                         const sender = getSender(msg.senderId);
                         return (
                             <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
@@ -123,10 +143,9 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
                                 )}
                                 <div className={cn("max-w-xs md:max-w-md p-3 rounded-2xl", isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none")}>
                                     <p className="text-sm">{msg.text}</p>
-                                    <ClientRelativeTime
-                                        timestamp={msg.timestamp}
-                                        className={cn("text-xs mt-1 text-right block", isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground/70")}
-                                    />
+                                    <div className={cn("text-xs mt-1 text-right block", isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground/70")}>
+                                        {format(new Date(msg.timestamp), 'p')}
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -163,32 +182,38 @@ const ConversationView = ({ member, onBack }: { member: MemberProfile; onBack: (
 
 
 const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberProfile) => void; }) => {
-    const { members, currentUser, conversations } = useAppContext();
+    const { members, currentUser, chatMessages } = useAppContext();
     const [searchTerm, setSearchTerm] = useState('');
 
     const membersWithChatInfo = useMemo(() => {
-        const otherMembers = members.filter(m => m.id !== currentUser.id);
+        if (!currentUser) return [];
 
-        return otherMembers.map(member => {
-            const conversation = conversations.find(c => c.memberId === member.id);
-            let lastMessage = { text: "No messages yet", timestamp: null };
+        return members
+            .filter(member => member.id !== currentUser.id)
+            .map(member => {
+                const conversationMessages = chatMessages.filter(
+                    msg =>
+                        (msg.senderId === currentUser.id && msg.receiverId === member.id) ||
+                        (msg.senderId === member.id && msg.receiverId === currentUser.id)
+                );
+                
+                const lastMessage = conversationMessages.length > 0 
+                    ? [...conversationMessages].sort((a, b) => b.timestamp - a.timestamp)[0] 
+                    : null;
 
-            if (conversation && conversation.messages.length > 0) {
-                const sortedMessages = [...conversation.messages].sort((a,b) => b.timestamp - a.timestamp);
-                const lastMsg = sortedMessages[0];
-                lastMessage = {
-                    text: lastMsg.text,
-                    timestamp: lastMsg.timestamp,
+                const unreadCount = conversationMessages.filter(
+                    msg => msg.receiverId === currentUser.id && !msg.isRead
+                ).length;
+                
+                return {
+                    ...member,
+                    lastMessage: lastMessage ? { text: lastMessage.text, timestamp: lastMessage.timestamp } : { text: "No messages yet", timestamp: null },
+                    unreadCount,
                 };
-            }
+            })
+            .sort((a, b) => (b.lastMessage.timestamp || 0) - (a.lastMessage.timestamp || 0));
 
-            return {
-                ...member,
-                lastMessage,
-                unreadCount: conversation?.unreadCount || 0
-            };
-        });
-    }, [members, currentUser.id, conversations]);
+    }, [members, currentUser, chatMessages]);
 
     const filteredMembers = useMemo(() => {
         if (!searchTerm) return membersWithChatInfo;
@@ -223,15 +248,18 @@ const ConversationList = ({ onSelectMember }: { onSelectMember: (member: MemberP
                                     <div className="flex-1 overflow-hidden">
                                         <div className="flex justify-between items-center">
                                             <h3 className="font-semibold truncate">{member.name}</h3>
-                                            {member.unreadCount > 0 ? (
-                                                <Badge className="bg-primary text-primary-foreground rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                                                    {member.unreadCount}
-                                                </Badge>
-                                            ) : member.lastMessage.timestamp && (
-                                                <ClientRelativeTime timestamp={member.lastMessage.timestamp} className="text-xs text-muted-foreground shrink-0" />
+                                            {member.lastMessage.timestamp && (
+                                                <ClientRelativeTime timestamp={member.lastMessage.timestamp} />
                                             )}
                                         </div>
-                                        <p className="text-sm text-muted-foreground truncate">{member.lastMessage.text}</p>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-sm text-muted-foreground truncate">{member.lastMessage.text}</p>
+                                            {member.unreadCount > 0 && (
+                                                <Badge className="bg-primary text-primary-foreground rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs shrink-0">
+                                                    {member.unreadCount}
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
                                 </button>
                             </li>

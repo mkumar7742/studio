@@ -2,14 +2,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog, Approval, ChatMessage, Budget, Family } from '@/types';
+import type { Transaction, Account, Category, MemberProfile, Role, Permission, AuditLog, Approval, ChatMessage, Budget, Family } from '@/types';
 import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText, Repeat, PiggyBank } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jwtDecode } from "jwt-decode";
 
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = '/api';
 
 const apiHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
 
@@ -35,7 +35,6 @@ interface AppContextType {
     budgets: Budget[];
     currentUser: MemberProfile | null;
     currentUserPermissions: Permission[];
-    conversations: Conversation[];
     login: (email: string, pass: string) => Promise<boolean>;
     logout: () => void;
     addTransaction: (values: Omit<Transaction, 'id'>) => Promise<void>;
@@ -226,7 +225,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const visibleTransactions = useMemo(() => {
         if (!currentUser) return [];
-        if (isFamilyHead) return transactions;
+        if (isFamilyHead || currentUser.roleName === 'System Administrator') return transactions;
         return transactions.filter(t => t.member === currentUser.name);
     }, [transactions, isFamilyHead, currentUser]);
 
@@ -326,69 +325,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [currentUser, editMember]);
     
-    // --- Chat Logic ---
-
-    const conversations = useMemo(() => {
-        if (!currentUser) return [];
-
-        const conversationsMap = new Map<string, ChatMessage[]>();
-        chatMessages.forEach(msg => {
-            let partnerId: string | null = null;
-            if (msg.senderId === currentUser.id) partnerId = msg.receiverId;
-            else if (msg.receiverId === currentUser.id) partnerId = msg.senderId;
-
-            if (partnerId) {
-                if (!conversationsMap.has(partnerId)) conversationsMap.set(partnerId, []);
-                conversationsMap.get(partnerId)!.push(msg);
-            }
-        });
-
-        const unreadCountsBySender = chatMessages.reduce((acc, msg) => {
-            if (msg.receiverId === currentUser.id && !msg.isRead) {
-                acc[msg.senderId] = (acc[msg.senderId] || 0) + 1;
-            }
-            return acc;
-        }, {} as {[key: string]: number});
-        
-        const result: Conversation[] = [];
-        members.forEach(member => {
-            if (member.id === currentUser.id) return;
-            
-            const messages = conversationsMap.get(member.id) || [];
-            
-            result.push({
-                memberId: member.id,
-                messages: messages.sort((a, b) => a.timestamp - b.timestamp),
-                unreadCount: unreadCountsBySender[member.id] || 0
-            });
-        });
-        
-        return result.sort((a, b) => {
-            const lastMsgA = a.messages[a.messages.length - 1]?.timestamp || 0;
-            const lastMsgB = b.messages[b.messages.length - 1]?.timestamp || 0;
-            return lastMsgB - lastMsgA;
-        });
-
-    }, [currentUser, members, chatMessages]);
-
-    const markConversationAsRead = useCallback(async (partnerId: string) => {
-        if (!currentUser) return;
-        
-        // Optimistic UI update
-        const updatedMessages = chatMessages.map(msg => 
-            (msg.senderId === partnerId && msg.receiverId === currentUser.id) 
-                ? { ...msg, isRead: true } 
-                : msg
-        );
-        setChatMessages(updatedMessages);
-
-        // API call
-        await makeApiRequest(`${API_BASE_URL}/chat/mark-as-read`, { 
-            method: 'POST', 
-            body: JSON.stringify({ partnerId }) 
-        });
-    }, [currentUser, chatMessages, makeApiRequest]);
-
     const sendMessage = useCallback(async (receiverId: string, text: string) => {
         if(!currentUser) return;
         
@@ -403,18 +339,35 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     }, [currentUser, makeApiRequest]);
 
+    const markConversationAsRead = useCallback(async (partnerId: string) => {
+        if (!currentUser) return;
+        
+        const updatedMessages = chatMessages.map(msg => 
+            (msg.senderId === partnerId && msg.receiverId === currentUser.id && !msg.isRead) 
+                ? { ...msg, isRead: true } 
+                : msg
+        );
+        setChatMessages(updatedMessages);
+
+        await makeApiRequest(`${API_BASE_URL}/chat/mark-as-read`, { 
+            method: 'POST', 
+            body: JSON.stringify({ partnerId }) 
+        });
+    }, [currentUser, chatMessages, makeApiRequest]);
+
 
     const value = useMemo(() => ({
         isAuthenticated, isLoading, login, logout,
         transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets, families,
         visibleTransactions,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
+        currentUser, currentUserPermissions,
+        addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,
     }), [
         isAuthenticated, isLoading, login, logout,
         transactions, accounts, categories, members, roles, allPermissions, auditLogs, approvals, budgets, families,
         visibleTransactions,
-        currentUser, currentUserPermissions, conversations, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
+        currentUser, currentUserPermissions, addTransaction, deleteTransactions, addCategory, editCategory, deleteCategory, setCategories, reorderCategories, addMember, editMember, deleteMember,
         getMemberRole, addRole, editRole, deleteRole, addApproval, updateApproval, addBudget, editBudget, deleteBudget, updateCurrentUser, sendMessage, markConversationAsRead,
     ]);
 
