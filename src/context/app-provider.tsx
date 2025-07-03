@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import type { Transaction, Account, Category, MemberProfile, Role, Permission, Conversation, AuditLog, Approval, ChatMessage } from '@/types';
-import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText } from "lucide-react";
+import { Briefcase, Car, Film, GraduationCap, HeartPulse, Home, Landmark, PawPrint, Pizza, Plane, Receipt, Shapes, ShoppingCart, Sprout, UtensilsCrossed, Gift, Shirt, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText, Repeat } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jwtDecode } from "jwt-decode";
@@ -14,7 +14,7 @@ const API_BASE_URL = 'http://localhost:5001/api';
 const apiHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
 
 const iconMap: { [key: string]: LucideIcon } = {
-    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText
+    Briefcase, Landmark, UtensilsCrossed, ShoppingCart, HeartPulse, Car, GraduationCap, Film, Gift, Plane, Home, PawPrint, Receipt, Pizza, Shirt, Sprout, Shapes, Dumbbell, Wrench, Sofa, Popcorn, Store, Baby, Train, Wifi, PenSquare, ClipboardCheck, CreditCard, Wallet, ScrollText, Repeat
 };
 
 export type FullTransaction = Omit<Transaction, 'id' | 'receiptUrl'>;
@@ -44,15 +44,15 @@ interface AppContextType {
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
     reorderCategories: (orderedIds: string[]) => Promise<void>;
     addMember: (values: { name: string; email: string; roleId: string; password: string;}) => Promise<void>;
-    editMember: (memberId: string, values: Partial<MemberProfile>) => Promise<void>;
+    editMember: (memberId: string, values: Partial<Omit<MemberProfile, 'email'>>) => Promise<void>;
     deleteMember: (memberId: string) => Promise<void>;
     getMemberRole: (member: MemberProfile) => Role | undefined;
     addRole: (values: { name: string; permissions: Permission[] }) => Promise<void>;
     editRole: (roleId: string, values: { name: string; permissions: Permission[] }) => Promise<void>;
     deleteRole: (roleId: string) => Promise<void>;
-    addApproval: (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName'>) => Promise<void>;
+    addApproval: (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName' | 'familyId'>) => Promise<void>;
     updateApproval: (approvalId: string, status: 'approved' | 'rejected', notes: string) => Promise<void>;
-    updateCurrentUser: (data: Partial<MemberProfile>) => Promise<void>;
+    updateCurrentUser: (data: Partial<Omit<MemberProfile, 'email' | 'roleId'>>) => Promise<void>;
     sendMessage: (receiverId: string, text: string) => void;
     markConversationAsRead: (memberId: string) => void;
 }
@@ -169,7 +169,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [toast, logout]);
     
-    const fetchData = useCallback(async (permissions: Permission[]) => {
+    const fetchDataForUser = useCallback(async (user: MemberProfile) => {
+        const permissions = user.permissions || [];
         const hasPermission = (p: Permission) => permissions.includes(p);
 
         try {
@@ -188,7 +189,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             
             setTransactions(transactionsRes || []);
             setAccounts((accountsRes || []).map(mapAccountData));
-            setCategories((categoriesRes || []).map(mapCategoryData));
+            setCategories((categoriesRes || []).map(mapCategoryData).sort((a,b) => a.order - b.order));
             setMembers(membersRes || []);
             setRoles(rolesRes || []);
             setAllPermissions(permissionsRes || []);
@@ -197,8 +198,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         } catch (error) {
             console.error("Failed to fetch initial data", error);
+            // If data fetching fails, it might be an auth issue, so log out.
+            logout();
         }
-    }, [makeApiRequest]);
+    }, [makeApiRequest, logout]);
 
     const login = useCallback(async (email: string, password: string): Promise<boolean> => {
         setIsLoading(true);
@@ -211,7 +214,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 const userProfile = data.user as MemberProfile;
                 setCurrentUser(userProfile);
                 setIsAuthenticated(true);
-                await fetchData(userProfile.permissions || []);
+                await fetchDataForUser(userProfile);
                 
                 setIsLoading(false);
                 return true;
@@ -222,7 +225,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(false);
             return false;
         }
-    }, [makeApiRequest, fetchData]);
+    }, [makeApiRequest, fetchDataForUser]);
 
     const initializeAuth = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -240,7 +243,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 if (userProfile) {
                     setCurrentUser(userProfile);
                     setIsAuthenticated(true);
-                    await fetchData(userProfile.permissions || []);
+                    await fetchDataForUser(userProfile);
                 } else {
                     logout();
                 }
@@ -249,7 +252,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         }
         setIsLoading(false);
-    }, [fetchData, makeApiRequest, logout]);
+    }, [fetchDataForUser, makeApiRequest, logout]);
 
     useEffect(() => {
         initializeAuth();
@@ -288,6 +291,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const reorderCategories = useCallback(async (orderedIds: string[]) => {
         await makeApiRequest(`${API_BASE_URL}/categories/reorder`, { method: 'POST', body: JSON.stringify({ orderedIds }) });
+        // The optimistic update is already handled in the component
     }, [makeApiRequest]);
 
     const deleteCategory = useCallback(async (categoryId: string) => {
@@ -301,7 +305,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setMembers(prev => [...prev, newMember]);
     }, [makeApiRequest]);
 
-    const editMember = useCallback(async (memberId: string, values: Partial<MemberProfile>) => {
+    const editMember = useCallback(async (memberId: string, values: Partial<Omit<MemberProfile, 'email'>>) => {
         const updatedMember = await makeApiRequest(`${API_BASE_URL}/members/${memberId}`, { method: 'PUT', body: JSON.stringify(values) });
         setMembers(prev => prev.map(m => (m.id === memberId ? { ...m, ...updatedMember } : m)));
         if(currentUser && currentUser.id === memberId) {
@@ -329,9 +333,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setRoles(prev => prev.filter(r => r.id !== roleId));
     }, [makeApiRequest]);
 
-    const addApproval = useCallback(async (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName'>) => {
+    const addApproval = useCallback(async (values: Omit<Approval, 'id' | 'status' | 'requestDate' | 'memberId' | 'memberName' | 'familyId'>) => {
         const newApproval = await makeApiRequest(`${API_BASE_URL}/approvals`, { method: 'POST', body: JSON.stringify(values) });
-        setApprovals(prev => [newApproval, ...prev]);
+        setApprovals(prev => [newApproval, ...prev].sort((a,b) => new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime()));
     }, [makeApiRequest]);
 
     const updateApproval = useCallback(async (approvalId: string, status: 'approved' | 'rejected', notes: string) => {
@@ -339,7 +343,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setApprovals(prev => prev.map(a => a.id === approvalId ? updatedApproval : a));
     }, [makeApiRequest]);
     
-    const updateCurrentUser = useCallback(async (data: Partial<MemberProfile>) => {
+    const updateCurrentUser = useCallback(async (data: Partial<Omit<MemberProfile, 'email' | 'roleId'>>) => {
         if(currentUser) {
             await editMember(currentUser.id, data);
         }

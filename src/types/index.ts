@@ -13,6 +13,7 @@ export interface Transaction {
   merchant: string;
   isRecurring?: boolean;
   recurrenceFrequency?: 'weekly' | 'monthly' | 'yearly';
+  familyId: string;
 }
 
 export interface Account {
@@ -21,6 +22,7 @@ export interface Account {
   balance: number;
   currency: string;
   icon: LucideIcon;
+  familyId: string;
 }
 
 export interface Category {
@@ -30,6 +32,7 @@ export interface Category {
   iconName: string;
   color: string;
   order: number;
+  familyId: string;
 }
 
 export type Permission =
@@ -60,6 +63,7 @@ export interface Role {
   id: string;
   name: string;
   permissions: Permission[];
+  familyId: string;
 }
 
 export interface MemberProfile {
@@ -68,6 +72,7 @@ export interface MemberProfile {
   name: string;
   email: string;
   roleId: string;
+  familyId: string;
   avatar: string;
   avatarHint: string;
   phone?: string;
@@ -101,6 +106,7 @@ export interface AuditLog {
   memberName: string;
   action: string;
   details: any;
+  familyId: string;
 }
 
 export interface Approval {
@@ -114,8 +120,9 @@ export interface Approval {
   category: string;
   status: 'pending' | 'approved' | 'rejected';
   requestDate: string;
-  decisionDate: string;
+  decisionDate?: string;
   approverId?: string;
   approverName?: string;
   notes?: string;
+  familyId: string;
 }

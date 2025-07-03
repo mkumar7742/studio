@@ -156,7 +156,7 @@ export default function HomePage() {
           }
           console.warn(`Attempt ${i+1}: Server responded with status ${response.status}. Retrying in ${delay}ms...`);
         } catch (error) {
-          console.warn(`Attempt ${i+1}: Fetch failed. Retrying in ${delay}ms...`);
+          console.warn(`Attempt ${i+1}: Fetch failed. Retrying in ${delay}ms...`, error);
         }
         await new Promise(res => setTimeout(res, delay));
       }
@@ -167,8 +167,7 @@ export default function HomePage() {
       const data = await checkSetupStatusWithRetry();
       
       if (data === null) {
-          // If the server never responds, maybe show an error page or just the login page.
-          // For now, let's assume it might be set up and default to login.
+          // If the server never responds, show an error or the login page as a fallback.
           router.replace('/login');
           return;
       }
@@ -181,6 +180,7 @@ export default function HomePage() {
         if (token) {
           router.replace('/dashboard');
         } else {
+          // Only show the landing page if setup is complete AND user is not logged in.
           setShouldRender(true);
         }
       }
