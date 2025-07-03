@@ -223,32 +223,41 @@ export default function DashboardPage() {
 
   const expenseTransactions = visibleTransactions.filter(t => t.type === 'expense');
 
-  const now = new Date();
-  const thisMonth = getMonth(now);
-  const thisYear = getYear(now);
-  const lastMonthDate = subMonths(now, 1);
-  const lastMonth = getMonth(lastMonthDate);
-  const lastYear = getYear(lastMonthDate);
+  const [stats, setStats] = useState({
+      thisMonth: { income: 0, expenses: 0 },
+      lastMonth: { income: 0, expenses: 0 }
+  });
 
-  const thisMonthStats = visibleTransactions.reduce((acc, t) => {
-      const tDate = new Date(t.date);
-      if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
-          const amountInUsd = convertToUsd(t.amount, t.currency);
-          if (t.type === 'income') acc.income += amountInUsd;
-          else acc.expenses += amountInUsd;
-      }
-      return acc;
-  }, { income: 0, expenses: 0 });
+  useEffect(() => {
+    const now = new Date();
+    const thisMonth = getMonth(now);
+    const thisYear = getYear(now);
+    const lastMonthDate = subMonths(now, 1);
+    const lastMonth = getMonth(lastMonthDate);
+    const lastYear = getYear(lastMonthDate);
 
-  const lastMonthStats = visibleTransactions.reduce((acc, t) => {
-      const tDate = new Date(t.date);
-      if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
-          const amountInUsd = convertToUsd(t.amount, t.currency);
-          if (t.type === 'income') acc.income += amountInUsd;
-          else acc.expenses += amountInUsd;
-      }
-      return acc;
-  }, { income: 0, expenses: 0 });
+    const thisMonthStats = visibleTransactions.reduce((acc, t) => {
+        const tDate = new Date(t.date);
+        if (getMonth(tDate) === thisMonth && getYear(tDate) === thisYear) {
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'income') acc.income += amountInUsd;
+            else acc.expenses += amountInUsd;
+        }
+        return acc;
+    }, { income: 0, expenses: 0 });
+
+    const lastMonthStats = visibleTransactions.reduce((acc, t) => {
+        const tDate = new Date(t.date);
+        if (getMonth(tDate) === lastMonth && getYear(tDate) === lastYear) {
+            const amountInUsd = convertToUsd(t.amount, t.currency);
+            if (t.type === 'income') acc.income += amountInUsd;
+            else acc.expenses += amountInUsd;
+        }
+        return acc;
+    }, { income: 0, expenses: 0 });
+
+    setStats({ thisMonth: thisMonthStats, lastMonth: lastMonthStats });
+  }, [visibleTransactions]);
 
   
   const [calendarDate, setCalendarDate] = useState<Date>();
@@ -262,8 +271,8 @@ export default function DashboardPage() {
     <main className="flex flex-col flex-1 gap-6 p-4 md:p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AllTimeSummaryCard transactions={visibleTransactions} />
-        <MonthStatCard title="This Month" income={thisMonthStats.income} expenses={thisMonthStats.expenses} />
-        <MonthStatCard title="Last Month" income={lastMonthStats.income} expenses={lastMonthStats.expenses} />
+        <MonthStatCard title="This Month" income={stats.thisMonth.income} expenses={stats.thisMonth.expenses} />
+        <MonthStatCard title="Last Month" income={stats.lastMonth.income} expenses={stats.lastMonth.expenses} />
         <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between px-3 py-2 space-y-0 border-b">
                 <CardTitle className="text-base font-semibold">Calendar</CardTitle>
@@ -343,4 +352,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-
